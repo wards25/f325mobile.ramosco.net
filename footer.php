@@ -13,7 +13,7 @@
                         <?php
                             $year = date("Y");
                         ?>
-                     <span>&copy; 2023 - <?php echo $year; ?> RGC BO App | Developed by RGC IT</span>
+                     <span>&copy; 2025 - <?php echo $year; ?> RGC BO App | Developed by RGC IT</span>
                     </div>
                 </div>
             </footer>

@@ -11,7 +11,7 @@ date_default_timezone_set("Asia/Manila");
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href="img/icon.png">
-    <title>RGC | BO/F325 Mobile App</title>
+    <title>RGC | BO/F325 Desktop App</title>
 
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">

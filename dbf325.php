@@ -1,9 +1,15 @@
 <?php
-$host = '192.168.1.23';
+// $host = '192.168.1.23';
 //$dbuser = 'apps';
 //$dbpass = 'ramosco@123456789';
-$dbuser = 'rgcit1';
-$dbpass = '524743it1';
+// $dbuser = 'rgcit1';
+// $dbpass = '524743it1';
+// $database = 'dbf325';
+
+//for local host 
+$host = 'localhost';
+$dbuser = 'root';
+$dbpass = '';
 $database = 'dbf325';
 
 // connect to server

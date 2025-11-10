@@ -15,7 +15,7 @@
                 <div class="sidebar-brand-icon">
                 </div>
                 <div class="sidebar-brand-text mx-3"><img src="img/logo.png" class="img-fluid" style="height:30px;">
-                    <small>BO/F325 MOBILE APP</small>
+                    <small>F325/DESKTOP</small>
                 </div>
             </a>
 
@@ -217,9 +217,12 @@
                 </a>
                 <div id="collapseSetting" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Settings:</h6>
+                        <h6 class="collapse-header">System Setting:</h6>
                         <!-- <a class="collapse-item" href="exportraw.php">Export Per Status</a> -->
-                        <a class="collapse-item" href="import_product.php">Import Product</a>
+                        <a class="collapse-item" href="company.php">Company</a>
+                        <a class="collapse-item" href="user.php">User</a>
+                        <a class="collapse-item" href="location.php">Location</a>
+                        <a class="collapse-item" href="maintenance.php">Maintenance</a>
                         <!-- <a class="collapse-item" href="exportborf.php">Generate BORF Report</a>
                         <a class="collapse-item" href="exportshortlanded.php">Generate SL Report</a>
                         <a class="collapse-item" href="bypass.php">Bypass Product List</a> -->

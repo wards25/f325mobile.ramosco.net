@@ -27,7 +27,7 @@ if(isset($_SESSION['id']))
                                 <div class="p-5">
                                     <div class="text-center">
                                         <img src="img/rgc.png" class="img-fluid" style="width: 270px;">
-                                        <h6 style="color:#0c4562;"><b>BO / F325 MOBILE APP</b></h6>
+                                        <h6 style="color:#0c4562;"><b>F325 / INVENTORY SYSTEM</b></h6>
                                     </div>
                                     <hr>
                                     <form class="user" method="POST" action="loginprocess.php">
