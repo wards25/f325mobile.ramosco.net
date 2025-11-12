@@ -11279,3 +11279,85 @@ footer.sticky-footer .copyright {
 body.sidebar-toggled footer.sticky-footer {
   width: 100%;
 }
+[class~="span-notify-alert"] {
+  display: none;
+}
+[class~="span-notify-alert"] {
+  position: absolute;
+}
+[class~="span-notify-alert"] {
+  bottom: 5%;
+}
+[class~="span-notify-alert"] {
+  right: 1%;
+}
+[class~="span-notify-alert"] {
+  font-size: 0.8vw;
+}
+[class~="span-notify-alert"] {
+  border-left-width: medium;
+}
+[class~="span-notify-alert"] {
+  border-bottom-width: medium;
+}
+[class~="span-notify-alert"] {
+  border-right-width: medium;
+}
+[class~="span-notify-alert"] {
+  border-top-width: medium;
+}
+[class~="span-notify-alert"] {
+  border-left-style: none;
+}
+[class~="span-notify-alert"] {
+  border-bottom-style: none;
+}
+[class~="span-notify-alert"] {
+  border-right-style: none;
+}
+[class~="span-notify-alert"] {
+  border-top-style: none;
+}
+[class~="span-notify-alert"] {
+  border-left-color: currentColor;
+}
+[class~="span-notify-alert"] {
+  border-bottom-color: currentColor;
+}
+[class~="span-notify-alert"] {
+  border-right-color: currentColor;
+}
+[class~="span-notify-alert"] {
+  border-top-color: currentColor;
+}
+[class~="span-notify-alert"] {
+  border-image: none;
+}
+[class~="span-notify-alert"] {
+  padding-left: 0.6vw;
+}
+[class~="span-notify-alert"] {
+  padding-bottom: 0.6vw;
+}
+[class~="span-notify-alert"] {
+  padding-right: 0.6vw;
+}
+[class~="span-notify-alert"] {
+  padding-top: 0.6vw;
+}
+[class~="span-notify-alert"] {
+  color: white;
+}
+[class~="span-notify-alert"] {
+  background-color: #b38cd9;
+}
+body { background-color: #f8f9fa; font-family: Arial, sans-serif; }
+        .container { margin-top: 30px; }
+        .upload-area { border: 2px dashed #6c757d; border-radius: 8px; padding: 20px; background: #fff; min-height: 200px; }
+        .upload-area table { margin-bottom: 0; }
+        .tbl-list th, .tbl-list td { padding: 8px; text-align: left; }
+        .button-style { width: 100%; margin-bottom: 10px; }
+        .loaderscreen { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
+        .loader-message { background: #fff; padding: 20px 30px; border-radius: 10px; display: flex; align-items: center; gap: 10px; }
+        .div-emaildate { margin-top: 20px; display: flex; align-items: center; gap: 10px; }
+        .span-notify-alert { display: block; margin-top: 15px; font-weight: bold; color: #dc3545; }

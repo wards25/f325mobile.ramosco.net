@@ -1,7 +1,13 @@
 <?php
     $uri = $_SERVER['REQUEST_URI'];
 ?>
-
+<?php
+include_once("dbconnect.php"); 
+$user_id = $_SESSION['id']; 
+$system_query = mysqli_query($conn, "SELECT syssetting FROM dbuser WHERE id='$user_id'");
+$system_row = mysqli_fetch_assoc($system_query);
+$system_setting = $system_row['syssetting']; 
+?>
 <body id="page-top">
 
     <!-- Page Wrapper -->
@@ -71,7 +77,8 @@
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">F325 Modules:</h6>
-                        <a class="collapse-item" href="open.php">Open F325</a>
+                        <!-- <a class="collapse-item" href="open.php">Open F325</a> -->
+                        <a class="collapse-item" href="import-notepad.php">Import Notepad</a>
                     <?php
                         if($_SESSION['print']=='1')
                     {
@@ -198,7 +205,7 @@
             ?>
 
             <?php
-            if($_SESSION['inventory']=='1'){
+            if($system_setting == '1'){
             ?>
             <!-- Divider -->
             <hr class="sidebar-divider">
@@ -220,7 +227,7 @@
                         <h6 class="collapse-header">System Setting:</h6>
                         <!-- <a class="collapse-item" href="exportraw.php">Export Per Status</a> -->
                         <a class="collapse-item" href="company.php">Company</a>
-                        <a class="collapse-item" href="user.php">User</a>
+                        <a class="collapse-item" href="account.php">User</a>
                         <a class="collapse-item" href="location.php">Location</a>
                         <a class="collapse-item" href="maintenance.php">Maintenance</a>
                         <!-- <a class="collapse-item" href="exportborf.php">Generate BORF Report</a>
