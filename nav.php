@@ -79,6 +79,7 @@ $system_setting = $system_row['syssetting'];
                         <h6 class="collapse-header">F325 Modules:</h6>
                         <!-- <a class="collapse-item" href="open.php">Open F325</a> -->
                         <a class="collapse-item" href="import-notepad.php">Import Notepad</a>
+                        <a class="collapse-item" href="print-notepad.php">Print Notepad</a>
                     <?php
                         if($_SESSION['print']=='1')
                     {
