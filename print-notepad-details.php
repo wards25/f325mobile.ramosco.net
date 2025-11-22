@@ -66,7 +66,7 @@ foreach ($items as $i) {
 
     $code     = $i['mdccode']        ?? '';
     $qty      = $i['quantity']       ?? '';
-    $desc     = 'Angel Condensada 380g '; 
+    $desc     = $i['description']    ?? ''; 
     $exp      = date('m/d/Y', strtotime($i['expiration']))     ?? '';
     $reason   = $i['reasoncode']     ?? '';
     $unit     = $i['unitcost']       ?? 0;

@@ -24,7 +24,7 @@ include('dbconnect.php');
                 <div class="table-responsive">
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <select class="form-control select-withNoBorder select-search">
+                            <select class="form-select select-withNoBorder select-search">
                                 <option value="f325number" placeholder="F325 Number...">F325 Number:</option>
                                 <option value="brcode" placeholder="Branch Code...">Branch Code:</option>
                             </select>
@@ -36,14 +36,14 @@ include('dbconnect.php');
                         </div>
                         <div class="form-group col-md-6">
                             <label class="lbl-style">Status:</label>
-                            <select class="form-control select-withBorder select-status" onchange="LoadNotepadList();">
+                            <select class="form-select select-withBorder select-status" onchange="LoadNotepadList();">
                                 <option value="OPEN">Open</option>
                                 <option value="PRINTED">Print</option>
                             </select>
                         </div>
                         <div class="form-group col-md-6">
                             <label class="lbl-style">Company:</label>
-                            <select class="form-control select-withBorder select-company" onchange="LoadNotepadList();">
+                            <select class="form-select select-withBorder select-company" onchange="LoadNotepadList();">
                                 <option value="">All</option>
                                 <?php
                                 $company_query = "SELECT * FROM dbcompany WHERE active='1' ";
