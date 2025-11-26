@@ -3,6 +3,7 @@ $(document).ready(function () {
   ReloadPage();
   LoadLocation();
   LoadNotepadList();
+  LoadClearingList();
   historyPosition();
 });
 function addCommas(number) {
@@ -12,7 +13,6 @@ function addCommas(number) {
   }
   return split.join(".");
 }
-;
 function LoadCompanyList() {
   $.ajax({
     url: "companylist.php",
@@ -261,39 +261,60 @@ function LoadNotepadDetail() {
         $(".input-orderdate").val(obj.f325date);
         $(".input-remarks").val(obj.remarks);
         $(".input-status").val(obj.status);
+        $(".input-tmnumber").val(obj.tmnumber);
+        $(".input-datesched").val(obj.datesched);
+        $(".input-driver").val(obj.driver);
+        $(".input-platenumber").val(obj.platenumber);
+        $(".input-remarks").val(obj.logisticremarks);
         LoadSKU();
+
         if ($(".input-status").val() == "OPEN") {
           $(".button-print").html("Print");
           $(".button-reopen").hide();
           $(".input-remarks").prop("disabled", false);
-        } else {
+        } else if ($(".input-status").val() == "PRINTED") {
           $(".button-print").html("Re-Print");
           $(".button-reopen").show();
+          $(".button-schedule-notepad").show();
+          $(".button-reopen-notepad").hide();
+          $(".input-tmnumber").prop("disabled", false);
+          $(".input-datesched").prop("disabled", false);
+          $(".input-remarks").prop("disabled", false);
+          $(".input-driver").prop("disabled", false);
+          $(".input-platenumber").prop("disabled", false);
+        } else if ($(".input-status").val() == "SCHEDULED") {
+          $(".button-schedule-notepad").hide();
+          $(".button-reopen-notepad").show();
+          $(".input-tmnumber").prop("disabled", true);
+          $(".input-datesched").prop("disabled", true);
           $(".input-remarks").prop("disabled", true);
+          $(".input-driver").prop("disabled", true);
+          $(".input-platenumber").prop("disabled", true);
         }
       },
     });
   });
 }
+
 function UnloadNotepadDetail() {
   $("#order-detail-modal").fadeOut();
 }
 function LoadSKU() {
-    const f325number = $(".input-ordernumber").val();
-    const vendorCode = $(".input-company").attr("vcode");
+  const f325number = $(".input-ordernumber").val();
+  const vendorCode = $(".input-company").attr("vcode");
 
-    $.ajax({
-        type: "POST",
-        url: "load-sku.php",
-        data: {
-            f325number: f325number,
-            vcode: vendorCode
-        },
-        success: function (response) {
-            $(".tbl-order-list").html(response);
-            Subtotal();
-        }
-    });
+  $.ajax({
+    type: "POST",
+    url: "load-sku.php",
+    data: {
+      f325number: f325number,
+      vcode: vendorCode,
+    },
+    success: function (response) {
+      $(".tbl-order-list").html(response);
+      Subtotal();
+    },
+  });
 }
 function Subtotal() {
   var _0x728b92 = 0x0;
@@ -303,28 +324,146 @@ function Subtotal() {
   $(".input-subtotal").val(addCommas(_0x728b92.toFixed(0x2)));
 }
 function historyPosition() {
-    $(".button-history").on("click", function () {
-        const pos = $(this).position();
-        $(".div-history").css({
-            top: pos.top + $(this).outerHeight(),
-            left: pos.left
-        });
-
-        const processNumber = $(".input-ordernumber").val();
-
-        $.ajax({
-            type: "POST",
-            url: "notepad-history.php",
-            data: { processnumber: processNumber },
-
-            success: function (response) {
-                $(".tbody-history-list").html(response);
-                $(".div-history").show();
-            }
-        });
+  $(".button-history").on("click", function () {
+    const pos = $(this).position();
+    $(".div-history").css({
+      top: pos.top + $(this).outerHeight(),
+      left: pos.left,
     });
+
+    const processNumber = $(".input-ordernumber").val();
+
+    $.ajax({
+      type: "POST",
+      url: "notepad-history.php",
+      data: { processnumber: processNumber },
+
+      success: function (response) {
+        $(".tbody-history-list").html(response);
+        $(".div-history").show();
+      },
+    });
+  });
 }
 function PrintNotepad() {
   var f325number = $(".input-ordernumber").val();
   window.open("print-notepad-details.php?f325number=" + f325number, "_blank");
+}
+function ReOpenNotepad() {
+  var f325number = $(".input-ordernumber").val();
+  $.ajax({
+    type: "POST",
+    url: "reopen-notepad.php",
+    data: {
+      f325number: f325number,
+    },
+    success: function (response) {
+      console.log(response);
+    },
+  });
+}
+function scheduleNotepad() {
+  $.ajax({
+    type: "POST",
+    url: "scheduled-notepad.php",
+    data: {
+      f325number: $(".input-ordernumber").val(),
+      tmnumber: $(".input-tmnumber").val(),
+      datesched: $(".input-datesched").val(),
+      driver: $(".input-driver").val(),
+      platenumber: $(".input-platenumber").val(),
+      remarks: $(".input-remarks").val(),
+    },
+    success: function (response) {
+      console.log(response);
+    },
+  });
+}
+function reScheduleNotepad() {
+  $.ajax({
+    type: "POST",
+    url: "rescheduled-notepad.php",
+    data: {
+      f325number: $(".input-ordernumber").val(),
+    },
+    success: function (response) {
+      console.log(response);
+    },
+  });
+}
+function LoadClearingList() {
+  var selectSearch = $(".select-search").val();
+  var searchKeyword = $(".input-search").val();
+  var statusCode = $(".select-status").val();
+  var company = $(".select-company").val();
+  $.ajax({
+    type: "POST",
+    url: "load-clearing-list.php",
+    data: {
+      selectsearch: selectSearch,
+      search: searchKeyword,
+      status: statusCode,
+      company: company,
+    },
+    success: function (response) {
+      $(".tbody-list-order-clearing").html(response);
+      LoadClearingDetail();
+    },
+  });
+}
+function LoadClearingDetail() {
+  $(".tbl-list-order-tr").click(function () {
+    var id = $(this).attr("f325id");
+    $.ajax({
+      type: "POST",
+      url: "load-clearing-detail.php",
+      data: {
+        id: id,
+      },
+      success: function (reponse) {
+        $("#order-detail-modal").fadeIn();
+        obj = JSON.parse(reponse);
+        $(".input-customer").val(obj.branchname);
+        $(".input-company").val(obj.vendorname);
+        $(".input-company").attr("vcode", obj.vcode);
+        $(".input-issued").val(obj.issuedby);
+        $(".input-emaildate").val(obj.emaildate);
+        $(".input-prepared").val(obj.preparedby);
+        $(".input-ordernumber").val(obj.f325number);
+        $(".input-orderdate").val(obj.f325date);
+        $(".input-remarks").val(obj.remarks);
+        $(".input-status").val(obj.status);
+        $(".input-tmnumber").val(obj.tmnumber);
+        $(".input-datesched").val(obj.datesched);
+        $(".input-driver").val(obj.driver);
+        $(".input-platenumber").val(obj.platenumber);
+        $(".input-remarks").val(obj.logisticremarks);
+        LoadSKU();
+
+        if ($(".input-status").val() == "OPEN") {
+          $(".button-print").html("Print");
+          $(".button-reopen").hide();
+          $(".input-remarks").prop("disabled", false);
+        } else if ($(".input-status").val() == "PRINTED") {
+          $(".button-print").html("Re-Print");
+          $(".button-reopen").show();
+          $(".button-schedule-notepad").show();
+          $(".button-reopen-notepad").hide();
+          $(".input-tmnumber").prop("disabled", false);
+          $(".input-datesched").prop("disabled", false);
+          $(".input-remarks").prop("disabled", false);
+          $(".input-driver").prop("disabled", false);
+          $(".input-platenumber").prop("disabled", false);
+        } else if ($(".input-status").val() == "SCHEDULED") {
+          $(".button-schedule-notepad").hide();
+          $(".button-reopen-notepad").show();
+          $(".input-tmnumber").prop("disabled", true);
+          $(".input-datesched").prop("disabled", true);
+          $(".input-remarks").prop("disabled", true);
+          $(".input-driver").prop("disabled", true);
+          $(".input-platenumber").prop("disabled", true);
+        }
+      },
+    });
+  });
 }

@@ -9,10 +9,6 @@ $fetch_detail = mysqli_fetch_array($detail_query);
 $f325number = $fetch_detail['f325number'];
 $f325date = $fetch_detail['f325date'];
 $emaildate = $fetch_detail['emaildate'];
-$tmnumber = $fetch_detail['tmnumber'];
-$datesched = $fetch_detail['datesched'];
-$driver = $fetch_detail['drivername'];
-$platenumber = $fetch_detail['platenumber'];
 
 $brcode = $fetch_detail['brcode'];
 // get branch name
@@ -36,25 +32,32 @@ $vendorname = $fetch_vname['name'];
 
 $preparedby = $fetch_detail['preparedby'];
 $issuedby = $fetch_detail['issuedby'];
-$remarks = $fetch_detail['printremarks'];
-$logisticremarks = $fetch_detail['logisticremarks'];
+$tmnumber = $fetch_detail['tmnumber'];
+$driver = $fetch_detail['drivername'];
+$platenumber = $fetch_detail['platenumber'];
+$arnumber = $fetch_detail['arnumber'];
+$remarks = $fetch_detail['clearingremarks'];
+$location = $fetch_detail['location'];
+$deducttype = $fetch_detail['deducttype'];
 $status = $fetch_detail['status'];
 
 echo json_encode(array(
 	'f325number' => $f325number,
 	'f325date' => $f325date,
-	'tmnumber' => $tmnumber,
-	'datesched' => $datesched,
-	'driver' => $driver,
-	'platenumber' => $platenumber,
-	'logisticremarks' => $logisticremarks,
 	'emaildate' => $emaildate,
 	'branchname' => $branchname,
+	'brcode' => $brcode,
 	'vendorname' => $vendorname,
 	'vcode' => $vcode,
 	'preparedby' => $preparedby,
 	'issuedby' => $issuedby,
+	'tmnumber' => $tmnumber,
+	'driver' => $driver,
+	'platenumber' => $platenumber,
+	'arnumber' => $arnumber,
 	'remarks' => $remarks,
+	'location' => $location,
+	'deducttype' => $deducttype,
 	'status' => $status
 ));
 

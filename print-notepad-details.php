@@ -7,7 +7,12 @@ header("Content-Disposition: attachment; filename=".basename($_GET['f325number']
 header("Pragma: no-cache");
 header("Expires: 0");
 
+date_default_timezone_set("Asia/Manila");
+$username = $_SESSION['fname'] ?? '';
+$dateprocessed = date("Y-m-d");
+$timeprocessed = date("H:i:s");
 $f325 = $_GET['f325number'] ?? '';
+$status = 'PRINTED';
 
 if ($f325 == '') {
     echo "Missing F325 Number";
@@ -98,5 +103,21 @@ echo "                                                       Rundate " . date("m
 
 echo " Reasons for returning the item/s to Central Warehouse c/o Returns Section or to Supplier\r\n";
 echo "  E-Expiring\r\n";
+if(isset($_POST['remarks'])){
+   $remarks = $_POST['remarks'];
+}
+else{
+    $remarks = '';
+}
+// update in dbf325number
+mysqli_query($conn,"UPDATE dbf325number SET status='$status',printremarks='$remarks' WHERE f325number='$f325' ");
 
+// update in dbraw
+mysqli_query($conn,"UPDATE dbraw SET status='$status' WHERE f325number='$f325' ");
+
+// insert in dbhistory
+$processed = 'Printed';
+mysqli_query($conn,"INSERT INTO dbhistory(processnumber,name,processed,dateprocessed,timeprocessed) VALUES ('$f325','$username','$processed','$dateprocessed','$timeprocessed')");
+
+$conn->close();
 ?>

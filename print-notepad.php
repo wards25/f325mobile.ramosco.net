@@ -75,7 +75,7 @@ include('dbconnect.php');
                             </select>
                         </div>
                     </div>
-                    <table class="tbl-border table table-striped" cellspacing="0" width="100%">
+                    <table id="listTable" class="tbl-border table table-striped" cellspacing="0" width="100%">
                         <thead class="thead-dark">
                             <tr>
                                 <th class="tbl-list-order-th1">F325 #</th>
@@ -97,7 +97,7 @@ include('dbconnect.php');
                                     <div class="d-flex justify-content-between mb-3">
                                         <div class="btn-group gap-2">
                                             <button type="button" class="btn btn-outline-primary button-reopen"
-                                                onclick="ReOpen();">Re-Open</button>
+                                                onclick="ReOpenNotepad();">Re-Open</button>
                                             <button type="button" class="btn btn-outline-success button-print"
                                                 onclick="PrintNotepad();">Printed</button>
 

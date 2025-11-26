@@ -78,25 +78,26 @@ $system_setting = $system_row['syssetting'];
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">F325 Modules:</h6>
                         <!-- <a class="collapse-item" href="open.php">Open F325</a> -->
-                        <a class="collapse-item" href="import-notepad.php">Import Notepad</a>
-                        <a class="collapse-item" href="print-notepad.php">Print Notepad</a>
+                        <a class="collapse-item" href="import-notepad.php">Import F325</a>
+                        <a class="collapse-item" href="print-notepad.php">Print F325</a>
                     <?php
                         if($_SESSION['print']=='1')
                     {
-                            echo '<a class="collapse-item" href="printed.php">Printed F325</a>';
+                            // echo '<a class="collapse-item" href="printed.php">Printed F325</a>';
                         }else{
                     }
 
                         if($_SESSION['schedule']=='1')
                     {
-                            echo '<a class="collapse-item" href="scheduled.php">Scheduled F325</a>';
+                            echo '<a class="collapse-item" href="scheduled.php">Schedule F325</a>';
                         }else{
                     }
 
                         if($_SESSION['clearing']=='1')
                     {
-                            echo '<a class="collapse-item" href="cleared.php">Cleared F325</a>';
-                            echo '<a class="collapse-item" href="disposed.php">Disposed F325</a>';
+                            // echo '<a class="collapse-item" href="cleared.php">Cleared F325</a>';
+                            // echo '<a class="collapse-item" href="disposed.php">Disposed F325</a>';
+                            echo '<a class="collapse-item" href="clearing.php">Clearing</a>';
                         }else{
                             
                     }

@@ -21,7 +21,7 @@ include_once("nav.php");
 ?>
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-        <h4 class="mb-0">Schedule</h4>
+        <h4 class="mb-0">Clearing</h4>
     </div>
 
     <div class="card shadow-lg border-0 rounded-4">
@@ -38,18 +38,24 @@ include_once("nav.php");
                         <div class="form-group col-md-6">
                             <input type="text" class="form-control input-withBorder input-search"
                                 oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"
-                                onkeyup="LoadNotepadList();" placeholder="F325 Number..." value="">
+                                onkeyup="LoadClearingList();" placeholder="F325 Number..." value="">
                         </div>
                         <div class="form-group col-md-6">
                             <label class="lbl-style">Status:</label>
-                            <select class="form-select select-withBorder select-status" onchange="LoadNotepadList();">
+                            <select class="form-select select-withBorder select-status" onchange="LoadClearingList();">
+                                <option value="OPEN">Open</option>
                                 <option value="PRINTED">Printed</option>
                                 <option value="SCHEDULED">Scheduled</option>
+                                <option value="OPEN" process='MANUAL'>Open Manual</option>
+                                <option value="CLEARED">Cleared</option>
+                                <option value="DISPOSED">Disposed</option>
+                                <option value="FOR PAYMENT">For Payment</option>
+                                <option value="SETTLED">Settled</option>    
                             </select>
                         </div>
                         <div class="form-group col-md-6">
                             <label class="lbl-style">Company:</label>
-                            <select class="form-select select-withBorder select-company" onchange="LoadNotepadList();">
+                            <select class="form-select select-withBorder select-company" onchange="LoadClearingList();">
                                 <option value="">All</option>
                                 <?php
                                 $company_query = "SELECT * FROM dbcompany WHERE active='1' ";
@@ -92,7 +98,7 @@ include_once("nav.php");
                                 <th class="tbl-list-order-th6">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="tbody-list-order"></tbody>
+                        <tbody class="tbody-list-order-clearing"></tbody>
                     </table>
 
                     <!-- View Order Detail -->
