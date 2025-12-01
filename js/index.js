@@ -3,7 +3,7 @@ $(document).ready(function () {
   ReloadPage();
   LoadLocation();
   LoadNotepadList();
-  LoadClearingList();
+  // LoadClearingList();
   historyPosition();
 });
 function addCommas(number) {
@@ -73,20 +73,27 @@ function UpdateCompany() {
       active: isActive,
     },
     beforeSend: function () {
-      $(".button-update-company").prop("disabled", true).text("Updating...");
+      $(".button-update-company").prop("disabled", true);
     },
     success: function (response) {
-      // $(".span-notify-alert").text("Company updated successfully!");
-      // $(".span-notify-alert").show();
-      // $(".form-company").css("background-Color", "");
-      // $(".div-load-data").html("");
-      // setTimeout(function () {
-      //   $(".span-notify-alert").fadeOut();
-      // }, 2000);
       if (response === "success") {
-        window.location.reload();
+        $(".alert-success").text("Company updated successfully!").fadeIn();
+        setTimeout(function () {
+          $(".alert-success").fadeOut();
+        }, 3000);
+      }
+      else {
+        $(".alert-success").removeClass("alert-success").addClass("alert-danger")
+          .text("Error updating company. Please try again.").fadeIn();
+        setTimeout(function () {
+          $(".alert-danger").fadeOut();
+        }, 3000);
       }
     },
+    complete: function () {
+      // Re-enable the update button after request completion
+      $(".button-update-company").prop("disabled", false);
+    }
   });
 
   return false;
@@ -102,47 +109,52 @@ function LoadLocation() {
 function UnloadUser() {
   $("#addUserModal").modal("hide");
 }
-// function UnloadLocation() {
-//   $(".div-load-data").html("");
-//   $(".tbl-button-menu-td").css("background-Color", "");
-//   $(".div-system-bg").hide();
-// }
+function UpdateLocation() {
+  $(".input-location").each(function () {
+    var id = $(this).attr("locid");
+    var value = $(this).val();
+    var active = $(this)
+      .closest("tr")
+      .find(".input-checkbox-active")
+      .is(":checked")
+      ? 1
+      : 0;
 
-// function UpdateLocation() {
-//   $(".input-location").each(function () {
-//     var id = $(this).attr("locid");
-//     var value = $(this).val();
-//     var active = $(this)
-//       .closest("tr")
-//       .find(".input-checkbox-active")
-//       .is(":checked")
-//       ? 1
-//       : 0;
+    $.ajax({
+      type: "POST",
+      url: "update-location.php",
+      data: {
+        id: id,
+        value: value,
+        active: active,
+      },
+      beforeSend: function () {
+        $(".button-update-location").prop("disabled", true);
+      },
+      success: function (response) {
+        if (response === "success") {
+          $(".alert-success").text("Company updated successfully!").fadeIn();
+          setTimeout(function () {
+            $(".alert-success").fadeOut();
+          }, 3000);
+        }
+        else {
+          $(".alert-success").removeClass("alert-success").addClass("alert-danger")
+            .text("Error updating location. Please try again.").fadeIn();
+          setTimeout(function () {
+            $(".alert-danger").fadeOut();
+          }, 3000);
+        }
+      },
+      complete: function () {
+        // Re-enable the update button after request completion
+        $(".button-update-location").prop("disabled", false);
+      },
+    });
+  });
 
-//     $.ajax({
-//       type: "POST",
-//       url: "location/updatelocation.php",
-//       data: {
-//         id: id,
-//         value: value,
-//         active: active,
-//       },
-//       success: function () {
-//         $(".span-notify-alert").html("Location updated successfully.").show();
-//         $(".div-load-data").html("");
-//         $(".span-notify-alert").css("background-color", "");
-//         setTimeout(function () {
-//           $(".span-notify-alert").fadeOut();
-//         }, 2000);
-//       },
-//       error: function () {
-//         alert("Error: Failed to update user.");
-//       },
-//     });
-//   });
-
-//   return false;
-// }
+  return false;
+}
 // function CheckAdmin() {
 //   $.ajax({
 //     url: "checkadmin.php",
@@ -391,79 +403,79 @@ function reScheduleNotepad() {
     },
   });
 }
-function LoadClearingList() {
-  var selectSearch = $(".select-search").val();
-  var searchKeyword = $(".input-search").val();
-  var statusCode = $(".select-status").val();
-  var company = $(".select-company").val();
-  $.ajax({
-    type: "POST",
-    url: "load-clearing-list.php",
-    data: {
-      selectsearch: selectSearch,
-      search: searchKeyword,
-      status: statusCode,
-      company: company,
-    },
-    success: function (response) {
-      $(".tbody-list-order-clearing").html(response);
-      LoadClearingDetail();
-    },
-  });
-}
-function LoadClearingDetail() {
-  $(".tbl-list-order-tr").click(function () {
-    var id = $(this).attr("f325id");
-    $.ajax({
-      type: "POST",
-      url: "load-clearing-detail.php",
-      data: {
-        id: id,
-      },
-      success: function (reponse) {
-        $("#order-detail-modal").fadeIn();
-        obj = JSON.parse(reponse);
-        $(".input-customer").val(obj.branchname);
-        $(".input-company").val(obj.vendorname);
-        $(".input-company").attr("vcode", obj.vcode);
-        $(".input-issued").val(obj.issuedby);
-        $(".input-emaildate").val(obj.emaildate);
-        $(".input-prepared").val(obj.preparedby);
-        $(".input-ordernumber").val(obj.f325number);
-        $(".input-orderdate").val(obj.f325date);
-        $(".input-remarks").val(obj.remarks);
-        $(".input-status").val(obj.status);
-        $(".input-tmnumber").val(obj.tmnumber);
-        $(".input-datesched").val(obj.datesched);
-        $(".input-driver").val(obj.driver);
-        $(".input-platenumber").val(obj.platenumber);
-        $(".input-remarks").val(obj.logisticremarks);
-        LoadSKU();
+// function LoadClearingList() {
+//   var selectSearch = $(".select-search").val();
+//   var searchKeyword = $(".input-search").val();
+//   var statusCode = $(".select-status").val();
+//   var company = $(".select-company").val();
+//   $.ajax({
+//     type: "POST",
+//     url: "load-clearing-list.php",
+//     data: {
+//       selectsearch: selectSearch,
+//       search: searchKeyword,
+//       status: statusCode,
+//       company: company,
+//     },
+//     success: function (response) {
+//       $(".tbody-list-order-clearing").html(response);
+//       LoadClearingDetail();
+//     },
+//   });
+// }
+// function LoadClearingDetail() {
+//   $(".tbl-list-order-tr").click(function () {
+//     var id = $(this).attr("f325id");
+//     $.ajax({
+//       type: "POST",
+//       url: "load-clearing-detail.php",
+//       data: {
+//         id: id,
+//       },
+//       success: function (reponse) {
+//         $("#order-detail-modal").fadeIn();
+//         obj = JSON.parse(reponse);
+//         $(".input-customer").val(obj.branchname);
+//         $(".input-company").val(obj.vendorname);
+//         $(".input-company").attr("vcode", obj.vcode);
+//         $(".input-issued").val(obj.issuedby);
+//         $(".input-emaildate").val(obj.emaildate);
+//         $(".input-prepared").val(obj.preparedby);
+//         $(".input-ordernumber").val(obj.f325number);
+//         $(".input-orderdate").val(obj.f325date);
+//         $(".input-remarks").val(obj.remarks);
+//         $(".input-status").val(obj.status);
+//         $(".input-tmnumber").val(obj.tmnumber);
+//         $(".input-datesched").val(obj.datesched);
+//         $(".input-driver").val(obj.driver);
+//         $(".input-platenumber").val(obj.platenumber);
+//         $(".input-remarks").val(obj.logisticremarks);
+//         LoadSKU();
 
-        if ($(".input-status").val() == "OPEN") {
-          $(".button-print").html("Print");
-          $(".button-reopen").hide();
-          $(".input-remarks").prop("disabled", false);
-        } else if ($(".input-status").val() == "PRINTED") {
-          $(".button-print").html("Re-Print");
-          $(".button-reopen").show();
-          $(".button-schedule-notepad").show();
-          $(".button-reopen-notepad").hide();
-          $(".input-tmnumber").prop("disabled", false);
-          $(".input-datesched").prop("disabled", false);
-          $(".input-remarks").prop("disabled", false);
-          $(".input-driver").prop("disabled", false);
-          $(".input-platenumber").prop("disabled", false);
-        } else if ($(".input-status").val() == "SCHEDULED") {
-          $(".button-schedule-notepad").hide();
-          $(".button-reopen-notepad").show();
-          $(".input-tmnumber").prop("disabled", true);
-          $(".input-datesched").prop("disabled", true);
-          $(".input-remarks").prop("disabled", true);
-          $(".input-driver").prop("disabled", true);
-          $(".input-platenumber").prop("disabled", true);
-        }
-      },
-    });
-  });
-}
+//         if ($(".input-status").val() == "OPEN") {
+//           $(".button-print").html("Print");
+//           $(".button-reopen").hide();
+//           $(".input-remarks").prop("disabled", false);
+//         } else if ($(".input-status").val() == "PRINTED") {
+//           $(".button-print").html("Re-Print");
+//           $(".button-reopen").show();
+//           $(".button-schedule-notepad").show();
+//           $(".button-reopen-notepad").hide();
+//           $(".input-tmnumber").prop("disabled", false);
+//           $(".input-datesched").prop("disabled", false);
+//           $(".input-remarks").prop("disabled", false);
+//           $(".input-driver").prop("disabled", false);
+//           $(".input-platenumber").prop("disabled", false);
+//         } else if ($(".input-status").val() == "SCHEDULED") {
+//           $(".button-schedule-notepad").hide();
+//           $(".button-reopen-notepad").show();
+//           $(".input-tmnumber").prop("disabled", true);
+//           $(".input-datesched").prop("disabled", true);
+//           $(".input-remarks").prop("disabled", true);
+//           $(".input-driver").prop("disabled", true);
+//           $(".input-platenumber").prop("disabled", true);
+//         }
+//       },
+//     });
+//   });
+// }

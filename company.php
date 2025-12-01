@@ -9,7 +9,7 @@ $username = $_SESSION['fname'];
 mysqli_query($conn, "DELETE FROM cleared_list WHERE user = '$username'");
 
 if (!isset($_SESSION['id'])) {
-    header("Location: index.php");
+  header("Location: index.php");
 }
 $res = mysqli_query($conn, "SELECT * FROM dbuser WHERE id=" . $_SESSION['id']);
 $userRow = mysqli_fetch_array($res);
@@ -19,6 +19,7 @@ $userRow = mysqli_fetch_array($res);
 include_once("nav.php");
 ?>
 <div class="container my-5">
+  <div class="alert alert-success" role="alert" style="display: none;"></div>
   <div class="card shadow-lg border-0 rounded-4">
     <div class="card-header text-white text-center py-3 rounded-top-4" style="background-color: #915c83;">
       <h4 class="mb-0">Company Information</h4>
@@ -49,7 +50,7 @@ include_once("nav.php");
         <div class="row">
           <div class="col-md-6 mb-3">
             <label class="form-label fw-semibold">Reference Code</label>
-            <input type="text" class="form-control input-referencecode" 
+            <input type="text" class="form-control input-referencecode"
               oninput="this.value=this.value.replace(/[^0-9.]/g,'').replace(/(\..*?)\..*/g,'$1');"
               placeholder="e.g. 12345" required>
           </div>
@@ -96,29 +97,3 @@ include_once("nav.php");
 <?php
 include_once("footer.php");
 ?>
-
-<!-- Scroll to Top Button-->
-<a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-</a>
-
-<script src="js/jquery.js"></script>
-<script type="text/javascript" src="js/index.js"></script>
-
-
-<!-- Bootstrap core JavaScript-->
-<script src="vendor/jquery/jquery.min.js"></script>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-<!-- Core plugin JavaScript-->
-<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-<!-- Custom scripts for all pages-->
-<script src="js/sb-admin-2.min.js"></script>
-
-<!-- Page level plugins -->
-<script src="vendor/datatables/jquery.dataTables.min.js"></script>
-<script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-<!-- Page level custom scripts -->
-<script src="js/demo/datatables-demo.js"></script>

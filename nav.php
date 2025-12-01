@@ -54,6 +54,7 @@ $system_setting = $system_row['syssetting'];
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Search:</h6>
                         <a class="collapse-item" href="search.php">Search F325</a>
+                        <a class="collapse-item" href="store-list.php">Store List</a>
                         <a class="collapse-item" href="search_sl.php">Shortlanded F325</a>
                 </div>
             </div>

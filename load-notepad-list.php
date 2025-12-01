@@ -61,7 +61,7 @@ for ($loc = 1; $loc <= 10; $loc++)
 
 $search_query .= "AND (".$location.") "; 
 
-$search_query .= "ORDER BY vendor,brcode ASC LIMIT 500";
+$search_query .= "ORDER BY vendor,brcode ASC LIMIT 10";
 
 // search in database
 $search_database = mysqli_query($conn,$search_query);

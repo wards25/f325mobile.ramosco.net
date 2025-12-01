@@ -31,7 +31,7 @@ if ($user['admin'] != 1) {
         <h5>Drag & Drop files here</h5>
         <p class="text-muted">or click below to select files</p>
     </div>
-    <input type="file" class="form-control mb-3" multiple id="fileInput">
+    <input type="file" class="form-control mb-3" id="fileInput" multiple>
     <!-- Results Table -->
     <table id="resultsTable" class="table table-striped table-hover tbl-list mt-3">
         <thead class="table-dark">
@@ -147,7 +147,7 @@ if ($user['admin'] != 1) {
                 processData: false,
                 contentType: false,
                 success: function (response) {
-                    alert("Insert Complete:\n" + response);
+                  console.log(response);
                 }
             });
         });
