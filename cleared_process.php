@@ -120,7 +120,7 @@ if (isset($_POST['submit']))
   			$ext = pathinfo($filename, PATHINFO_EXTENSION);
   			$new_file_name = $ordernumber.'.'.$ext;
 			//$filelocation = "C:/public/www/f325.ramosco.net/filepicture/dbapps/";
-			$filelocation = "C:/xampp/htdocs/f325.ramosco.net/filepicture/dbapps/";
+			$filelocation = "C:/xampp/htdocs/f325mobile.ramosco.net/filepicture/dbapps/";
 			move_uploaded_file($_FILES["image"]["tmp_name"], $filelocation.$new_file_name);
 
 			// update in dbf325number

@@ -44,6 +44,7 @@ include_once("nav.php");
     <div class="card shadow-lg border-0 rounded-4">
         <div class="card-body p-4">
             <form class="row g-2 p-4" id="updateUserForm">
+                <input type="text" name="id" value="<?php echo $id; ?>" hidden>
                 <div class="col-md-6">
                     <label class="form-label">Name:</label>
                     <input type="text" class="form-control input-withBorder input-form-field input-fname"
@@ -107,10 +108,10 @@ include_once("nav.php");
                                         $user_has_access = ($editUser['comp' . $company['id']] == 1) ? 'checked' : '';
                                         echo "
                                             <tr>
+                                            <td><label class='form-check-label ms-2'>{$company['name']}</label></td>
                                                 <td class='text-center'>
                                                     <div class='form-check form-switch d-flex justify-content-center'>
                                                         <input class='form-check-input company-switch' type='checkbox' name='company[]' value='{$company['id']}' $user_has_access>
-                                                        <label class='form-check-label ms-2'>{$company['nickname']}</label>
                                                     </div>
                                                 </td>
                                             </tr>";
@@ -136,10 +137,10 @@ include_once("nav.php");
                                         $user_has_access = ($editUser['loc' . $loc['id']] == 1) ? 'checked' : '';
                                         echo "
                                         <tr>
+                                        <td><label class='form-check-label ms-2'>{$loc['location']}</label></td>
                                             <td class='text-center'>
                                                 <div class='form-check form-switch d-flex justify-content-center'>
                                                     <input class='form-check-input location-switch' type='checkbox' name='location[]' value='{$loc['id']}' $user_has_access>
-                                                    <label class='form-check-label ms-2'>{$loc['location']}</label>
                                                 </div>
                                             </td>
                                         </tr>";
@@ -204,40 +205,25 @@ include_once("nav.php");
 </div>
 
 <?php include_once("footer.php"); ?>
-<script src="js/jquery.js"></script>
-<script type="text/javascript" src="js/index.js"></script>
+<script>
+$(document).ready(function() {
+    $('#updateUserForm').on('submit', function(e) {
+        e.preventDefault(); // prevent default form submission
 
+        // Serialize form data
+        var formData = $(this).serialize();
 
-<!-- Bootstrap core JavaScript-->
-<script src="vendor/jquery/jquery.min.js"></script>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-<!-- Core plugin JavaScript-->
-<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-<!-- Custom scripts for all pages-->
-<script src="js/sb-admin-2.min.js"></script>
-
-<!-- Page level plugins -->
-<script src="vendor/datatables/jquery.dataTables.min.js"></script>
-<script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-<!-- Page level custom scripts -->
-<script src="js/demo/datatables-demo.js"></script>
-
-<!-- jQuery (required for DataTables) -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Bootstrap 5 -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- DataTables + Bootstrap 5 integration -->
-<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-
-<!-- DataTables scripts -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
-<!-- bootstrap icon -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+        $.ajax({
+            url: 'update-user.php',
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+               console.log(response);
+            },
+            error: function(xhr, status, error) {
+                alert("An error occurred: " + error);
+            }
+        });
+    });
+});
+</script>

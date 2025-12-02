@@ -55,7 +55,8 @@ $system_setting = $system_row['syssetting'];
                         <h6 class="collapse-header">Search:</h6>
                         <a class="collapse-item" href="search.php">Search F325</a>
                         <a class="collapse-item" href="store-list.php">Store List</a>
-                        <a class="collapse-item" href="search_sl.php">Shortlanded F325</a>
+                        <a class="collapse-item" href="product-list.php">Product List</a>
+                        <!-- <a class="collapse-item" href="search_sl.php">Shortlanded F325</a> -->
                 </div>
             </div>
             </li>
@@ -105,7 +106,7 @@ $system_setting = $system_row['syssetting'];
 
                         if($_SESSION['print']=='1')
                     {
-                            echo '<a class="collapse-item" href="borf.php">BORF F325</a>';
+                            // echo '<a class="collapse-item" href="borf.php">BORF F325</a>';
                         }else{
                     }
                     ?>
@@ -120,12 +121,12 @@ $system_setting = $system_row['syssetting'];
             <hr class="sidebar-divider">
 
             <!-- Heading -->
-            <div class="sidebar-heading">
+            <!-- <div class="sidebar-heading">
                 Receivables
-            </div>
+            </div> -->
             
             <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSL"
                     aria-expanded="true" aria-controls="collapseSL">
                     <i class="fas fa-fw fa-money-bill"></i>
@@ -138,7 +139,7 @@ $system_setting = $system_row['syssetting'];
                         <a class="collapse-item" href="shortlanded.php">Unpaid F325</a>
                 </div>
             </div>
-            </li>
+            </li> -->
 
             <?php
             }else{

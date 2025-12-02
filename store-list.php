@@ -4,7 +4,16 @@ include('dbconnect.php');
 include_once('header.php');
 include_once('nav.php');
 ?>
+<?php
+$editData = null;
 
+if (isset($_GET['edit_id'])) {
+    $id = $_GET['edit_id'];
+    $editQuery = $conn->query("SELECT * FROM dbcensus WHERE id = '$id' LIMIT 1");
+    $editData = $editQuery->fetch_assoc();
+}
+
+?>
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
         <h4 class="mb-0">Store List</h4>
@@ -55,7 +64,7 @@ include_once('nav.php');
             <div class="table-responsive">
 
                 <?php
-                $query = "SELECT code, branchname, region, status, location FROM dbcensus";
+                $query = "SELECT id, code, branchname, region, status, location FROM dbcensus";
                 $result = $conn->query($query);
                 ?>
 
@@ -75,7 +84,7 @@ include_once('nav.php');
                                 <td><?= htmlspecialchars($row['branchname']); ?></td>
                                 <td><?= htmlspecialchars($row['region']); ?></td>
                                 <td>
-                                    <a href="edit_store.php?id=<?= $row['id']; ?>" class="btn btn-warning btn-sm">
+                                    <a href="store-list.php?edit_id=<?= $row['id']; ?>" class="btn btn-warning btn-sm">
                                         <i class="bi bi-pencil-square"></i> Edit
                                     </a>
                                 </td>
@@ -100,7 +109,7 @@ include_once('nav.php');
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="storeForm" class="p-4">
+                <form id="storeForm" method="POST" action="store-list-process.php" class="p-4">
 
                     <!-- CUSTOMER INFO -->
                     <h5 class="fw-bold">Customer Info</h5>
@@ -112,23 +121,23 @@ include_once('nav.php');
                             <label class="form-label fw-bold">Code</label>
                             <input type="text"
                                 class="form-control input-code"
-                                maxlength="6"
+                                maxlength="6" name="code"
                                 required>
                         </div>
 
                         <div class="col-md-12">
                             <label class="form-label fw-bold">Branch Name</label>
-                            <textarea class="form-control input-branchname" required></textarea>
+                            <textarea class="form-control input-branchname" name="branchname" required></textarea>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Shipping Address</label>
-                            <textarea class="form-control input-shippingaddress" required></textarea>
+                            <textarea class="form-control input-shippingaddress" name="shipping" required></textarea>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Billing Address</label>
-                            <textarea class="form-control input-billingaddress" required></textarea>
+                            <textarea class="form-control input-billingaddress" name="billing" required></textarea>
                         </div>
 
                     </div>
@@ -223,22 +232,181 @@ include_once('nav.php');
         </div>
     </div>
 </div>
+<!-- EDIT STORE MODAL -->
+<?php if ($editData): ?>
+
+    <body class="modal-open">
+        <div class="modal-backdrop fade show"></div>
+    <?php endif; ?>
+
+    <div class="modal fade <?php if ($editData) echo 'show'; ?>"
+        id="editStoreModal"
+        tabindex="-1"
+        style="<?php if ($editData) echo 'display:block;'; ?>">
+
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg">
+
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-shop-window"></i> Edit Store
+                    </h5>
+                    <a href="store-list.php" class="btn-close"></a>
+                </div>
+
+                <div class="modal-body">
+                    <form method="POST" action="update-store-process.php" class="p-4">
+
+                        <input type="hidden" name="id" value="<?= $editData['id']; ?>">
+
+                        <h5 class="fw-bold">Customer Info</h5>
+                        <hr>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Code</label>
+                                <input type="text" name="code" maxlength="6" class="form-control"
+                                    value="<?= $editData['code']; ?>" required>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Branch Name</label>
+                                <textarea name="branchname" class="form-control" required><?= $editData['branchname']; ?></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Shipping Address</label>
+                                <textarea name="shipping" class="form-control" required><?= $editData['shipping']; ?></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Billing Address</label>
+                                <textarea name="billing" class="form-control" required><?= $editData['billing']; ?></textarea>
+                            </div>
+
+                        </div>
+
+                        <h5 class="fw-bold mt-4">Customer Detail</h5>
+                        <hr>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Franchise</label>
+                                <select name="franchise" class="form-select" required>
+                                    <option value="">Select Franchise</option>
+                                    <?php
+                                    $frQ = $conn->query("SELECT DISTINCT franchise FROM dbcensus WHERE franchise <> '' ORDER BY franchise");
+                                    while ($f = $frQ->fetch_assoc()):
+                                    ?>
+                                        <option value="<?= $f['franchise']; ?>"
+                                            <?= ($editData['franchise'] == $f['franchise']) ? 'selected' : '' ?>>
+                                            <?= $f['franchise']; ?>
+                                        </option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Region</label>
+                                <select name="region" class="form-select" required>
+                                    <option value="">Select Region</option>
+                                    <?php
+                                    $regionQ = $conn->query("SELECT DISTINCT region FROM dbcensus WHERE region <> '' ORDER BY region");
+                                    while ($r = $regionQ->fetch_assoc()):
+                                    ?>
+                                        <option value="<?= $r['region']; ?>"
+                                            <?= ($editData['region'] == $r['region']) ? 'selected' : '' ?>>
+                                            <?= $r['region']; ?>
+                                        </option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Cluster</label>
+                                <select name="cluster" class="form-select" required>
+                                    <option value="">Select Cluster</option>
+                                    <?php
+                                    $clQ = $conn->query("SELECT DISTINCT cluster FROM dbcensus WHERE cluster <> '' ORDER BY cluster");
+                                    while ($c = $clQ->fetch_assoc()):
+                                    ?>
+                                        <option value="<?= $c['cluster']; ?>"
+                                            <?= ($editData['cluster'] == $c['cluster']) ? 'selected' : '' ?>>
+                                            <?= $c['cluster']; ?>
+                                        </option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Deduct Type</label>
+                                <select name="deducttype" class="form-select" required>
+                                    <option value="">Select Deduct Type</option>
+                                    <?php
+                                    $dtQ = $conn->query("SELECT DISTINCT deducttype FROM dbcensus WHERE deducttype <> '' ORDER BY deducttype");
+                                    while ($d = $dtQ->fetch_assoc()):
+                                    ?>
+                                        <option value="<?= $d['deducttype']; ?>"
+                                            <?= ($editData['deducttype'] == $d['deducttype']) ? 'selected' : '' ?>>
+                                            <?= $d['deducttype']; ?>
+                                        </option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Location</label>
+                                <select name="location" class="form-select" required>
+                                    <option value="">Select Location</option>
+                                    <?php
+                                    $locQ = $conn->query("SELECT DISTINCT location FROM dbcensus WHERE location <> '' ORDER BY location");
+                                    while ($l = $locQ->fetch_assoc()):
+                                    ?>
+                                        <option value="<?= $l['location']; ?>"
+                                            <?= ($editData['location'] == $l['location']) ? 'selected' : '' ?>>
+                                            <?= $l['location']; ?>
+                                        </option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer mt-4">
+                            <button type="submit" name="action" value="update" class="btn btn-primary">Save Changes</button>
+
+                            <button type="submit" name="action" value="deactivate"
+                                class="btn btn-outline-danger"
+                                onclick="return confirm('Are you sure you want to deactivate this store?');">
+                                Deactivate Store
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 
-<?php include_once('footer.php'); ?>
-<?php $conn->close(); ?>
 
-<script>
-    $(document).ready(function() {
-        var table = $('#storeTable').DataTable();
+    <?php include_once('footer.php'); ?>
+    <?php $conn->close(); ?>
 
-        // Filter by Region
-        $('#filterRegion').on('change', function() {
-            table.column(2).search(this.value).draw();
+    <script>
+        $(document).ready(function() {
+            var table = $('#storeTable').DataTable();
+
+            // Filter by Region
+            $('#filterRegion').on('change', function() {
+                table.column(2).search(this.value).draw();
+            });
+
+            $('#filterLocation').on('change', function() {
+                table.column(2).search(this.value).draw();
+            });
         });
-
-        $('#filterLocation').on('change', function() {
-            table.column(2).search(this.value).draw();
-        });
-    });
-</script>
+    </script>
