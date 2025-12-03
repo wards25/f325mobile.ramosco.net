@@ -24,7 +24,7 @@ if ($user['admin'] != 1) {
 <?php
 include_once("nav.php");
 ?>
-
+<!-- //working with user accounts -->
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
         <h4 class="mb-0">User Accounts</h4>
