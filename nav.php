@@ -193,10 +193,11 @@ $system_setting = $system_row['syssetting'];
                         <h6 class="collapse-header">Export:</h6>
                         <!-- <a class="collapse-item" href="exportraw.php">Export Per Status</a> -->
                         <a class="collapse-item" href="exportprincipal.php">Generate Report</a>
-                        <a class="collapse-item" href="exportborf.php">Generate BORF Report</a>
+                        <a class="collapse-item" href="export-pullout-report.php">Generate Pullout Report</a>
+                        <!-- <a class="collapse-item" href="exportborf.php">Generate BORF Report</a>
                         <a class="collapse-item" href="exportshortlanded.php">Generate SL Report</a>
                         <a class="collapse-item" href="#" data-toggle="modal" data-target="#F325Transmittal">Generate F325 Transmittal</a>
-                        <a class="collapse-item" href="#" data-toggle="modal" data-target="#LogTransmittal">Generate Log Transmittal</a>
+                        <a class="collapse-item" href="#" data-toggle="modal" data-target="#LogTransmittal">Generate Log Transmittal</a> -->
                         <!-- <a class="collapse-item" href="bypass.php">Bypass Product List</a>
                         <a class="collapse-item" href="payslip.php">Payslip</a> -->
                     </div>

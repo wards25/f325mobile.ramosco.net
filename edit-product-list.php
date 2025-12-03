@@ -70,25 +70,34 @@ if (!$editData) {
                 <div class="row g-3 mb-4">
                     <?php
                     $mdccode = $editData['mdccode'];
-                    $location_query = mysqli_query($conn, "SELECT * FROM dblocation WHERE active='1'");
+                    $status_cleared = "CLEARED";
+                    $status_scheduled = "SCHEDULED";
+
+                    // Optimize the query to fetch stock and pick quantities for all locations at once
+                    $query = "
+                        SELECT 
+                            l.location,
+                            SUM(CASE WHEN r.statusout = '$status_cleared' THEN r.quantity ELSE 0 END) AS totalquantity,
+                            SUM(CASE WHEN r.status = '$status_scheduled' THEN r.quantity ELSE 0 END) AS totalpickquantity
+                        FROM 
+                            dblocation l
+                        LEFT JOIN dbraw r ON l.location = r.location AND r.mdccode = '$mdccode'
+                        WHERE 
+                            l.active = '1'
+                        GROUP BY 
+                            l.location
+                    ";
+                    $location_query = mysqli_query($conn, $query);
+
                     while ($loc = mysqli_fetch_assoc($location_query)) {
-                        $location = $loc['location'];
-                        $status_cleared = "CLEARED";
-                        $status_scheduled = "SCHEDULED";
-
-                        $stock_query = mysqli_query($conn,"SELECT SUM(quantity) AS totalquantity FROM dbraw WHERE mdccode='$mdccode' AND location='$location' AND statusout='$status_cleared'");
-                        $stock = mysqli_fetch_assoc($stock_query);
-
-                        $pick_query = mysqli_query($conn,"SELECT SUM(quantity) AS totalpickquantity FROM dbraw WHERE mdccode='$mdccode' AND location='$location' AND status='$status_scheduled'");
-                        $pick = mysqli_fetch_assoc($pick_query);
                     ?>
                         <div class="col-md-6">
-                            <label class="form-label"><?= htmlspecialchars($location); ?> Available</label>
-                            <input type="text" class="form-control" value="<?= number_format($stock['totalquantity'],0); ?>" readonly>
+                            <label class="form-label"><?= htmlspecialchars($loc['location']); ?> Available</label>
+                            <input type="text" class="form-control" value="<?= number_format($loc['totalquantity'], 0); ?>" readonly>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label"><?= htmlspecialchars($location); ?> Scheduled</label>
-                            <input type="text" class="form-control" value="<?= number_format($pick['totalpickquantity'],0); ?>" readonly>
+                            <label class="form-label"><?= htmlspecialchars($loc['location']); ?> Scheduled</label>
+                            <input type="text" class="form-control" value="<?= number_format($loc['totalpickquantity'], 0); ?>" readonly>
                         </div>
                     <?php } ?>
                 </div>
