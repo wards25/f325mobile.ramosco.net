@@ -403,12 +403,12 @@ if (isset($_GET['edit_id'])) {
             var table = $('#storeTable').DataTable();
 
             // Filter by Region
-            $('#filterRegion').on('change', function() {
-                table.column(2).search(this.value).draw();
-            });
-
             $('#filterLocation').on('change', function() {
                 table.column(2).search(this.value).draw();
             });
+             $('#filterRegion').on('change', function() {
+                table.column(3).search(this.value).draw();
+            });
+
         });
     </script>

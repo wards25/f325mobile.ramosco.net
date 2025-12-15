@@ -38,7 +38,7 @@ if (isset($_FILES['files'])) {
             else {
                 $process_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE f325number='$f325number'");
                 $fetch_process = mysqli_fetch_assoc($process_query);
-                $status = $fetch_process ? $fetch_process['process'] : "Ready";
+                $status = $fetch_process ? $fetch_process['process'] : "READY";
             }
         }
 

@@ -24,6 +24,11 @@ if ($user['admin'] != 1) {
 <?php
 include_once("nav.php");
 ?>
+<?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+    <div id="success-alert" class='alert alert-success'>
+        User updated successfully!
+    </div>
+<?php endif; ?>
 
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
@@ -73,17 +78,29 @@ include_once("nav.php");
                                         <td>{$role}</td>
                                         <td>{$status}</td>
                                         <td class='text-center'>
-                                        <button class='btn btn-sm btn-outline-warning me-1' 
-                                                data-bs-toggle='modal' 
-                                                data-bs-target='#editUserModal' 
-                                                data-id='{$row['id']}' 
-                                                data-fname='{$row['fname']}' 
-                                                data-username='{$row['username']}' 
-                                                data-active='{$row['active']}' 
-                                                data-admin='{$row['admin']}'
-                                                data-password='{$row['password']}'>
+                                        <button class='btn btn-sm btn-outline-warning me-1'
+                                            data-bs-toggle='modal'
+                                            data-bs-target='#editUserModal'
+                                            data-id='{$row['id']}'
+                                            data-fname='{$row['fname']}'
+                                            data-username='{$row['username']}'
+                                            data-active='{$row['active']}'
+                                            data-admin='{$row['admin']}'
+                                            data-semiadmin='{$row['semiadmin']}'
+                                            data-loc1='{$row['loc1']}'
+                                            data-loc2='{$row['loc2']}'
+                                            data-loc3='{$row['loc3']}'
+                                            data-loc4='{$row['loc4']}'
+                                            data-loc5='{$row['loc5']}'
+                                            data-loc6='{$row['loc6']}'
+                                            data-loc7='{$row['loc7']}'
+                                            data-loc8='{$row['loc8']}'
+                                            data-loc9='{$row['loc9']}'
+                                            data-loc10='{$row['loc10']}'
+                                            data-password='{$row['password']}'>
                                             <i class='bi bi-gear'></i> Update
                                         </button>
+
                                         </td>
                                         <td class='text-center'>
                                             <button class='btn btn-sm btn-primary me-1' onclick='EditUser({$row['id']})'> <i class='bi bi-shield'></i> Edit</button>
@@ -218,119 +235,88 @@ include_once("nav.php");
             </div>
 
             <!-- Modal for EditUser -->
-            <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel"
-                aria-hidden="true">
+            <!-- Modal for EditUser -->
+            <div class="modal fade" id="editUserModal" tabindex="-1">
                 <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content">
-                        <div class="modal-header bg-warning text-dark">
-                            <h5 class="modal-title fw-bold" id="editUserModalLabel">
-                                <i class="bi bi-person-plus-fill me-2"></i> Edit User
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="modal-header bg-warning">
+                            <h5>Edit User</h5>
+                            <button class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <form class="form-user row g-2 p-4" id="editUserForm">
-                            <table class="tbl-user">
-                                <div class="col-md-6">
-                                    <label class="form-label">Name:</label>
-                                    <input type="text"
-                                        class="form-control input-withBorder input-form-field input-fname" name="fname"
-                                        required>
+                        <div class="modal-body">
+                            <form class="form-user row g-2 p-4" id="editUserForm" method="POST" action="update-user.php">
+                                <input type="hidden" name="id">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label>Name</label>
+                                        <input type="text" name="fname" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Username</label>
+                                        <input type="text" name="username" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Status</label>
+                                        <select name="active" class="form-select">
+                                            <option value="1">Active</option>
+                                            <option value="0">Inactive</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Access</label>
+                                        <select name="access" class="form-select">
+                                            <option value="1">Admin</option>
+                                            <option value="2">Semi Admin</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label>Password</label>
+                                        <input type="password" name="password" class="form-control">
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Username:</label>
-                                    <input type="text" maxlength="15"
-                                        class="form-control input-withBorder input-form-field input-username"
-                                        name="username" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Status:</label>
-                                    <select class="form-select input-withBorder input-form-field input-active"
-                                        name="active" required>
-                                        <option selected disabled>select user status</option>
-                                        <option value="1">Active</option>
-                                        <option value="0">Inactive</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">User Access:</label>
-                                    <select class="form-select input-withBorder input-form-field input-access"
-                                        name="access" required>
-                                        <option selected disabled>select user access</option>
-                                        <option value="1">Admin</option>
-                                        <option value="2">Semi Admin</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-12">
-                                    <label class="form-label">Password:</label>
-                                    <input type="password"
-                                        class="form-control input-withBorder input-form-field input-password"
-                                        name="password" maxlength="10" required>
-                                </div>
-                                <td class="tbl-user-td3" colspan="4">
-                                    <div style="overflow-y: auto; height: 100%; width: 100%;">
-                                        <table class="tbl-user-access table table-bordered align-middle w-100">
-                                            <thead>
-                                                <tr>
-                                                    <th colspan="2" class="text-center bg-light">Location Access</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php
-                                                $location_query = mysqli_query($conn, "SELECT * FROM dblocation ORDER BY id ASC");
-                                                $locations = [];
-                                                while ($row = mysqli_fetch_assoc($location_query)) {
-                                                    $locations[] = $row;
+
+                                <hr>
+
+                                <h6 class="text-center">Location Access</h6>
+
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <?php
+                                        $location_query = mysqli_query($conn, "SELECT * FROM dblocation ORDER BY id ASC");
+                                        $locations = [];
+                                        while ($l = mysqli_fetch_assoc($location_query)) $locations[] = $l;
+
+                                        for ($i = 0; $i < count($locations); $i += 2) {
+                                            echo "<tr>";
+                                            foreach ([$i, $i + 1] as $idx) {
+                                                if (!isset($locations[$idx])) {
+                                                    echo "<td></td>";
+                                                    continue;
                                                 }
-                                                $total = count($locations);
-                                                for ($i = 0; $i < $total; $i += 2) {
-                                                    echo "<tr>";
-                                                    echo "<td style='width:50%;'>
+                                                $id = $locations[$idx]['id'];
+                                                $name = $locations[$idx]['location'];
+                                                echo "<td>
                                             <div class='form-check'>
-                                                <input type='checkbox' 
-                                                    class='form-check-input input-form-field input-loc{$locations[$i]['id']}'
-                                                    value='1' name='location[{$locations[$i]['id']}]' id='loc{$locations[$i]['id']}'>
-                                                <label class='form-check-label' for='loc{$locations[$i]['id']}'>
-                                                    {$locations[$i]['location']}
-                                                </label>
+                                                <input class='form-check-input input-loc$id' type='checkbox' name='location[$id]' value='1'>
+                                                <label class='form-check-label'>$name</label>
                                             </div>
                                         </td>";
+                                            }
+                                            echo "</tr>";
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
 
-                                                    if (isset($locations[$i + 1])) {
-                                                        echo "<td style='width:50%;'>
-                                                <div class='form-check'>
-                                                    <input type='checkbox' 
-                                                        class='form-check-input input-form-field input-loc{$locations[$i + 1]['id']}'
-                                                        value='1' name='location[{$locations[$i + 1]['id']}]' id='loc{$locations[$i + 1]['id']}'>
-                                                    <label class='form-check-label' for='loc{$locations[$i + 1]['id']}'>
-                                                        {$locations[$i + 1]['location']}
-                                                    </label>
-                                                </div>
-                                            </td>";
-                                                    } else {
-                                                        echo "<td></td>";
-                                                    }
-                                                    echo "</tr>";
-                                                }
-                                                ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </td>
-                                </tr>
-                                <tr>
-                                    <td class="tbl-user-td1" colspan="4" style="text-align:right;">
-                                        <button type="button" class="btn btn-sm btn-secondary px-4 button-user"
-                                            onclick="UnloadUser();">Cancel</button>
-                                        <button class="btn btn-sm btn-primary px-4 button-user button-user-save"
-                                            type="submit">Save</button>
-                                    </td>
-                                </tr>
-                            </table>
-                        </form>
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Save</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -346,74 +332,45 @@ include_once("footer.php");
 </a>
 
 <script>
-    $(document).ready(function () {
-        $('.user-table').DataTable({
-            pageLength: 10,
-            lengthChange: true,
-            searching: true,
-            ordering: true,
-            responsive: true,
-            language: {
-                search: "Search user:",
-                lengthMenu: "Show _MENU_ entries per page",
-                info: "Showing _START_ to _END_ of _TOTAL_ users",
-            }
-        });
-        $('#editUserModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget); // Button that triggered the modal
-            var userId = button.data('id');
-            var fname = button.data('fname');
-            var username = button.data('username');
-            var active = button.data('active');
-            var admin = button.data('admin');
-            var password = button.data('password');
+    $(document).ready(function() {
+        $('.user-table').DataTable();
 
-            // Populate the modal fields
-            $(this).find('input[name="fname"]').val(fname);
-            $(this).find('input[name="username"]').val(username);
-            $(this).find('select[name="active"]').val(active);
-            $(this).find('select[name="access"]').val(admin);
-            $(this).find('input[name="password"]').val(password);
+        $('#editUserModal').on('show.bs.modal', function(event) {
+            let button = $(event.relatedTarget);
+
+            // Fill user info
+            $('input[name="id"]').val(button.data('id'));
+            $('input[name="fname"]').val(button.data('fname'));
+            $('input[name="username"]').val(button.data('username'));
+            $('select[name="active"]').val(button.data('active'));
+            $('select[name="access"]').val(button.data('admin'));
+            $('input[name="password"]').val(button.data('password'));
+            if (button.data('admin') == 1) {
+                $('select[name="access"]').val(1); // Admin
+            } else if (button.data('semiadmin') == 1) {
+                $('select[name="access"]').val(2); // Semi Admin
+            } else {
+                $('select[name="access"]').val(0); // Regular User
+            }
+
+            // Reset all checkboxes
+            $('#editUserModal input[type="checkbox"]').prop('checked', false);
+
+            // Check locations dynamically
+            $('#editUserModal input[type="checkbox"]').each(function() {
+                let locId = $(this).attr('class').match(/input-loc(\d+)/)[1];
+                if (button.data('loc' + locId) == 1) {
+                    $(this).prop('checked', true);
+                }
+            });
         });
     });
-
+    setTimeout(function() {
+            var alert = document.getElementById('success-alert');
+            if(alert){
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(function(){ alert.remove(); }, 500); // remove after fade
+            }
+        }, 1000);
 </script>
-
-
-<script src="js/jquery.js"></script>
-<script type="text/javascript" src="js/index.js"></script>
-
-
-<!-- Bootstrap core JavaScript-->
-<script src="vendor/jquery/jquery.min.js"></script>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-<!-- Core plugin JavaScript-->
-<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-<!-- Custom scripts for all pages-->
-<script src="js/sb-admin-2.min.js"></script>
-
-<!-- Page level plugins -->
-<script src="vendor/datatables/jquery.dataTables.min.js"></script>
-<script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-<!-- Page level custom scripts -->
-<script src="js/demo/datatables-demo.js"></script>
-
-<!-- jQuery (required for DataTables) -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Bootstrap 5 -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- DataTables + Bootstrap 5 integration -->
-<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-
-<!-- DataTables scripts -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
-<!-- bootstrap icon -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">

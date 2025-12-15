@@ -16,8 +16,41 @@ if ($user['admin'] != 1) {
     exit;
 }
 ?>
+<style>
+    #preloader {
+    display: none;
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 9999;
+}
+
+#preloader .preloader-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100%;
+}
+
+</style>
 <?php include_once('header.php'); ?>
 <?php include_once('nav.php'); ?>
+<!-- Preloader Overlay -->
+ <div id="preloader">
+    <div class="preloader-content">
+        <div class="spinner-border text-primary" role="status" style="width:2rem;height:2rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Uploading files, please wait...</p>
+    </div>
+</div>
+
 <div class="container mt-4">
     <!-- Email Date -->
     <div class="div-emaildate mt-3 mb-3">
@@ -49,7 +82,7 @@ if ($user['admin'] != 1) {
 
 <?php include_once('footer.php'); ?>
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
 
         let dataTable = $('#resultsTable').DataTable({
             responsive: true,
@@ -62,20 +95,20 @@ if ($user['admin'] != 1) {
 
         $dropArea.on("click", () => $fileInput.trigger("click"));
 
-        $fileInput.on("change", function () {
+        $fileInput.on("change", function() {
             verifyUPloads(this.files);
         });
 
-        $dropArea.on("dragover", function (e) {
+        $dropArea.on("dragover", function(e) {
             e.preventDefault();
             $dropArea.addClass("drag-over").css("border-color", "#0d6efd");
         });
 
-        $dropArea.on("dragleave", function () {
+        $dropArea.on("dragleave", function() {
             $dropArea.removeClass("drag-over").css("border-color", "#6c757d");
         });
 
-        $dropArea.on("drop", function (e) {
+        $dropArea.on("drop", function(e) {
             e.preventDefault();
             $dropArea.removeClass("drag-over").css("border-color", "#6c757d");
 
@@ -91,6 +124,7 @@ if ($user['admin'] != 1) {
 
 
         function verifyUPloads(files) {
+            showPreloader();
             const formData = new FormData();
             $.each(files, (i, file) => formData.append("files[]", file));
 
@@ -100,7 +134,8 @@ if ($user['admin'] != 1) {
                 data: formData,
                 processData: false,
                 contentType: false,
-                success: function (response) {
+                success: function(response) {
+                    hidePreloader();
                     response.forEach(row => {
                         const f325Exists = checkIfF325Exists(row.f325);
                         if (!f325Exists) {
@@ -109,14 +144,16 @@ if ($user['admin'] != 1) {
                     });
                     dataTable.draw();
                 },
-                error: function () {
+                error: function() {
+                    hidePreloader();
                     alert("Upload failed");
                 }
             });
         }
+
         function checkIfF325Exists(f325Number) {
             let exists = false;
-            dataTable.rows().every(function () {
+            dataTable.rows().every(function() {
                 const rowData = this.data();
                 if (rowData[1] === f325Number) {
                     exists = true;
@@ -125,7 +162,7 @@ if ($user['admin'] != 1) {
             });
             return exists;
         }
-        $(".btn-upload").on("click", function () {
+        $(".btn-upload").on("click", function() {
             let formData = new FormData();
             formData.append("emaildate", $(".email-date").val());
 
@@ -146,13 +183,20 @@ if ($user['admin'] != 1) {
                 data: formData,
                 processData: false,
                 contentType: false,
-                success: function (response) {
-                  console.log(response);
+                success: function(response) {
+                    console.log(response);
                 }
             });
         });
-    });
 
+        function showPreloader() {
+            $("#preloader").fadeIn(200);
+        }
+
+        function hidePreloader() {
+            $("#preloader").fadeOut(200);
+        }
+    });
 </script>
 
 <?php $conn->close(); ?>
