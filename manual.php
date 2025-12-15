@@ -404,7 +404,6 @@ include_once("nav.php");
                 }
             });
         }); 
-
        // item list
        function ItemList() {
             $.ajax({

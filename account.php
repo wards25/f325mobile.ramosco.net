@@ -24,7 +24,7 @@ if ($user['admin'] != 1) {
 <?php
 include_once("nav.php");
 ?>
-<!-- //working with user accounts -->
+
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
         <h4 class="mb-0">User Accounts</h4>
@@ -44,7 +44,8 @@ include_once("nav.php");
                                 <th>Username</th>
                                 <th>Role</th>
                                 <th>Status</th>
-                                <th class="text-center">Actions</th>
+                                <th>Update</th>
+                                <th class="text-center">Permissions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -72,7 +73,20 @@ include_once("nav.php");
                                         <td>{$role}</td>
                                         <td>{$status}</td>
                                         <td class='text-center'>
-                                            <button class='btn btn-sm btn-primary me-1' onclick='EditUser({$row['id']})'>Edit</button>
+                                        <button class='btn btn-sm btn-outline-warning me-1' 
+                                                data-bs-toggle='modal' 
+                                                data-bs-target='#editUserModal' 
+                                                data-id='{$row['id']}' 
+                                                data-fname='{$row['fname']}' 
+                                                data-username='{$row['username']}' 
+                                                data-active='{$row['active']}' 
+                                                data-admin='{$row['admin']}'
+                                                data-password='{$row['password']}'>
+                                            <i class='bi bi-gear'></i> Update
+                                        </button>
+                                        </td>
+                                        <td class='text-center'>
+                                            <button class='btn btn-sm btn-primary me-1' onclick='EditUser({$row['id']})'> <i class='bi bi-shield'></i> Edit</button>
                                         </td>
                                         </tr>
                                     ";
@@ -109,8 +123,8 @@ include_once("nav.php");
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Status:</label>
-                                    <select type="password" class="form-select input-withBorder input-form-field input-active"
-                                        required>
+                                    <select type="password"
+                                        class="form-select input-withBorder input-form-field input-active" required>
                                         <option selected disabled>select user status</option>
                                         <option value="1">Active</option>
                                         <option value="0">Inactive</option>
@@ -118,8 +132,8 @@ include_once("nav.php");
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">User Access:</label>
-                                    <select type="password" class="form-select input-withBorder input-form-field input-access"
-                                        required>
+                                    <select type="password"
+                                        class="form-select input-withBorder input-form-field input-access" required>
                                         <option selected disabled>select user access</option>
                                         <option value="1">Admin</option>
                                         <option value="2">Semi Admin</option>
@@ -202,6 +216,121 @@ include_once("nav.php");
                     </div>
                 </div>
             </div>
+
+            <!-- Modal for EditUser -->
+            <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title fw-bold" id="editUserModalLabel">
+                                <i class="bi bi-person-plus-fill me-2"></i> Edit User
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form class="form-user row g-2 p-4" id="editUserForm">
+                            <table class="tbl-user">
+                                <div class="col-md-6">
+                                    <label class="form-label">Name:</label>
+                                    <input type="text"
+                                        class="form-control input-withBorder input-form-field input-fname" name="fname"
+                                        required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Username:</label>
+                                    <input type="text" maxlength="15"
+                                        class="form-control input-withBorder input-form-field input-username"
+                                        name="username" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Status:</label>
+                                    <select class="form-select input-withBorder input-form-field input-active"
+                                        name="active" required>
+                                        <option selected disabled>select user status</option>
+                                        <option value="1">Active</option>
+                                        <option value="0">Inactive</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">User Access:</label>
+                                    <select class="form-select input-withBorder input-form-field input-access"
+                                        name="access" required>
+                                        <option selected disabled>select user access</option>
+                                        <option value="1">Admin</option>
+                                        <option value="2">Semi Admin</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Password:</label>
+                                    <input type="password"
+                                        class="form-control input-withBorder input-form-field input-password"
+                                        name="password" maxlength="10" required>
+                                </div>
+                                <td class="tbl-user-td3" colspan="4">
+                                    <div style="overflow-y: auto; height: 100%; width: 100%;">
+                                        <table class="tbl-user-access table table-bordered align-middle w-100">
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="2" class="text-center bg-light">Location Access</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                $location_query = mysqli_query($conn, "SELECT * FROM dblocation ORDER BY id ASC");
+                                                $locations = [];
+                                                while ($row = mysqli_fetch_assoc($location_query)) {
+                                                    $locations[] = $row;
+                                                }
+                                                $total = count($locations);
+                                                for ($i = 0; $i < $total; $i += 2) {
+                                                    echo "<tr>";
+                                                    echo "<td style='width:50%;'>
+                                            <div class='form-check'>
+                                                <input type='checkbox' 
+                                                    class='form-check-input input-form-field input-loc{$locations[$i]['id']}'
+                                                    value='1' name='location[{$locations[$i]['id']}]' id='loc{$locations[$i]['id']}'>
+                                                <label class='form-check-label' for='loc{$locations[$i]['id']}'>
+                                                    {$locations[$i]['location']}
+                                                </label>
+                                            </div>
+                                        </td>";
+
+                                                    if (isset($locations[$i + 1])) {
+                                                        echo "<td style='width:50%;'>
+                                                <div class='form-check'>
+                                                    <input type='checkbox' 
+                                                        class='form-check-input input-form-field input-loc{$locations[$i + 1]['id']}'
+                                                        value='1' name='location[{$locations[$i + 1]['id']}]' id='loc{$locations[$i + 1]['id']}'>
+                                                    <label class='form-check-label' for='loc{$locations[$i + 1]['id']}'>
+                                                        {$locations[$i + 1]['location']}
+                                                    </label>
+                                                </div>
+                                            </td>";
+                                                    } else {
+                                                        echo "<td></td>";
+                                                    }
+                                                    echo "</tr>";
+                                                }
+                                                ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                                </tr>
+                                <tr>
+                                    <td class="tbl-user-td1" colspan="4" style="text-align:right;">
+                                        <button type="button" class="btn btn-sm btn-secondary px-4 button-user"
+                                            onclick="UnloadUser();">Cancel</button>
+                                        <button class="btn btn-sm btn-primary px-4 button-user button-user-save"
+                                            type="submit">Save</button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -229,6 +358,22 @@ include_once("footer.php");
                 lengthMenu: "Show _MENU_ entries per page",
                 info: "Showing _START_ to _END_ of _TOTAL_ users",
             }
+        });
+        $('#editUserModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var userId = button.data('id');
+            var fname = button.data('fname');
+            var username = button.data('username');
+            var active = button.data('active');
+            var admin = button.data('admin');
+            var password = button.data('password');
+
+            // Populate the modal fields
+            $(this).find('input[name="fname"]').val(fname);
+            $(this).find('input[name="username"]').val(username);
+            $(this).find('select[name="active"]').val(active);
+            $(this).find('select[name="access"]').val(admin);
+            $(this).find('input[name="password"]').val(password);
         });
     });
 
