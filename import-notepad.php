@@ -121,8 +121,6 @@ if ($user['admin'] != 1) {
 
             verifyUPloads(files);
         });
-
-
         function verifyUPloads(files) {
             showPreloader();
             const formData = new FormData();
@@ -163,6 +161,7 @@ if ($user['admin'] != 1) {
             return exists;
         }
         $(".btn-upload").on("click", function() {
+            showPreloader();
             let formData = new FormData();
             formData.append("emaildate", $(".email-date").val());
 
@@ -184,6 +183,8 @@ if ($user['admin'] != 1) {
                 processData: false,
                 contentType: false,
                 success: function(response) {
+                    hidePreloader();
+                    window.location.reload();
                     console.log(response);
                 }
             });

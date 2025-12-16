@@ -98,7 +98,7 @@ include('dbconnect.php');
                                         <div class="btn-group gap-2">
                                             <button type="button" class="btn btn-outline-primary button-reopen"
                                                 onclick="ReOpenNotepad();">Re-Open</button>
-                                            <button type="button" class="btn btn-outline-success button-print"
+                                            <button type="button" class="btn btn-sm btn-outline-success button-print"
                                                 onclick="PrintNotepad();">Printed</button>
 
                                             <!-- History Dropdown -->

@@ -37,7 +37,7 @@ if ($action == 'update') {
         mysqli_query($conn,"UPDATE dbproduct SET mdccode='$mdccode',itemcode='$itemcode',description='$description',vendor='$company',category='$category',dmpicode='$dmpicode',dmpipack='$dmpipack',dmpiclassification='$dmpiclass',uom='$uom' WHERE id='$id'");
 
         // Update category in dbraw
-        mysqli_query($conn,"UPDATE dbraw SET category='$category' WHERE mdccode='$oldmdccode' AND category='$oldcategory' ");
+        mysqli_query($conn,"UPDATE dbraw SET category='$category' WHERE mdccode='$mdccode' AND category='$category' ");
 
         echo "Update successfully!";
     }
@@ -69,9 +69,10 @@ if ($action == 'update') {
             mysqli_query($conn,"UPDATE dbproduct SET mdccode='$mdccode',itemcode='$itemcode',description='$description',vendor='$company',category='$category',dmpicode='$dmpicode',dmpipack='$dmpipack',dmpiclassification='$dmpiclass',uom='$uom' WHERE id='$id'");
 
             // Update category in dbraw
-            mysqli_query($conn,"UPDATE dbraw SET category='$category' WHERE mdccode='$oldmdccode' AND category='$oldcategory' ");
+            mysqli_query($conn,"UPDATE dbraw SET category='$category' WHERE mdccode='$mdccode' AND category='$category' ");
 
-            echo "Update successfully!";
+            header("Location: edit-product-list.php?edit_id=$id&success=1");
+            exit();
         }
     }
 } elseif ($action == 'deactivate') {

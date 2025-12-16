@@ -36,6 +36,11 @@ if (!$editData) {
 <?php include('nav.php'); ?>
 
 <div class="container my-5">
+    <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+        <div id="success-alert" class='alert alert-success'>
+            product updated successfully!
+        </div>
+    <?php endif; ?>
     <div class="d-flex justify-content-between align-items-center mb-3 border-bottom">
         <h4 class="mb-0">Edit Product</h4>
         <a href="product-list.php" class="btn btn-secondary">Back to Product List</a>
@@ -142,3 +147,15 @@ if (!$editData) {
 
 <?php include('footer.php'); ?>
 <?php $conn->close(); ?>
+<script>
+    setTimeout(function() {
+        var alert = document.getElementById('success-alert');
+        if (alert) {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.remove();
+            }, 500); 
+        }
+    }, 1000);
+</script>
