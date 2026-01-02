@@ -27,13 +27,9 @@ include_once("nav.php");
                         <div class="card-body">
                             <form method="POST" action="search.php">
                                 <div class="form-row">
-                                    <div class="col-6">
-                                        <label>Email Date From:</label>
-                                        <input type="date" class="form-control form-control-sm" name="from" required>
-                                    </div>
-                                    <div class="col-6">
-                                        <label>Email Date To:</label>
-                                        <input type="date" class="form-control form-control-sm" name="to" required>
+                                    <div class="col-12">
+                                        <label>F325 Number</label>
+                                        <input type="number" class="form-control form-control-sm" name="f325number" required>
                                     </div>
                                 </div>
                                 <div class="form-row">
@@ -76,7 +72,7 @@ include_once("nav.php");
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary"><?php echo ucfirst($_POST['status']); ?> F325 List | From: <?php echo $_POST['from']; ?> To: <?php echo $_POST['to']; ?> / Loc: <?php echo strtoupper($_POST['location']);?></h6>
+                            <h6 class="m-0 font-weight-bold text-primary"><?php echo ucfirst($_POST['status']); ?> F325 List | F325number: <?php echo $_POST['f325number']; ?> / Loc: <?php echo strtoupper($_POST['location']);?></h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -90,25 +86,24 @@ include_once("nav.php");
                                     </thead>
                                     <tbody class="text-center">
                                         <?php
-                                        $from = $_POST['from'];
-                                        $to = $_POST['to'];
+                                        $f325_number = $_POST['f325number'];
                                         $status = $_POST['status'];
                                         $location = $_POST['location'];
 
                                         if($status == 'all'){
 
                                             if($location == 'all'){
-                                                $result = mysqli_query($conn,"SELECT * FROM dbf325number WHERE emaildate BETWEEN '$from' AND '$to'");
+                                                $result = mysqli_query($conn,"SELECT * FROM dbf325number WHERE f325number = '$f325_number'");
                                             }else{
-                                                $result = mysqli_query($conn,"SELECT * FROM dbf325number WHERE location = '$location' AND emaildate BETWEEN '$from' AND '$to'");
+                                                $result = mysqli_query($conn,"SELECT * FROM dbf325number WHERE location = '$location' AND f325number = '$f325_number'");
                                             }
 
                                         }else{
 
                                             if($location == 'all'){
-                                                $result = mysqli_query($conn,"SELECT * FROM dbf325number WHERE status = '$status' AND emaildate BETWEEN '$from' AND '$to'");
+                                                $result = mysqli_query($conn,"SELECT * FROM dbf325number WHERE status = '$status' AND f325number = '$f325_number'");
                                             }else{
-                                                $result = mysqli_query($conn,"SELECT * FROM dbf325number WHERE location = '$location' AND status = '$status' AND emaildate BETWEEN '$from' AND '$to'");
+                                                $result = mysqli_query($conn,"SELECT * FROM dbf325number WHERE location = '$location' AND status = '$status' AND f325number = '$f325_number'");
                                             }
 
                                         }
@@ -156,24 +151,6 @@ include_once("nav.php");
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-
-    <!-- Bootstrap core JavaScript-->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
-
-    <!-- Page level plugins -->
-    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-    <!-- Page level custom scripts -->
-    <script src="js/demo/datatables-demo.js"></script>
-
 </body>
 
 </html>

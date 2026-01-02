@@ -138,6 +138,7 @@ if ($user['admin'] != 1) {
                         const f325Exists = checkIfF325Exists(row.f325);
                         if (!f325Exists) {
                             dataTable.row.add([row.filename, row.f325, row.status]);
+
                         }
                     });
                     dataTable.draw();
