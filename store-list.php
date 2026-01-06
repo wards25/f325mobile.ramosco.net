@@ -409,6 +409,5 @@ if (isset($_GET['edit_id'])) {
              $('#filterRegion').on('change', function() {
                 table.column(3).search(this.value).draw();
             });
-
         });
     </script>

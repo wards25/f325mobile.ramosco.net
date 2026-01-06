@@ -54,7 +54,7 @@ if($_POST['type'] == 2){
 
 }else{
 
-    fputcsv($output, array('F325 NUMBER', 'SKU CODE', 'DESCRIPTION', 'QTY', 'CLEARED DATE', 'CLEARED TIME', 'COMPANY', 'LOCATION'));
+    fputcsv($output, array('F325 NUMBER', 'SKU CODE', 'DESCRIPTION', 'QTY', 'CLEARED DATE', 'CLEARED TIME', 'COMPANY', 'LOCATION', 'FOR PULL OUT', 'FOR CHARGING'));
 
     $query = "
         SELECT dbraw.f325number,dbraw.mdccode, dbraw.datecleared, dbraw.rcvdqty, 
@@ -73,7 +73,8 @@ if($_POST['type'] == 2){
     ";
 
     $result = mysqli_query($conn, $query);
-
+    $for_pullout = '0';
+    $for_charging = '0';
     if ($result) {
         while ($row = mysqli_fetch_assoc($result)) {
             fputcsv($output, array(
@@ -84,7 +85,9 @@ if($_POST['type'] == 2){
                 $row['datecleared'], 
                 $row['cleared_time'],
                 $row['company'], 
-                $row['location']
+                $row['location'],
+                $for_pullout,
+                $for_charging
             ));
         }
     } else {

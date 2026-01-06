@@ -29,7 +29,7 @@ include_once("nav.php");
                                 <div class="form-row">
                                     <div class="col-12">
                                         <label>F325 Number</label>
-                                        <input type="number" class="form-control form-control-sm" name="f325number" required>
+                                        <input type="number" class="form-control form-control-sm" name="f325number" onKeyPress="if(this.value.length==12) return false;" required>
                                     </div>
                                 </div>
                                 <div class="form-row">

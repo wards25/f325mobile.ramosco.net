@@ -432,5 +432,12 @@ function formState(state){
       var term = $.trim(params.term);
     }
   })
-  return state; 
+  return state;
 }
+function formatRepoSelection(repo){
+ var data = repo.username ? repo.username : repo.text;
+ return data; 
+}
+$('select .js-tokenizer').select2({
+  placeholder: "Select a user"
+});
