@@ -418,26 +418,3 @@ $('#updateUserForm').on('submit', function(e) {
             }
         });
     });
-
-function formState(state){
-  if(!state.id){
-    return state.text;
-  }
-  var baseUrl = "/user/img/flags";
-  var state = $('<span><img src="' + baseUrl + '/' + state.id.toLowerCase() + '.png" class="img-flag" /> ' + state.text + '</span>');
-  $('.js-tokenizer').select2({
-    tags: true, 
-    tokenSeparators: [',', ' '],
-    createTag: function (params) {
-      var term = $.trim(params.term);
-    }
-  })
-  return state;
-}
-function formatRepoSelection(repo){
- var data = repo.username ? repo.username : repo.text;
- return data; 
-}
-$('select .js-tokenizer').select2({
-  placeholder: "Select a user"
-});

@@ -415,7 +415,7 @@ $system_setting = $system_row['syssetting'];
                             <div class="col-12">
                                 <select class="form-control form-control-sm" name="type">
                                     <option value="1">With F325 Number</option>
-                                    <option value="2">Without F325 Number</option>
+                                    <!-- <option value="2">Without F325 Number</option> -->
                                 </select>
                             </div>
                         </div>
