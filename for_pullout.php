@@ -104,7 +104,6 @@ include_once("nav.php");
                 <div class="table-responsive">
                     <table class="table table-striped table-bordered" id="dataTable" width="100%" cellspacing="0">
 
-                        <!-- TABLE HEADER -->
                         <thead class="table-info text-dark text-center">
                             <tr>
                                 <th>MDCCODE</th>
