@@ -418,3 +418,4 @@ $('#updateUserForm').on('submit', function(e) {
             }
         });
     });
+    

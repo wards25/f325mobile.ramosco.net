@@ -20,11 +20,9 @@ include_once("nav.php");
 ?>
 <!-- Begin Page Content -->
 <div class="container-fluid">
-
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Import Pull Out</h1>
+        <h1 class="h3 mb-0 text-gray-800">For Charging</h1>
     </div>
-
     <script>
         window.setTimeout(function () {
             $(".alert").fadeTo(500, 0).slideUp(500, function () {
@@ -106,46 +104,37 @@ include_once("nav.php");
 
                         <thead class="table-info text-dark text-center">
                             <tr>
-                                <th>Company</th>
-                                <th>Principal</th>
+                                <th>MDCCODE</th>
+                                <th>Category</th>
                                 <th>Quantity</th>
-                                <th>Total</th>
-                                <th>Action</th>
+                                <th>Vendor</th>
+                                <th>Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="text-center">
                             <?php
                             $query = "
-                                SELECT 
-                                    c.nickname AS company,
-                                    r.category,
-                                    SUM(r.quantity) AS total_qty,
-                                    SUM(r.costextended) AS total_cost
-                                FROM dbraw r
-                                INNER JOIN dbcompany c
-                                    ON r.vendorcode = c.vendorcode
-                                WHERE r.forpullout = '1'
-                                GROUP BY c.nickname, r.category
-                                ORDER BY r.category ASC
-                            ";
-
+                        SELECT 
+                            mdccode,
+                            category,
+                            quantity,
+                            vendorcode,
+                            costextended
+                        FROM dbraw
+                        WHERE forcharging = '1'
+                        ORDER BY datecleared ASC
+                    ";
 
                             $result = mysqli_query($conn, $query);
                             while ($row = mysqli_fetch_assoc($result)) {
-                                echo "<tr>
-                                <td>{$row['company']}</td>
+                                echo "
+                                <td>{$row['mdccode']}</td>
                                 <td>{$row['category']}</td>
-                                <td>{$row['total_qty']}</td>
-                                <td>₱" . number_format($row['total_cost'], 2) . "</td>
-                                <td>
-                                    <a href='for_pullout_details.php?category=" . urlencode($row['category']) . "&company=" . urlencode($row['company']) . "' 
-                                    class='btn btn-primary btn-sm'>
-                                    View
-                                    </a>
-                                </td>
-                            </tr>";
+                                <td>{$row['quantity']}</td>
+                                <td>{$row['vendorcode']}</td>
+                                <td>₱" . number_format($row['costextended'], 2) . "</td>
+                              </tr>";
                             }
-
                             ?>
                         </tbody>
 
