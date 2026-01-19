@@ -22,15 +22,19 @@ include_once("nav.php");
 
     <div
         class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between mb-4 gap-3">
-        <h1 class="h3 mb-0 text-gray-800">
-            Pull-Out Summary – <?= htmlspecialchars($batchnumber) ?>
-        </h1>
+        <div class="d-flex align-items-center">
+            <span class="h4 mb-0 text-gray-800 me-2">
+                Pull-Out Summary -
+            </span>
+            <span class="h2 mb-0 fw-bold text-gray-800">
+                <?= htmlspecialchars($batchnumber) ?>
+            </span>
+        </div>
+
+
 
         <div class="d-flex align-items-center gap-2">
-            <input type="date" id="date-processed" class="form-control form-control-sm" value="<?= date('Y-m-d') ?>"
-                style="max-width: 160px;">
-
-            <button class="btn btn-outline-success btn-sm" onclick="printBatch()">
+            <button class="btn btn-success btn-md" onclick="printBatch()">
                 <i class="bi bi-printer me-1"></i> Print
             </button>
 
@@ -64,19 +68,43 @@ include_once("nav.php");
                 $principal = $header['principal'] ?? '';
                 $company = $header['name'] ?? '';
                 ?>
-                <table class="header-table">
-                    <tr>
-                        <td class="info-left">
-                            <p><strong>Principal Name:</strong> <?= htmlspecialchars($principal) ?></p>
-                            <p><strong>Company:</strong> <?= htmlspecialchars($company) ?></p>
-                            <p><strong>Prepared By:</strong> <?= htmlspecialchars($preparedBy) ?></p>
-                        </td>
-                        <td class="info-right">
-                            <p><strong>Reference #:</strong> <?= $referenceNo ?></p>
-                            <p><strong>Date Processed:</strong> <?= $dateProcessed ?></p>
-                        </td>
-                    </tr>
-                </table>
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <label class="form-label"><strong>Principal Name:</strong></label>
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($principal) ?>"
+                                readonly>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label"><strong>Company:</strong></label>
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($company) ?>" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Prepared By:</strong></label>
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($preparedBy) ?>"
+                                readonly>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <label class="form-label"><strong>Reference #:</strong></label>
+                            <input type="text" id="ref-number" class="form-control" value="<?= htmlspecialchars($referenceNo) ?>"
+                                readonly>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label"><strong>Date Processed:</strong></label>
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($dateProcessed) ?>"
+                                readonly>
+                        </div>
+                    </div>
+                </div>
+
                 <table class="table table-bordered table-sm" width="100%">
                     <thead class="table-info text-dark text-center">
                         <tr>
@@ -103,7 +131,8 @@ include_once("nav.php");
                                 p.description,
                                 r.quantity,
                                 p.uom,
-                                r.costextended
+                                r.costextended,
+                                r.mdccode
                             FROM dbraw r
 
                             LEFT JOIN (
@@ -143,7 +172,7 @@ include_once("nav.php");
                                 
                                     <td>{$row['franchise']} {$row['code']} - {$row['branchname']}</td>
                                     <td class='text-center'>{$row['f325number']}</td>
-                                    <td>{$row['description']}</td>
+                                    <td>{$row['mdccode']} - {$row['description']}</td>
                                     <td class='text-end'>{$row['quantity']}</td>
                                     <td class='text-center'>{$row['uom']}</td>
                                     <td class='text-end'>" . number_format($row['costextended'], 2) . "</td>
@@ -167,18 +196,26 @@ include_once("nav.php");
 
             <!-- SUMMARY -->
             <div class="row justify-content-end">
-                <div class="col-md-4">
-                    <table class="table table-borderless">
-                        <tr>
-                            <th class="text-end">Subtotal:</th>
-                            <td class="text-end"><?= number_format($subtotal, 2) ?></td>
-                        </tr>
-                        <tr>
-                            <th class="text-end">Total Quantity:</th>
-                            <td class="text-end"><?= number_format($totalQty, 2) ?></td>
-                        </tr>
-                    </table>
+                <div class="row justify-content-end">
+                    <div class="col-md-4">
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-6 text-end fw-bold">Subtotal:</label>
+                            <div class="col-6">
+                                <input type="text" class="form-control text-end"
+                                    value="<?= number_format($subtotal, 2) ?>" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2 align-items-center">
+                            <label class="col-6 text-end fw-bold">Total Quantity:</label>
+                            <div class="col-6">
+                                <input type="text" class="form-control text-end"
+                                    value="<?= number_format($totalQty, 2) ?>" readonly>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -189,12 +226,10 @@ include_once("nav.php");
 <script>
     function printBatch() {
         const batchnumber = "<?= htmlspecialchars($batchnumber) ?>";
-        const dateProcessed = document.getElementById("date-processed").value;
-
+        const referenceNo = $("#ref-number");
         window.location.href =
             "print_batch_details.php?batchnumber=" +
-            encodeURIComponent(batchnumber) +
-            "&date_processed=" +
-            encodeURIComponent(dateProcessed);
+            encodeURIComponent(batchnumber) + 
+            "&referenceNum=" + encodeURIComponent(referenceNo);
     }
 </script>

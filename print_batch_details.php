@@ -132,7 +132,7 @@ body {
 }
 </style>
 </head>
-
+ 
 <body onload="window.print()">
 <div class="title">PULL-OUT SUMMARY</div>
 <!-- HEADER -->
