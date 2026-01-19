@@ -20,30 +20,63 @@ include_once("nav.php");
 
 <div class="container-fluid">
 
-    <div class="d-sm-flex align-items-center justify-content-between mb-4 gap-2">
+    <div
+        class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between mb-4 gap-3">
         <h1 class="h3 mb-0 text-gray-800">
             Pull-Out Summary – <?= htmlspecialchars($batchnumber) ?>
         </h1>
 
         <div class="d-flex align-items-center gap-2">
-            <input
-                type="date"
-                id="date-processed"
-                class="form-control form-control-sm"
-                value="<?= date('Y-m-d') ?>">
+            <input type="date" id="date-processed" class="form-control form-control-sm" value="<?= date('Y-m-d') ?>"
+                style="max-width: 160px;">
 
-            <button
-                class="btn btn-success btn-sm"
-                onclick="printBatch()">
+            <button class="btn btn-outline-success btn-sm" onclick="printBatch()">
                 <i class="bi bi-printer me-1"></i> Print
             </button>
+
+            <!-- <button class="btn btn-primary btn-sm">
+                <i class="bi bi-box-arrow-up me-1"></i> Pull Out
+            </button> -->
         </div>
     </div>
+
 
 
     <div class="card shadow mb-4">
         <div class="card-body">
             <div class="table-responsive">
+                <?php
+                $preparedBy = $_SESSION['fname'] ?? '';
+                $referenceNo = date('Y') . '-' . rand(1000, 9999);
+                $dateProcessed = $_GET['date_processed'] ?? date('Y-m-d');
+                $headerQuery = "
+                    SELECT 
+                        r.category AS principal,
+                        c.name
+                    FROM dbraw r
+                    LEFT JOIN dbcompany c ON r.vendorcode = c.vendorcode
+                    WHERE r.batchnumber = '$batchnumber'
+                    LIMIT 1
+                ";
+                $headerResult = mysqli_query($conn, $headerQuery);
+                $header = mysqli_fetch_assoc($headerResult);
+
+                $principal = $header['principal'] ?? '';
+                $company = $header['name'] ?? '';
+                ?>
+                <table class="header-table">
+                    <tr>
+                        <td class="info-left">
+                            <p><strong>Principal Name:</strong> <?= htmlspecialchars($principal) ?></p>
+                            <p><strong>Company:</strong> <?= htmlspecialchars($company) ?></p>
+                            <p><strong>Prepared By:</strong> <?= htmlspecialchars($preparedBy) ?></p>
+                        </td>
+                        <td class="info-right">
+                            <p><strong>Reference #:</strong> <?= $referenceNo ?></p>
+                            <p><strong>Date Processed:</strong> <?= $dateProcessed ?></p>
+                        </td>
+                    </tr>
+                </table>
                 <table class="table table-bordered table-sm" width="100%">
                     <thead class="table-info text-dark text-center">
                         <tr>
@@ -102,8 +135,8 @@ include_once("nav.php");
                         if (mysqli_num_rows($result) > 0) {
                             while ($row = mysqli_fetch_assoc($result)) {
 
-                                $totalQty += (float)$row['quantity'];
-                                $subtotal += (float)$row['costextended'];
+                                $totalQty += (float) $row['quantity'];
+                                $subtotal += (float) $row['costextended'];
 
                                 echo "
                                 <tr>
@@ -154,14 +187,14 @@ include_once("nav.php");
 
 <?php include_once("footer.php"); ?>
 <script>
-function printBatch() {
-    const batchnumber = "<?= htmlspecialchars($batchnumber) ?>";
-    const dateProcessed = document.getElementById("date-processed").value;
+    function printBatch() {
+        const batchnumber = "<?= htmlspecialchars($batchnumber) ?>";
+        const dateProcessed = document.getElementById("date-processed").value;
 
-    window.location.href =
-        "print_batch_details.php?batchnumber=" +
-        encodeURIComponent(batchnumber) +
-        "&date_processed=" +
-        encodeURIComponent(dateProcessed);
-}
+        window.location.href =
+            "print_batch_details.php?batchnumber=" +
+            encodeURIComponent(batchnumber) +
+            "&date_processed=" +
+            encodeURIComponent(dateProcessed);
+    }
 </script>

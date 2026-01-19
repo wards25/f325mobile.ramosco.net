@@ -19,16 +19,14 @@ if (isset($_POST['create_batch'])) {
     }
 
     $items = $_POST['items'];
-    $batchNumber = "BATCH-" . date("YmdHis") . "-" . rand(100, 999);
     $userId = $_SESSION['id'];
 
-    // Prepare arrays to hold f325numbers and mdccodes
+    // Prepare arrays
     $f325numbers = [];
     $mdccodes = [];
 
     foreach ($items as $item) {
-        // Split f325number and mdccode from the checkbox value
-        // Format: f325number|mdccode
+        // checkbox value format: f325number|mdccode
         $parts = explode('|', $item);
         if (count($parts) === 2) {
             $f325numbers[] = intval($parts[0]);
@@ -45,33 +43,67 @@ if (isset($_POST['create_batch'])) {
     $conn->begin_transaction();
 
     try {
-        // Build placeholders for prepared statement
+        $yearMonth = date('Ym'); 
+        $prefix = "PU-$yearMonth-";
+
+        $sqlLast = "
+            SELECT batchnumber
+            FROM dbraw
+            WHERE batchnumber LIKE ?
+            ORDER BY batchnumber DESC
+            LIMIT 1
+        ";
+
+        $stmtLast = $conn->prepare($sqlLast);
+        if (!$stmtLast) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+
+        $like = $prefix . '%';
+        $stmtLast->bind_param('s', $like);
+        $stmtLast->execute();
+        $result = $stmtLast->get_result();
+
+        $nextNumber = 1;
+        if ($row = $result->fetch_assoc()) {
+            $lastNumber = intval(substr($row['batchnumber'], -6));
+            $nextNumber = $lastNumber + 1;
+        }
+
+        $stmtLast->close();
+
+        $sequence = str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+        $batchNumber = $prefix . $sequence;
+
         $fPlaceholders = implode(',', array_fill(0, count($f325numbers), '?'));
         $mPlaceholders = implode(',', array_fill(0, count($mdccodes), '?'));
 
-        // Construct SQL
-        $sql = "UPDATE dbraw SET batchnumber = ?, forpullout = 0 WHERE f325number IN ($fPlaceholders) AND mdccode IN ($mPlaceholders)";
-        $stmt = $conn->prepare($sql);
+        $sql = "
+            UPDATE dbraw
+            SET batchnumber = ?, forpullout = 0
+            WHERE f325number IN ($fPlaceholders)
+              AND mdccode IN ($mPlaceholders)
+        ";
 
+        $stmt = $conn->prepare($sql);
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
 
-        // Merge batchNumber + f325numbers + mdccodes into a single array for binding
-        $types = str_repeat('i', count($f325numbers) + count($mdccodes));
-        $types = 's' . $types; // 's' for batchNumber
+        $types = 's' . str_repeat('i', count($f325numbers) + count($mdccodes));
         $params = array_merge([$batchNumber], $f325numbers, $mdccodes);
 
-        // Use call_user_func_array to bind dynamically
         $tmp = [];
         foreach ($params as $key => $value) {
             $tmp[$key] = &$params[$key];
         }
         array_unshift($tmp, $types);
+
         call_user_func_array([$stmt, 'bind_param'], $tmp);
 
         $stmt->execute();
         $stmt->close();
+
         $conn->commit();
 
         $_SESSION['success'] = "Batch created successfully! Batch Number: $batchNumber";
