@@ -1,28 +1,32 @@
 <?php
-//error_reporting(0);
 session_start();
 include_once("header.php");
 include_once("dbconnect.php");
-$username = $_SESSION['fname'];
 
-// delete prdlist in db 
+$username = $_SESSION['fname'] ?? '';
+
+// Clear previous list
 mysqli_query($conn, "DELETE FROM cleared_list WHERE user = '$username'");
 
 if (!isset($_SESSION['id'])) {
     header("Location: index.php");
+    exit();
 }
+
 $res = mysqli_query($conn, "SELECT * FROM dbuser WHERE id=" . $_SESSION['id']);
 $userRow = mysqli_fetch_array($res);
-?>
 
-<?php
 include_once("nav.php");
 ?>
-<!-- Begin Page Content -->
+
 <div class="container-fluid">
+
+    <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">For Charging</h1>
     </div>
+
+    <!-- Alert Message -->
     <script>
         window.setTimeout(function () {
             $(".alert").fadeTo(500, 0).slideUp(500, function () {
@@ -32,15 +36,11 @@ include_once("nav.php");
     </script>
 
     <?php
-    // Get status message
     if (!empty($_GET['status'])) {
         switch ($_GET['status']) {
             case 'succ':
                 $statusType = 'alert-success';
-                $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> Import Pullout successfully.';
-                ?>
-                <!--<meta http-equiv="refresh" content="2.7;url=scheduled.php">-->
-                <?php
+                $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> Created a Batch successfully.';
                 break;
             case 'verify':
                 $statusType = 'alert-success';
@@ -61,110 +61,104 @@ include_once("nav.php");
     }
     ?>
 
-    <!-- Display status message -->
     <?php if (!empty($statusMsg)) { ?>
-        <div class="alert <?php echo $statusType; ?> alert-dismissable fade show" role="alert">
+        <div class="alert <?= $statusType ?> alert-dismissable fade show" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-            <?php echo $statusMsg; ?>
+            <?= $statusMsg ?>
         </div>
     <?php } ?>
 
-
-    <!-- Content Row -->
+    <!-- Table Card -->
     <div class="row">
         <div class="col-xl-12 col-md-12 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card shadow h-100">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Select CSV file</div>
-                            <div>
-                                <form action="import_pullout.php" method="POST" enctype="multipart/form-data">
-                                    <div class="input-group mb-3">
-                                        <input type="file" name="csv_file" class="form-control" required>
-                                        <button class="btn btn-primary btn-sm" type="submit" name="upload">
-                                            <i class="fas fa-upload"></i> Upload
-                                        </button>
-                                    </div>
-                                </form>
-
-                            </div>
-
+                    <form method="POST" action="create_batch_forcharge.php">
+                        <div class="d-flex mb-3">
+                            <button type="submit" name="create_batch" class="btn btn-primary me-2">
+                                <i class="fas fa-plus-circle"></i> Create Batch
+                            </button>
+                            <button type="button" id="toggleSelect" class="btn btn-success">
+                                <i class="fas fa-check-square"></i> Select All
+                            </button>
                         </div>
-                    </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered" id="dataTable" width="100%"
+                                cellspacing="0">
+                                <thead class="table-info text-dark text-center">
+                                    <tr>
+                                        <th>f325number</th>
+                                        <th>Mdccode</th>
+                                        <th>Quantity</th>
+                                        <th>Amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-center">
+                                    <?php
+                                    $sql = "
+                                        SELECT 
+                                            r.f325number,
+                                            r.mdccode,
+                                            r.quantity,
+                                            r.unitcost,
+                                            r.costextended
+                                        FROM dbraw r
+                                        INNER JOIN dbcompany c
+                                            ON r.vendorcode = c.vendorcode
+                                        WHERE 
+                                            r.forcharging = '1'  
+                                        AND batchnumber = ''
+                                    ";
+
+                                    $result = mysqli_query($conn, $sql);
+
+                                    if (!$result) {
+                                        die("SQL Error: " . mysqli_error($conn));
+                                    }
+
+                                    if (mysqli_num_rows($result) > 0) {
+                                        while ($row = mysqli_fetch_assoc($result)) {
+                                            echo "<tr>
+                                                <td>{$row['f325number']}</td>
+                                                <td>{$row['mdccode']}</td>
+                                                <td>{$row['quantity']}</td>
+                                                <td>₱" . number_format($row['unitcost'], 2) . "</td>
+                                                <td>
+                                                    <input type='checkbox' class='form-check-input row-checkbox big-checkbox' 
+                                                        name='items[]' value='{$row['f325number']}|{$row['mdccode']}'>
+                                                </td>
+                                            </tr>";
+                                        }
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-        <!-- DataTables Example -->
-        <div class="card shadow mb-4">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered" id="dataTable" width="100%" cellspacing="0">
-
-                        <thead class="table-info text-dark text-center">
-                            <tr>
-                                <th>MDCCODE</th>
-                                <th>Category</th>
-                                <th>Quantity</th>
-                                <th>Vendor</th>
-                                <th>Total Cost</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-center">
-                            <?php
-                            $query = "
-                        SELECT 
-                            mdccode,
-                            category,
-                            quantity,
-                            vendorcode,
-                            costextended
-                        FROM dbraw
-                        WHERE forcharging = '1'
-                        ORDER BY datecleared ASC
-                    ";
-
-                            $result = mysqli_query($conn, $query);
-                            while ($row = mysqli_fetch_assoc($result)) {
-                                echo "
-                                <td>{$row['mdccode']}</td>
-                                <td>{$row['category']}</td>
-                                <td>{$row['quantity']}</td>
-                                <td>{$row['vendorcode']}</td>
-                                <td>₱" . number_format($row['costextended'], 2) . "</td>
-                              </tr>";
-                            }
-                            ?>
-                        </tbody>
-
-                    </table>
-                </div>
-            </div>
-        </div>
-
     </div>
-    <!-- /.container-fluid -->
-
 
 </div>
-<!-- End of Main Content -->
 
-<?php
-include_once("footer.php");
-?>
+<?php include_once("footer.php"); ?>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("toggleSelect");
+        const checkboxes = document.querySelectorAll(".row-checkbox");
 
+        let allSelected = false;
 
-</div>
-<!-- End of Content Wrapper -->
+        toggleBtn.addEventListener("click", function () {
+            allSelected = !allSelected;
 
-</div>
-<!-- End of Page Wrapper -->
+            checkboxes.forEach(cb => cb.checked = allSelected);
 
-<!-- Scroll to Top Button-->
-<a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-</a>
-</body>
-
-</html>
+            toggleBtn.innerHTML = allSelected ?
+                '<i class="fas fa-times-square"></i> Unselect All' :
+                '<i class="fas fa-check-square"></i> Select All';
+        });
+    });
+</script>

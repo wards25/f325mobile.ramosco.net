@@ -101,8 +101,10 @@ $system_setting = $system_row['syssetting'];
                             // echo '<a class="collapse-item" href="disposed.php">Disposed F325</a>';
                             echo '<a class="collapse-item" href="clearing.php">Clearing</a>';
                             echo '<a class="collapse-item" href="for_pullout.php">For Pull Out</a>';
-                            echo '<a class="collapse-item" href="batchlist.php">Pull Out Batch List</a>';
                             echo '<a class="collapse-item" href="for_charging.php">For Charging</a>';
+                            echo '<h6 class="collapse-header">Bacth List:</h6>';
+                            echo '<a class="collapse-item" href="batchlist.php">Pull Out Batch List</a>';
+                            echo '<a class="collapse-item" href="charging_batchlist.php">Charging Batch List</a>';
                         }else{
                             
                     }

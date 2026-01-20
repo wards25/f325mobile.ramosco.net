@@ -18,7 +18,7 @@ include_once("nav.php");
 <div class="container-fluid">
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">For Pull Out Batch List</h1>
+        <h1 class="h3 mb-0 text-gray-800">For Charging Batch List</h1>
     </div>
 
     <!-- DataTables Example -->
@@ -40,7 +40,7 @@ include_once("nav.php");
                                 SELECT 
                                     batchnumber
                                 FROM dbraw
-                                WHERE batchnumber IS NOT NULL AND forpullout = 1
+                                WHERE batchnumber IS NOT NULL AND forcharging = 1
                                 AND batchnumber <> ''
                                 GROUP BY batchnumber
                                 ORDER BY batchnumber ASC
@@ -51,7 +51,7 @@ include_once("nav.php");
                             echo "<tr>
                                 <td>{$row['batchnumber']}</td>
                                <td>
-                                <a href='batchlist_details.php?batchnumber={$row['batchnumber']}'
+                                <a href='charging_batchlist_details.php?batchnumber={$row['batchnumber']}'
                                 class='btn btn-primary btn-sm'>
                                     View
                                 </a>

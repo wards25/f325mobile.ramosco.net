@@ -33,14 +33,16 @@ $company = isset($_GET['company']) ? mysqli_real_escape_string($conn, $_GET['com
                 Company: <b><?php echo htmlspecialchars($company); ?></b> |
                 Principal: <b><?php echo htmlspecialchars($category); ?></b>
             </h6>
-            <!-- <button id="toggleSelect" class="btn btn-success">
-                <i class="fas fa-check-square"></i> Select All
-            </button> -->
         </div>
-
-
         <div class="card-body">
             <form method="POST" action="create_batch.php">
+                <button type="submit" name="create_batch" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> Create Batch
+                </button>
+                <button id="toggleSelect" type="button" class="btn btn-success">
+                    <i class="fas fa-check-square"></i> Select All
+                </button>
+                <hr>
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped" id="dataTable" width="100%" cellspacing="0">
                         <thead class="table-info text-dark text-center">
@@ -111,9 +113,6 @@ $company = isset($_GET['company']) ? mysqli_real_escape_string($conn, $_GET['com
                         </tbody>
                     </table>
                 </div>
-                <button type="submit" name="create_batch" class="btn btn-primary">
-                    <i class="fas fa-plus-circle"></i> Create Batch
-                </button>
             </form>
         </div>
     </div>
@@ -123,20 +122,20 @@ $company = isset($_GET['company']) ? mysqli_real_escape_string($conn, $_GET['com
 
 <?php include_once("footer.php"); ?>
 <script>
-    // document.addEventListener("DOMContentLoaded", function() {
-    //     const toggleBtn = document.getElementById("toggleSelect");
-    //     const checkboxes = document.querySelectorAll(".row-checkbox");
+    document.addEventListener("DOMContentLoaded", function() {
+        const toggleBtn = document.getElementById("toggleSelect");
+        const checkboxes = document.querySelectorAll(".row-checkbox");
 
-    //     let allSelected = false;
+        let allSelected = false;
 
-    //     toggleBtn.addEventListener("click", function() {
-    //         allSelected = !allSelected;
+        toggleBtn.addEventListener("click", function() {
+            allSelected = !allSelected;
 
-    //         checkboxes.forEach(cb => cb.checked = allSelected);
+            checkboxes.forEach(cb => cb.checked = allSelected);
 
-    //         toggleBtn.innerHTML = allSelected ?
-    //             '<i class="fas fa-times-square"></i> Unselect All' :
-    //             '<i class="fas fa-check-square"></i> Select All';
-    //     });
-    // });
+            toggleBtn.innerHTML = allSelected ?
+                '<i class="fas fa-times-square"></i> Unselect All' :
+                '<i class="fas fa-check-square"></i> Select All';
+        });
+    });
 </script>
