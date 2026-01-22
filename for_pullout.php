@@ -22,7 +22,7 @@ include_once("nav.php");
 <div class="container-fluid">
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Import Pull Out</h1>
+        <h1 class="h3 mb-0 text-gray-800">For Pull Out</h1>
     </div>
 
     <script>
@@ -72,9 +72,42 @@ include_once("nav.php");
     <?php } ?>
 
 
+
     <!-- Content Row -->
     <div class="row">
-        <div class="col-xl-12 col-md-12 mb-4">
+
+        <!-- Earnings (Total) Card Example -->
+        <!-- <div class="col-xl-12 col-md-12 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Amount </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <?php
+                                $scheduled_query = mysqli_query($conn, "SELECT SUM(costextended) AS total_cost FROM dbraw WHERE forpullout = '1'");
+
+                                $row = mysqli_fetch_assoc($scheduled_query);
+                                $total_cost = $row['total_cost'] ?? 0;
+
+                                echo "₱" . number_format($total_cost, 2);
+                                ?>
+                            </div>
+                            <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> </small>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- <div class="col-xl-12 col-md-12 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -95,7 +128,7 @@ include_once("nav.php");
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
         <!-- DataTables Example -->
         <div class="card shadow mb-4">
             <div class="card-body">
@@ -104,11 +137,11 @@ include_once("nav.php");
 
                         <thead class="table-info text-dark text-center">
                             <tr>
-                                <th>Company</th>
-                                <th>Principal</th>
-                                <th>Quantity</th>
-                                <th>Total</th>
-                                <th>Action</th>
+                                <th class="text-center">Company</th>
+                                <th class="text-center">Principal</th>
+                                <th class="text-center">Pullout Quantity</th>
+                                <th class="text-center">Total</th>
+                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody class="text-center">
@@ -117,12 +150,13 @@ include_once("nav.php");
                                 SELECT 
                                     c.nickname AS company,
                                     r.category,
-                                    SUM(r.quantity) AS total_qty,
-                                    SUM(r.costextended) AS total_cost
+                                    r.vendorcode,
+                                    SUM(r.forpullout) AS total_qty,
+                                    SUM(r.unitcost * r.forpullout) AS total_cost
                                 FROM dbraw r
                                 INNER JOIN dbcompany c
                                     ON r.vendorcode = c.vendorcode
-                                WHERE r.forpullout = '1'
+                                WHERE r.forpullout > 0 AND batchnumber = ''
                                 GROUP BY c.nickname, r.category
                                 ORDER BY r.category ASC
                             ";
@@ -136,7 +170,7 @@ include_once("nav.php");
                                 <td>{$row['total_qty']}</td>
                                 <td>₱" . number_format($row['total_cost'], 2) . "</td>
                                 <td>
-                                    <a href='for_pullout_details.php?category=" . urlencode($row['category']) . "&company=" . urlencode($row['company']) . "' 
+                                    <a href='for_pullout_details.php?category=" . urlencode($row['category']) . "&company=" . urlencode($row['company']) . "&vc=" . urlencode($row['vendorcode']) . "' 
                                     class='btn btn-primary btn-sm'>
                                     View
                                     </a>

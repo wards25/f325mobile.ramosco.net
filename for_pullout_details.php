@@ -13,6 +13,7 @@ include_once("nav.php");
 // Get parameters safely
 $category = isset($_GET['category']) ? mysqli_real_escape_string($conn, $_GET['category']) : '';
 $company = isset($_GET['company']) ? mysqli_real_escape_string($conn, $_GET['company']) : '';
+$vendorcode = isset($_GET['vc']) ? mysqli_real_escape_string($conn, $_GET['vc']) : '';
 ?>
 
 <!-- Begin Page Content -->
@@ -47,11 +48,12 @@ $company = isset($_GET['company']) ? mysqli_real_escape_string($conn, $_GET['com
                     <table class="table table-bordered table-striped" id="dataTable" width="100%" cellspacing="0">
                         <thead class="table-info text-dark text-center">
                             <tr>
-                                <th>f325number</th>
-                                <th>Mdccode</th>
-                                <th>Quantity</th>
-                                <th>Amout</th>
-                                <th>Action</th>
+                                <th class="text-center">f325number</th>
+                                <th class="text-center">Mdccode</th>
+                                <th class="text-center">Received Quantity</th>
+                                <th class="text-center">Pullout Quantity</th>
+                                <th class="text-center">Total</th>
+                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody class="text-center">
@@ -60,16 +62,21 @@ $company = isset($_GET['company']) ? mysqli_real_escape_string($conn, $_GET['com
                             SELECT 
                                 r.f325number,
                                 r.mdccode,
-                                r.quantity,
-                                r.unitcost,
-                                r.costextended
+                                r.rcvdqty,
+                                r.unitcost * r.forpullout AS total_cost,
+                                r.costextended,
+                                p.description
                             FROM dbraw r
                             INNER JOIN dbcompany c
                                 ON r.vendorcode = c.vendorcode
+                            INNER JOIN dbproduct p 
+                             ON r.mdccode = p.mdccode
                             WHERE 
-                                r.forpullout = '1'
+                                r.forpullout > 1
+                                AND batchnumber = ''
                                 AND r.category = '$category'
                                 AND c.nickname = '$company'
+                                AND p.vendor = '$vendorcode'
                         ";
 
                             $result = mysqli_query($conn, $sql);
@@ -88,9 +95,10 @@ $company = isset($_GET['company']) ? mysqli_real_escape_string($conn, $_GET['com
                                     echo "
                                     <tr>
                                         <td>{$row['f325number']}</td>
-                                        <td>{$row['mdccode']}</td>
-                                        <td>{$row['quantity']}</td>
-                                        <td>₱" . number_format($row['unitcost'], 2) . "</td>
+                                        <td>{$row['mdccode']} - {$row['description']}</td>
+                                        <td>{$row['rcvdqty']}</td>
+                                        <td>5</td>
+                                        <td>₱" . number_format($row['total_cost'], 2) . "</td>
                                         <td>
                                             <input type='checkbox' 
                                             class='form-check-input row-checkbox big-checkbox' 
@@ -101,12 +109,6 @@ $company = isset($_GET['company']) ? mysqli_real_escape_string($conn, $_GET['com
                                     </tr>
                                     ";
                                 }
-                            } else {
-                                echo "
-                                <tr>
-                                    <td colspan='6'>No records found.</td>
-                                </tr>
-                                ";
                             }
                             ?>
 

@@ -4,89 +4,94 @@ session_start();
 
 if (isset($_POST['upload'])) {
 
+    $errors = [];
+    $updated = 0;
+    $rowNumber = 1;
+
+    // Check file upload
     if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] != 0) {
-        die("CSV upload failed.");
-    }
+        $errors[] = "File upload failed.";
+    } else {
 
-    $file = $_FILES['csv_file']['tmp_name'];
+        $file = $_FILES['csv_file']['tmp_name'];
 
-    if (($handle = fopen($file, "r")) !== FALSE) {
+        if (($handle = fopen($file, "r")) !== FALSE) {
 
-        fgetcsv($handle); // skip header
+            fgetcsv($handle); // Skip header row
 
-        $username = $_SESSION['fname'];
-        $updated = 0;
-        $processed = 'Import for Pullout.';
-        $dateprocessed = date('Y-m-d');
-        $timeprocessed = date('H:i:s');
+            // Prepare statements for updating pullout and charging
+            $stmtPullout = $conn->prepare("
+                UPDATE dbraw
+                SET forpullout = ?
+                WHERE mdccode = ? 
+                  AND f325number = ? 
+                  AND (batchnumber IS NULL OR batchnumber = '')
+            ");
+            if (!$stmtPullout) die("Prepare failed for Pullout: " . $conn->error);
 
-        // PREPARE STATEMENTS
-        $stmtAll = $conn->prepare("
-            UPDATE dbraw 
-            SET forpullout = 1
-            WHERE mdccode = ? AND f325number = ?
-        ");
+            $stmtCharge = $conn->prepare("
+                UPDATE dbraw
+                SET forcharging = ?
+                WHERE mdccode = ? 
+                  AND f325number = ? 
+                  AND (batchnumber IS NULL OR batchnumber = '')
+            ");
+            if (!$stmtCharge) die("Prepare failed for Charging: " . $conn->error);
 
-        $stmtPullout = $conn->prepare("
-            UPDATE dbraw 
-            SET forpullout = 1
-            WHERE mdccode = ? AND f325number = ?
-        ");
+            // Process each CSV row
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                $rowNumber++;
 
-        $stmtCharge = $conn->prepare("
-            UPDATE dbraw 
-            SET forcharging = 1
-            WHERE mdccode = ? AND f325number = ?
-        ");
+                // --- Adjust column indices to match your CSV ---
+                $f325Number  = trim($data[0] ?? '');   // column 1
+                $mdccode     = trim($data[1] ?? '');   // column 0
+                $qty         = (int)($data[3] ?? 0);   // column 7 → total qty
+                $forpullout  = (int)($data[8] ?? 0);  // column 22 → pullout
+                $forcharging = (int)($data[9] ?? 0);  // column 23 → charging
 
-        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                // --- Validations ---
+                if ($qty <= 0) {
+                    $errors[] = "Row {$rowNumber}: Invalid QTY value.";
+                    continue;
+                }
 
-            $f325Number = trim($data[0]);
-            $mdccode = trim($data[1]);
+                if (($forpullout + $forcharging) !== $qty) {
+                    $errors[] = "Row {$rowNumber}: Pullout + Charging ({$forpullout}+{$forcharging}) must equal QTY ({$qty}).";
+                    continue;
+                }
 
-            $qty = isset($data[3]) ? (int) $data[3] : 0;
-            $forpullout = isset($data[8]) ? (int) $data[8] : 0;
-            $forcharging = isset($data[9]) ? (int) $data[9] : 0;
+                // --- Update Pullout ---
+                if ($forpullout > 0) {
+                    $stmtPullout->bind_param("iss", $forpullout, $mdccode, $f325Number);
+                    $stmtPullout->execute();
+                    if ($stmtPullout->affected_rows > 0) {
+                        $updated += $forpullout;
+                    } else {
+                        $errors[] = "Row {$rowNumber}: Pullout for mdccode {$mdccode} / f325 {$f325Number} already uploaded.";
+                    }
+                }
 
-            if ($qty > 0 && $forcharging === $qty && $forpullout === 0) {
-
-                // CHARGING ONLY
-                $stmtCharge->bind_param("ss", $mdccode, $f325Number);
-                $stmtCharge->execute();
-                $updated++;
-
-            } elseif ($qty > 0 && $forpullout === $qty && $forcharging === 0) {
-
-                // PULLOUT ONLY
-                $stmtPullout->bind_param("ss", $mdccode, $f325Number);
-                $stmtPullout->execute();
-                $updated++;
-
-            } elseif ($qty > 0 && ($forpullout + $forcharging) === $qty) {
-
-                // MIXED (PULLOUT + CHARGE)
-                $stmtAll->bind_param("ss", $mdccode, $f325Number);
-                $stmtAll->execute();
-                $updated++;
+                // --- Update Charging ---
+                if ($forcharging > 0) {
+                    $stmtCharge->bind_param("iss", $forcharging, $mdccode, $f325Number);
+                    $stmtCharge->execute();
+                    if ($stmtCharge->affected_rows > 0) {
+                        $updated += $forcharging;
+                    } else {
+                        $errors[] = "Row {$rowNumber}: Charging for mdccode {$mdccode} / f325 {$f325Number} already uploaded.";
+                    }
+                }
             }
 
+            fclose($handle);
+            $stmtPullout->close();
+            $stmtCharge->close();
         }
-
-        // Insert history (use prepared statement ideally)
-        $sql1 = "
-            INSERT INTO dbhistory(processnumber, name, processed, dateprocessed, timeprocessed)
-            VALUES ('$f325Number','$username','$processed','$dateprocessed','$timeprocessed')
-        ";
-        mysqli_query($conn, $sql1);
-
-        // Close statements
-        $stmtAll->close();
-        $stmtPullout->close();
-        $stmtCharge->close();
-        fclose($handle);
-
-        header("Location: for_pullout.php?status=succ");
-        exit;
     }
+
+    // Store results in session
+    $_SESSION['pullout_errors']  = $errors;
+    $_SESSION['pullout_success'] = $updated;
+
+    exit;
 }
-?>

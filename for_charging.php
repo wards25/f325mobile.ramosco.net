@@ -87,11 +87,11 @@ include_once("nav.php");
                                 cellspacing="0">
                                 <thead class="table-info text-dark text-center">
                                     <tr>
-                                        <th>f325number</th>
-                                        <th>Mdccode</th>
-                                        <th>Quantity</th>
-                                        <th>Amount</th>
-                                        <th>Action</th>
+                                        <th class="text-center">f325number</th>
+                                        <th class="text-center">Mdccode</th>
+                                        <th class="text-center">For Charge Quantity</th>
+                                        <th class="text-center">Amount</th>
+                                        <th class="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-center">
@@ -100,14 +100,14 @@ include_once("nav.php");
                                         SELECT 
                                             r.f325number,
                                             r.mdccode,
-                                            r.quantity,
+                                            r.forcharging,
                                             r.unitcost,
                                             r.costextended
                                         FROM dbraw r
                                         INNER JOIN dbcompany c
                                             ON r.vendorcode = c.vendorcode
                                         WHERE 
-                                            r.forcharging = '1'  
+                                            r.forcharging > 1  
                                         AND batchnumber = ''
                                     ";
 
@@ -122,7 +122,7 @@ include_once("nav.php");
                                             echo "<tr>
                                                 <td>{$row['f325number']}</td>
                                                 <td>{$row['mdccode']}</td>
-                                                <td>{$row['quantity']}</td>
+                                                <td>{$row['forcharging']}</td>
                                                 <td>₱" . number_format($row['unitcost'], 2) . "</td>
                                                 <td>
                                                     <input type='checkbox' class='form-check-input row-checkbox big-checkbox' 
