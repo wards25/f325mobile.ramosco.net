@@ -396,7 +396,6 @@ $system_setting = $system_row['syssetting'];
                         </div>
                     </div>
                 </div>
-
                 <!-- Log Transmittal Modal-->
                 <div class="modal fade" id="LogTransmittal" tabindex="-1" role="dialog"
                     aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -508,7 +507,6 @@ $system_setting = $system_row['syssetting'];
                         </div>
                     </div>
                 </div>
-
                 <?php if (!empty($_SESSION['pullout_errors'])): ?>
                     <script>
                         $(document).ready(function () {

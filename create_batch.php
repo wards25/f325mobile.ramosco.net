@@ -43,7 +43,7 @@ if (isset($_POST['create_batch'])) {
     $conn->begin_transaction();
 
     try {
-        $yearMonth = date('Ym'); 
+        $yearMonth = date('y'); 
         $prefix = "PU-$yearMonth-";
 
         $sqlLast = "

@@ -63,6 +63,7 @@ $vendorcode = isset($_GET['vc']) ? mysqli_real_escape_string($conn, $_GET['vc'])
                                 r.f325number,
                                 r.mdccode,
                                 r.rcvdqty,
+                                r.forpullout,
                                 r.unitcost * r.forpullout AS total_cost,
                                 r.costextended,
                                 p.description
@@ -72,7 +73,7 @@ $vendorcode = isset($_GET['vc']) ? mysqli_real_escape_string($conn, $_GET['vc'])
                             INNER JOIN dbproduct p 
                              ON r.mdccode = p.mdccode
                             WHERE 
-                                r.forpullout > 1
+                                r.forpullout >= 1
                                 AND batchnumber = ''
                                 AND r.category = '$category'
                                 AND c.nickname = '$company'
@@ -97,7 +98,7 @@ $vendorcode = isset($_GET['vc']) ? mysqli_real_escape_string($conn, $_GET['vc'])
                                         <td>{$row['f325number']}</td>
                                         <td>{$row['mdccode']} - {$row['description']}</td>
                                         <td>{$row['rcvdqty']}</td>
-                                        <td>5</td>
+                                        <td>{$row['forpullout']}</td>
                                         <td>₱" . number_format($row['total_cost'], 2) . "</td>
                                         <td>
                                             <input type='checkbox' 

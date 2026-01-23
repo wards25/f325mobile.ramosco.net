@@ -33,151 +33,159 @@ $headerResult = mysqli_query($conn, $headerQuery);
 $header = mysqli_fetch_assoc($headerResult);
 
 $principal = $header['principal'] ?? '';
-$company   = $header['name'] ?? '';
+$company = $header['name'] ?? '';
 ?>
 
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Pull-Out Summary</title>
+    <title>Pull-Out Summary</title>
 
-<style>
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 11px;
-    margin: 20px;
-}
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            margin: 20px;
+        }
 
-@media print {
-    body {
-        margin: 0;
-    }
-}
+        @media print {
+            body {
+                margin: 0;
+            }
+        }
 
-.header-table {
-    width: 100%;
-    margin-bottom: 5px;
-}
+        .header-table {
+            width: 100%;
+            margin-bottom: 5px;
+        }
 
-.header-table td {
-    vertical-align: top;
-}
+        .header-table td {
+            vertical-align: top;
+        }
 
-.title {
-    text-align: center;
-    font-weight: bold;
-    font-size: 14px;
-    margin: 10px 0;
-}
+        .title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 10px 0;
+        }
 
-.info-left p,
-.info-right p {
-    margin: 2px 0;
-}
+        .info-left p,
+        .info-right p {
+            margin: 2px 0;
+        }
 
-.info-right {
-    text-align: right;
-}
+        .info-right {
+            text-align: right;
+        }
 
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
 
-.data-table th,
-.data-table td {
-    border: 1px solid #000;
-    padding: 4px;
-}
+        .data-table th,
+        .data-table td {
+            border: 1px solid #000;
+            padding: 4px;
+        }
 
-.data-table th {
-    text-align: center;
-    font-weight: bold;
-}
+        .data-table th {
+            text-align: center;
+            font-weight: bold;
+        }
 
-.text-right {
-    text-align: right;
-}
+        .text-right {
+            text-align: right;
+        }
 
-.text-center {
-    text-align: center;
-}
+        .text-center {
+            text-align: center;
+        }
 
-.footer-table {
-    width: 100%;
-    margin-top: 15px;
-}
+        .footer-table {
+            width: 100%;
+            margin-top: 15px;
+        }
 
-.signature {
-    margin-top: 40px;
-    border-top: 1px solid #000;
-    width: 200px;
-    text-align: center;
-}
-.plateno{
-     margin-top: 40px;
-    border-top: 1px solid #000;
-    width: 200px;
-    text-align: center;
-}
-.totals {
-    width: 250px;
-    float: right;
-    margin-top: 10px;
-}
+        .signature {
+            margin-top: 40px;
+            border-top: 1px solid #000;
+            width: 200px;
+            text-align: center;
+        }
 
-.totals td {
-    padding: 3px;
-}
-</style>
+        .plateno {
+            margin-top: 40px;
+            border-top: 1px solid #000;
+            width: 200px;
+            text-align: center;
+        }
+
+        .totals {
+            width: 250px;
+            float: right;
+            margin-top: 10px;
+        }
+
+        .totals td {
+            padding: 3px;
+        }
+    </style>
 </head>
- 
+
 <body onload="window.print()">
-<div class="title">PULL-OUT SUMMARY</div>
-<!-- HEADER -->
-<table class="header-table">
-<tr>
-    <td class="info-left">
-        <p><strong>Principal Name:</strong> <?= htmlspecialchars($principal) ?></p>
-        <p><strong>Company:</strong> <?= htmlspecialchars($company) ?></p>
-        <p><strong>Prepared By:</strong> <?= htmlspecialchars($preparedBy) ?></p>
-    </td>
-    <td class="info-right">
-        <p><strong>Reference #:</strong> <?= $referenceNo ?></p>
-        <p><strong>Date Processed:</strong> <?= $dateProcessed ?></p>
-    </td>
-</tr>
-</table>
-<hr>
-<!-- DATA TABLE -->
-<table class="data-table">
-<thead>
-<tr>
-    <th>Branch Name</th>
-    <th>F325 Number</th>
-    <th>Description</th>
-    <th>Quantity</th>
-    <th>UoM</th>
-    <th>Cost Extended</th>
-</tr>
-</thead>
-<tbody>
+    <div class="title">PULL-OUT SUMMARY</div>
+    <!-- HEADER -->
+    <table class="header-table">
+        <tr>
+            <td class="info-left">
+                <p><strong>Principal Name:</strong> <?= htmlspecialchars($principal) ?></p>
+                <p><strong>Company:</strong> <?= htmlspecialchars($company) ?></p>
+                <p><strong>Prepared By:</strong> <?= htmlspecialchars($preparedBy) ?></p>
+            </td>
+            <td class="info-right">
+                <p><strong>Reference #:</strong> <?= $referenceNo ?></p>
+                <p><strong>Date Processed:</strong> <?= $dateProcessed ?></p>
+                <p><strong>Hub:</strong></p>
+            </td>
+        </tr>
+    </table>
+    <hr>
+    <!-- DATA TABLE -->
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Branch Name</th>
+                <th>F325 Number</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>MDC Reason Code</th>
+                <th>BBD</th>
+                <th>UoM</th>
+                <th>Cost Extended</th>
+            </tr>
+        </thead>
+        <tbody>
 
-<?php
-$totalQty = 0;
-$subtotal = 0;
+            <?php
+            $totalQty = 0;
+            $subtotal = 0;
 
-$query = "
+            $query = "
                             SELECT 
                                 c.branchname,
                                 c.franchise,
                                 c.code,
                                 r.f325number,
                                 p.description,
-                                r.quantity,
+                                r.rcvdqty,
                                 p.uom,
-                                r.costextended
+                                r.costextended,
+                                r.expiration,
+                                r.reasoncode
                             FROM dbraw r
 
                             LEFT JOIN (
@@ -201,47 +209,49 @@ $query = "
                             WHERE r.batchnumber = '$batchnumber';
                             ";
 
-$result = mysqli_query($conn, $query);
+            $result = mysqli_query($conn, $query);
 
-while ($row = mysqli_fetch_assoc($result)) {
-    $totalQty += (float)$row['quantity'];
-    $subtotal += (float)$row['costextended'];
-?>
-<tr>
-    <td><?= "{$row['franchise']} {$row['code']} - {$row['branchname']}" ?></td>
-    <td class="text-center"><?= $row['f325number'] ?></td>
-    <td><?= $row['description'] ?></td>
-    <td class="text-right"><?= $row['quantity'] ?></td>
-    <td class="text-center"><?= $row['uom'] ?></td>
-    <td class="text-right"><?= number_format($row['costextended'], 2) ?></td>
-</tr>
-<?php } ?>
+            while ($row = mysqli_fetch_assoc($result)) {
+                $totalQty += (float) $row['rcvdqty'];
+                $subtotal += (float) $row['costextended'];
+                ?>
+                <tr>
+                    <td><?= "{$row['franchise']} {$row['code']} - {$row['branchname']}" ?></td>
+                    <td class="text-center"><?= $row['f325number'] ?></td>
+                    <td><?= $row['description'] ?></td>
+                    <td class="text-right"><?= $row['rcvdqty'] ?></td>
+                    <td class="text-center"><?= $row['reasoncode'] ?></td>
+                    <td class="text-right"><?= $row['expiration'] ?></td>
+                    <td class="text-center"><?= $row['uom'] ?></td>
+                    <td class="text-right"><?= number_format($row['costextended'], 2) ?></td>
+                </tr>
+            <?php } ?>
+        </tbody>
+    </table>
+    <br>
+    <hr>
+    <!-- TOTALS -->
+    <table class="totals">
+        <tr>
+            <td><strong>Subtotal:</strong></td>
+            <td class="text-right"><?= number_format($subtotal, 2) ?></td>
+        </tr>
+        <tr>
+            <td><strong>Total Qty:</strong></td>
+            <td class="text-right"><?= number_format($totalQty, 2) ?></td>
+        </tr>
+    </table>
 
-</tbody>
-</table>
-<br>
-<hr>
-<!-- TOTALS -->
-<table class="totals">
-<tr>
-    <td><strong>Subtotal:</strong></td>
-    <td class="text-right"><?= number_format($subtotal, 2) ?></td>
-</tr>
-<tr>
-    <td><strong>Total Qty:</strong></td>
-    <td class="text-right"><?= number_format($totalQty, 2) ?></td>
-</tr>
-</table>
+    <div style="clear: both;"></div>
 
-<div style="clear: both;"></div>
-
-<!-- SIGNATURE -->
-<div style="margin-top: 40px;">
-    <div class="signature">
-        Name of Driver
+    <!-- SIGNATURE -->
+    <div style="margin-top: 40px;">
+        <div class="signature">
+            Name of Driver
+        </div>
+        <p class="plateno">Plate #:</p>
     </div>
-    <p class="plateno">Plate #:</p>
-</div>
 
 </body>
+
 </html>

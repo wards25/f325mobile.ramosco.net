@@ -30,7 +30,7 @@ include_once("nav.php");
                             Total Amount </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             <?php
-                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forpullout) AS total_cost FROM dbraw WHERE forpullout > 0 AND batchnumber IS NOT NULL");
+                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forpullout) AS total_cost FROM dbraw WHERE forpullout >=1 AND batchnumber <> '' ");
 
                             $row = mysqli_fetch_assoc($scheduled_query);
                             $total_cost = $row['total_cost'] ?? 0;
