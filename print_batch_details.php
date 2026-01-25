@@ -7,18 +7,19 @@ if (!isset($_GET['batchnumber'])) {
 }
 
 $batchnumber = mysqli_real_escape_string($conn, $_GET['batchnumber']);
+$type = $_GET['type'] ?? 'pullout'; 
 $dateProcessed = $_GET['date_processed'] ?? date('Y-m-d');
 
-// Format for printing (same as image)
-$dateProcessedFormatted = date("m-d-Y", strtotime($dateProcessed));
+if ($type === 'total') {
+    $qtyField = 'r.rcvdqty';
+    $qtyLabel   = 'Received Qty';
+} else {
+    $qtyField = 'r.forpullout';
+    $qtyLabel   = 'Pull-Out Qty';
+}
 
-// Prepared by
 $preparedBy = $_SESSION['fname'] ?? '';
 
-// Reference #: YEAR + random 4 digits
-$referenceNo = date('Y') . '-' . rand(1000, 9999);
-
-/* Get Principal & Company */
 $headerQuery = "
     SELECT 
         r.category AS principal,
@@ -28,19 +29,18 @@ $headerQuery = "
     WHERE r.batchnumber = '$batchnumber'
     LIMIT 1
 ";
-
 $headerResult = mysqli_query($conn, $headerQuery);
 $header = mysqli_fetch_assoc($headerResult);
 
 $principal = $header['principal'] ?? '';
-$company = $header['name'] ?? '';
+$company   = $header['name'] ?? '';
 ?>
 
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title>Pull-Out Summary</title>
+    <title>PULL-OUT SUMMARY </title>
 
     <style>
         body {
@@ -55,15 +55,6 @@ $company = $header['name'] ?? '';
             }
         }
 
-        .header-table {
-            width: 100%;
-            margin-bottom: 5px;
-        }
-
-        .header-table td {
-            vertical-align: top;
-        }
-
         .title {
             text-align: center;
             font-weight: bold;
@@ -71,19 +62,14 @@ $company = $header['name'] ?? '';
             margin: 10px 0;
         }
 
-        .info-left p,
-        .info-right p {
-            margin: 2px 0;
-        }
-
-        .info-right {
-            text-align: right;
-        }
-
+        .header-table,
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+        }
+
+        .header-table td {
+            vertical-align: top;
         }
 
         .data-table th,
@@ -94,7 +80,6 @@ $company = $header['name'] ?? '';
 
         .data-table th {
             text-align: center;
-            font-weight: bold;
         }
 
         .text-right {
@@ -105,9 +90,10 @@ $company = $header['name'] ?? '';
             text-align: center;
         }
 
-        .footer-table {
-            width: 100%;
-            margin-top: 15px;
+        .totals {
+            width: 250px;
+            float: right;
+            margin-top: 10px;
         }
 
         .signature {
@@ -116,44 +102,31 @@ $company = $header['name'] ?? '';
             width: 200px;
             text-align: center;
         }
-
-        .plateno {
-            margin-top: 40px;
-            border-top: 1px solid #000;
-            width: 200px;
-            text-align: center;
-        }
-
-        .totals {
-            width: 250px;
-            float: right;
-            margin-top: 10px;
-        }
-
-        .totals td {
-            padding: 3px;
-        }
     </style>
 </head>
 
 <body onload="window.print()">
+
     <div class="title">PULL-OUT SUMMARY</div>
+
     <!-- HEADER -->
     <table class="header-table">
         <tr>
-            <td class="info-left">
+            <td>
                 <p><strong>Principal Name:</strong> <?= htmlspecialchars($principal) ?></p>
                 <p><strong>Company:</strong> <?= htmlspecialchars($company) ?></p>
                 <p><strong>Prepared By:</strong> <?= htmlspecialchars($preparedBy) ?></p>
             </td>
-            <td class="info-right">
-                <p><strong>Reference #:</strong> <?= $referenceNo ?></p>
+            <td class="text-right">
+                <p><strong>Reference #:</strong><?= $batchnumber ?></p>
                 <p><strong>Date Processed:</strong> <?= $dateProcessed ?></p>
                 <p><strong>Hub:</strong></p>
             </td>
         </tr>
     </table>
+
     <hr>
+
     <!-- DATA TABLE -->
     <table class="data-table">
         <thead>
@@ -161,8 +134,8 @@ $company = $header['name'] ?? '';
                 <th>Branch Name</th>
                 <th>F325 Number</th>
                 <th>Description</th>
-                <th>Quantity</th>
-                <th>MDC Reason Code</th>
+                <th><?= $qtyLabel ?></th>
+                <th>Reason Code</th>
                 <th>BBD</th>
                 <th>UoM</th>
                 <th>Cost Extended</th>
@@ -173,63 +146,65 @@ $company = $header['name'] ?? '';
             <?php
             $totalQty = 0;
             $subtotal = 0;
+            $cost_extended = 0;
 
             $query = "
-                            SELECT 
-                                c.branchname,
-                                c.franchise,
-                                c.code,
-                                r.f325number,
-                                p.description,
-                                r.rcvdqty,
-                                p.uom,
-                                r.costextended,
-                                r.expiration,
-                                r.reasoncode
-                            FROM dbraw r
-
-                            LEFT JOIN (
-                                SELECT f325number, brcode
-                                FROM dbf325number
-                                GROUP BY f325number
-                            ) f ON r.f325number = f.f325number
-
-                            LEFT JOIN (
-                                SELECT code, franchise, branchname
-                                FROM dbcensus
-                                GROUP BY code
-                            ) c ON f.brcode = c.code
-
-                            LEFT JOIN (
-                                SELECT mdccode, description, uom
-                                FROM dbproduct
-                                GROUP BY mdccode
-                            ) p ON r.mdccode = p.mdccode
-
-                            WHERE r.batchnumber = '$batchnumber';
-                            ";
+    SELECT 
+        c.branchname,
+        c.franchise,
+        c.code,
+        r.f325number,
+        p.description,
+        $qtyField AS qty,
+        p.uom,
+        r.expiration,
+        r.reasoncode,
+        r.unitcost,
+        r.forpullout,
+        r.mdccode
+    FROM dbraw r
+    LEFT JOIN (
+        SELECT f325number, brcode
+        FROM dbf325number
+        GROUP BY f325number
+    ) f ON r.f325number = f.f325number
+    LEFT JOIN (
+        SELECT code, franchise, branchname
+        FROM dbcensus
+        GROUP BY code
+    ) c ON f.brcode = c.code
+    LEFT JOIN (
+        SELECT mdccode, description, uom
+        FROM dbproduct
+        GROUP BY mdccode
+    ) p ON r.mdccode = p.mdccode
+    WHERE r.batchnumber = '$batchnumber'
+";
 
             $result = mysqli_query($conn, $query);
 
             while ($row = mysqli_fetch_assoc($result)) {
-                $totalQty += (float) $row['rcvdqty'];
-                $subtotal += (float) $row['costextended'];
-                ?>
+                $totalQty += (float)$row['qty']; 
+                $cost_extended = (float) $row['unitcost'] * $row['forpullout'];
+                $subtotal += (float) $cost_extended;
+
+            ?>
                 <tr>
                     <td><?= "{$row['franchise']} {$row['code']} - {$row['branchname']}" ?></td>
                     <td class="text-center"><?= $row['f325number'] ?></td>
-                    <td><?= $row['description'] ?></td>
-                    <td class="text-right"><?= $row['rcvdqty'] ?></td>
+                    <td><?= "{$row['mdccode']} - {$row['description']} "?></td>
+                    <td class="text-right"><?= $row['qty'] ?></td>
                     <td class="text-center"><?= $row['reasoncode'] ?></td>
                     <td class="text-right"><?= $row['expiration'] ?></td>
                     <td class="text-center"><?= $row['uom'] ?></td>
-                    <td class="text-right"><?= number_format($row['costextended'], 2) ?></td>
+                    <td class="text-right"><?= number_format($row['unitcost'], 2) ?></td>
                 </tr>
             <?php } ?>
         </tbody>
     </table>
-    <br>
+
     <hr>
+
     <!-- TOTALS -->
     <table class="totals">
         <tr>
@@ -246,10 +221,8 @@ $company = $header['name'] ?? '';
 
     <!-- SIGNATURE -->
     <div style="margin-top: 40px;">
-        <div class="signature">
-            Name of Driver
-        </div>
-        <p class="plateno">Plate #:</p>
+        <div class="signature">Name of Driver</div>
+        <p>Plate #:</p>
     </div>
 
 </body>

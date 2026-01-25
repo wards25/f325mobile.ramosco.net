@@ -47,8 +47,6 @@ include_once("nav.php");
         line-height: 18px;
     }
 </style>
-
-
 <div class="container-fluid">
 
     <div
@@ -65,20 +63,20 @@ include_once("nav.php");
 
 
         <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-success btn-md" onclick="printBatch()">
-                <i class="bi bi-printer me-1"></i> Print forpullout QTY
+            <button class="btn btn-success btn-md" onclick="printBatch('pullout')">
+                <i class="bi bi-printer me-1"></i> Print Pull-Out QTY
             </button>
-            <button class="btn btn-success btn-md" onclick="printBatch()">
+
+            <button class="btn btn-success btn-md" onclick="printBatch('total')">
                 <i class="bi bi-printer me-1"></i> Print Total QTY
             </button>
+
 
             <!-- <button class="btn btn-primary btn-sm">
                 <i class="bi bi-box-arrow-up me-1"></i> Pull Out
             </button> -->
         </div>
     </div>
-
-
 
     <div class="card shadow mb-4">
         <div class="card-body">
@@ -89,6 +87,7 @@ include_once("nav.php");
                 $headerQuery = "
                     SELECT 
                         r.category AS principal,
+                        r.location AS hub,
                         c.name
                     FROM dbraw r
                     LEFT JOIN dbcompany c ON r.vendorcode = c.vendorcode
@@ -100,6 +99,7 @@ include_once("nav.php");
 
                 $principal = $header['principal'] ?? '';
                 $company = $header['name'] ?? '';
+                $hub       = $header['hub'] ?? '';
                 ?>
                 <div class="row">
                     <!-- Left Column -->
@@ -137,7 +137,7 @@ include_once("nav.php");
                         </div>
                         <div class="mb-2">
                             <label class="form-label"><strong>Hub:</strong></label>
-                            <input type="text" class="form-control" 
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($hub) ?>"
                                 readonly>
                         </div>
                     </div>
@@ -216,16 +216,9 @@ include_once("nav.php");
                                     <td>{$row['mdccode']} - {$row['description']}</td>
                                     <td class='text-end'>{$row['forpullout']}</td>
                                     <td class='text-center'>{$row['uom']}</td>
-                                    <td class='text-end'>" . number_format($cost_extended, 2) . "</td>
+                                    <td class='text-end'>" . number_format($row['unitcost'], 2) . "</td>
                                 </tr>";
                             }
-                        } else {
-                            echo "
-                            <tr>
-                                <td colspan='6' class='text-center text-muted'>
-                                    No records found for this batch.
-                                </td>
-                            </tr>";
                         }
                         ?>
 
@@ -233,54 +226,84 @@ include_once("nav.php");
                 </table>
             </div>
             <hr>
-            <form method="POST" enctype="multipart/form-data">
-
-                <div class="row align-items-start">
+            <form method="POST" enctype="multipart/form-data" action="upload_pullout_attachment.php">
+                <input type="hidden" name="batchnumber" value="<?= htmlspecialchars($batchnumber) ?>">
+                <div class="row g-4 align-items-start">
 
                     <!-- LEFT: Upload Section -->
-                    <div class="col-md-6">
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-light fw-bold text-center">
+                                Pull-Out Details
+                            </div>
 
-                        <!-- LogP Images -->
-                        <div class="mb-3">
-                            <label class="fw-bold">Upload LogP Images</label>
-                            <input type="file" id="logpImages" class="form-control" multiple accept="image/*">
-                            <div id="logpPreview" class="d-flex flex-wrap mt-2"></div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="fw-bold">Pull-Out Date <span class="text-danger">*</span></label>
+                                        <input type="date" name="pullout_date" class="form-control" required value="<?= date('Y-m-d') ?>">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="fw-bold">Driver Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="drivername" required>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <label class="fw-bold">LOGP # <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="logpnumber" required>
+                                    </div>
+
+                                    <!-- LogP Images -->
+                                    <div class="col-12">
+                                        <label class="fw-bold">Upload LogP Images <span class="text-danger">*</span></label>
+                                        <input type="file" id="logpImages" name="logp_images[]" class="form-control" multiple accept="image/*" required>
+                                        <div id="logpPreview" class="d-flex flex-wrap mt-2"></div>
+                                    </div>
+
+                                    <!-- Pullout Summary Images -->
+                                    <div class="col-12">
+                                        <label class="fw-bold">Upload Pull-Out Summary Images <span class="text-danger">*</span></label>
+                                        <input type="file" name="pullout_summary[]" id="summaryImage" class="form-control" multiple accept="image/*" required>
+                                        <div id="summaryPreview" class="d-flex flex-wrap mt-2"></div>
+                                    </div>
+
+                                </div>
+                            </div>
                         </div>
-
-                        <!-- Pullout Summary Image -->
-                        <div class="mb-3">
-                            <label class="fw-bold">Upload Pullout Summary Image</label>
-                            <input type="file" name="pullout_summary" id="summaryImage" class="form-control"
-                                accept="image/*">
-
-                            <!-- Preview -->
-                            <div id="summaryPreview" class="mt-2"></div>
-                        </div>
-
                     </div>
 
                     <!-- RIGHT: Summary Section -->
-                    <div class="col-md-4 offset-md-2">
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header fw-bold text-center">
+                                Summary
+                            </div>
 
-                        <div class="row mb-2 align-items-center">
-                            <label class="col-6 text-end fw-bold">Subtotal:</label>
-                            <div class="col-6">
-                                <input type="text" class="form-control text-end bg-light"
-                                    value="<?= number_format($subtotal, 2) ?>" readonly>
+                            <div class="card-body">
+
+                                <div class="mb-3">
+                                    <label class="fw-bold">Subtotal</label>
+                                    <input type="text"
+                                        class="form-control text-end fw-bold bg-light"
+                                        value="<?= number_format($subtotal, 2) ?>"
+                                        readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="fw-bold">Total Quantity</label>
+                                    <input type="text"
+                                        class="form-control text-end fw-bold bg-light"
+                                        value="<?= number_format($totalQty, 2) ?>"
+                                        readonly>
+                                </div>
+
                             </div>
                         </div>
-
-                        <div class="row mb-2 align-items-center">
-                            <label class="col-6 text-end fw-bold">Total Quantity:</label>
-                            <div class="col-6">
-                                <input type="text" class="form-control text-end bg-light"
-                                    value="<?= number_format($totalQty, 2) ?>" readonly>
-                            </div>
-                        </div>
-
                     </div>
 
                 </div>
+
 
                 <!-- CENTERED BUTTON -->
                 <div class="row mt-4">
@@ -297,18 +320,22 @@ include_once("nav.php");
 
 <?php include_once("footer.php"); ?>
 <script>
-    function printBatch() {
+    function printBatch(type) {
         const batchnumber = "<?= htmlspecialchars($batchnumber) ?>";
         window.location.href =
             "print_batch_details.php?batchnumber=" +
-            encodeURIComponent(batchnumber)
+            encodeURIComponent(batchnumber) +
+            "&type=" + type;
     }
+
     const logpInput = document.getElementById('logpImages');
     const logpPreview = document.getElementById('logpPreview');
+    const summaryInput = document.getElementById('summaryImage');
+    const summaryPreview = document.getElementById('summaryPreview');
 
     let logpFiles = []; // store selected files
 
-    logpInput.addEventListener('change', function () {
+    logpInput.addEventListener('change', function() {
         Array.from(this.files).forEach(file => {
             if (file.type.startsWith('image/')) {
                 logpFiles.push(file);
@@ -355,5 +382,56 @@ include_once("nav.php");
         const dataTransfer = new DataTransfer();
         logpFiles.forEach(file => dataTransfer.items.add(file));
         logpInput.files = dataTransfer.files;
+    }
+
+    let summaryFiles = []; // store selected files
+
+    summaryInput.addEventListener('change', function() {
+        Array.from(this.files).forEach(file => {
+            if (file.type.startsWith('image/')) {
+                summaryFiles.push(file);
+            }
+        });
+
+        updateSummaryPreview();
+        updateSummaryInput();
+    });
+
+    function updateSummaryPreview() {
+        summaryPreview.innerHTML = '';
+
+        summaryFiles.forEach((file, index) => {
+            const reader = new FileReader();
+
+            reader.onload = e => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'preview-wrapper';
+
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'preview-img';
+
+                const btn = document.createElement('button');
+                btn.className = 'remove-btn';
+                btn.innerHTML = '&times;';
+                btn.onclick = () => {
+                    summaryFiles.splice(index, 1);
+                    updateSummaryPreview();
+                    updateSummaryInput();
+                };
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(btn);
+                summaryPreview.appendChild(wrapper);
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function updateSummaryInput() {
+        const dataTransfer = new DataTransfer();
+        summaryFiles.forEach(file => dataTransfer.items.add(file));
+        summaryInput.files = dataTransfer.files;
     }
 </script>

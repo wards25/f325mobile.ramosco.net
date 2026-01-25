@@ -26,8 +26,8 @@ include_once("nav.php");
     </div>
 
     <script>
-        window.setTimeout(function () {
-            $(".alert").fadeTo(500, 0).slideUp(500, function () {
+        window.setTimeout(function() {
+            $(".alert").fadeTo(500, 0).slideUp(500, function() {
                 $(this).remove();
             });
         }, 2000);
@@ -40,9 +40,9 @@ include_once("nav.php");
             case 'succ':
                 $statusType = 'alert-success';
                 $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> Import Pullout successfully.';
-                ?>
+    ?>
                 <!--<meta http-equiv="refresh" content="2.7;url=scheduled.php">-->
-                <?php
+    <?php
                 break;
             case 'verify':
                 $statusType = 'alert-success';
@@ -156,7 +156,7 @@ include_once("nav.php");
                                 FROM dbraw r
                                 INNER JOIN dbcompany c
                                     ON r.vendorcode = c.vendorcode
-                                WHERE r.forpullout > 0 AND batchnumber = ''
+                                WHERE r.forpullout >= 1 AND batchnumber = ''
                                 GROUP BY c.nickname, r.category
                                 ORDER BY r.category ASC
                             ";

@@ -16,7 +16,42 @@ include_once("nav.php");
 
 <!-- Begin Page Content -->
 <div class="container-fluid">
-
+    <?php
+    // Get status message
+    if (!empty($_GET['status'])) {
+        switch ($_GET['status']) {
+            case 'succ':
+                $statusType = 'alert-success';
+                $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> Upload Attachment successfully.';
+    ?>
+                <!--<meta http-equiv="refresh" content="2.7;url=scheduled.php">-->
+    <?php
+                break;
+            case 'verify':
+                $statusType = 'alert-success';
+                $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> F325 for verification.';
+                break;
+            case 'dispose':
+                $statusType = 'alert-success';
+                $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> F325 disposed successfully.';
+                break;
+            case 'err':
+                $statusType = 'alert-danger';
+                $statusMsg = '<i class="fa fa-exclamation-triangle"></i>&nbsp;<b>Error!</b> No data encoded.';
+                break;
+            default:
+                $statusType = '';
+                $statusMsg = '';
+        }
+    }
+    ?>
+    <!-- Display status message -->
+    <?php if (!empty($statusMsg)) { ?>
+        <div class="alert <?php echo $statusType; ?> alert-dismissable fade show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            <?php echo $statusMsg; ?>
+        </div>
+    <?php } ?>
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">For Pull Out Batch List</h1>
     </div>
@@ -38,9 +73,7 @@ include_once("nav.php");
                             echo "₱" . number_format($total_cost, 2);
                             ?>
                         </div>
-                        <small class="mb-0 text-gray-800">as of
-                            <?php echo date("h:i A"); ?>
-                        </small>
+                        <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="pulledout.php" class="text-decoration-none">BATCH Pulled Out</a></small>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
@@ -106,3 +139,11 @@ include_once("nav.php");
 <?php
 include_once("footer.php");
 ?>
+
+<script>
+    window.setTimeout(function() {
+        $(".alert").fadeTo(500, 0).slideUp(500, function() {
+            $(this).remove();
+        });
+    }, 2000);
+</script>

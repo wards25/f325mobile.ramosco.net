@@ -21,8 +21,8 @@ if (isset($_POST['create_batch'])) {
 
     try {
         // Generate batch number: CHG-YYYYMM-000001
-        $yearMonth = date('Ym'); 
-        $prefix = "CHG-$yearMonth-";
+        $yearMonth = date('y'); 
+        $prefix = "CH-$yearMonth-";
 
         $sqlLast = "
             SELECT batchnumber 

@@ -55,8 +55,14 @@ $system_setting = $system_row['syssetting'];
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Search:</h6>
                         <a class="collapse-item" href="search.php">Search F325</a>
-                        <a class="collapse-item" href="store-list.php">Store List</a>
-                        <a class="collapse-item" href="product-list.php">Product List</a>
+                        <?php
+                        if ($_SESSION['store'] == '1') {
+                            echo '<a class="collapse-item" href="store-list.php">Store List</a>';
+                        }
+                        if ($_SESSION['inventory'] == '1') {
+                            echo ' <a class="collapse-item" href="product-list.php">Product List</a>';
+                        }
+                        ?>
                         <!-- <a class="collapse-item" href="search_sl.php">Shortlanded F325</a> -->
                     </div>
                 </div>
@@ -71,20 +77,27 @@ $system_setting = $system_row['syssetting'];
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                    aria-expanded="true" aria-controls="collapseTwo">
-                    <i class="fas fa-fw fa-window-maximize"></i>
-                    <span>Importing</span>
-                </a>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="import-notepad.php">Import F325</a>
-                        <a class="collapse-item" href="#" data-toggle="modal" data-target="#pull-out">Import Pullout -
-                            Charging</a>
+            <?php
+            if ($_SESSION['import'] == '1') {
+            ?>
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
+                        aria-expanded="true" aria-controls="collapseTwo">
+                        <i class="fas fa-file-import"></i>
+                        <span>Importing</span>
+                    </a>
+                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <a class="collapse-item" href="import-notepad.php">Import F325</a>
+                            <a class="collapse-item" href="#" data-toggle="modal" data-target="#pull-out">Import Pullout -
+                                Charging</a>
+                        </div>
                     </div>
-                </div>
-            </li>
+                </li>
+            <?php
+            } else {
+            }
+            ?>
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
                     aria-expanded="true" aria-controls="collapseThree">
@@ -95,13 +108,10 @@ $system_setting = $system_row['syssetting'];
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">F325 Modules:</h6>
                         <!-- <a class="collapse-item" href="open.php">Open F325</a> -->
-                        <a class="collapse-item" href="print-notepad.php">Print F325</a>
                         <?php
                         if ($_SESSION['print'] == '1') {
-                            // echo '<a class="collapse-item" href="printed.php">Printed F325</a>';
-                        } else {
+                            echo '<a class="collapse-item" href="print-notepad.php">Print F325</a>';
                         }
-
                         if ($_SESSION['schedule'] == '1') {
                             echo '<a class="collapse-item" href="scheduled.php">Schedule F325</a>';
                         } else {
@@ -111,13 +121,18 @@ $system_setting = $system_row['syssetting'];
                             // echo '<a class="collapse-item" href="cleared.php">Cleared F325</a>';
                             // echo '<a class="collapse-item" href="disposed.php">Disposed F325</a>';
                             echo '<a class="collapse-item" href="clearing.php">Clearing</a>';
-                            echo '<a class="collapse-item" href="for_pullout.php">For Pull Out</a>';
-                            echo '<a class="collapse-item" href="for_charging.php">For Charging</a>';
-                            echo '<h6 class="collapse-header">Bacth List:</h6>';
-                            echo '<a class="collapse-item" href="batchlist.php">Pull Out Batch List</a>';
-                            echo '<a class="collapse-item" href="charging_batchlist.php">Charging Batch List</a>';
                         } else {
-
+                        }
+                        ?>
+                        <h6 class="collapse-header">Bacth List:</h6>
+                        <?php
+                        if ($_SESSION['pulloutdoc'] == '1') {
+                            echo '<a class="collapse-item" href="for_pullout.php">For Pull Out</a>';
+                            echo '<a class="collapse-item" href="batchlist.php">Pull Out Batch List</a>';
+                        }
+                        if ($_SESSION['payment'] == '1') {
+                            echo '<a class="collapse-item" href="for_charging.php">For Charging</a>';
+                            echo '<a class="collapse-item" href="charging_batchlist.php">Charging Batch List</a>';
                         }
 
                         if ($_SESSION['print'] == '1') {
@@ -131,7 +146,7 @@ $system_setting = $system_row['syssetting'];
 
             <?php
             if ($_SESSION['payment'] == '1') {
-                ?>
+            ?>
                 <!-- Divider -->
                 <hr class="sidebar-divider">
 
@@ -156,15 +171,14 @@ $system_setting = $system_row['syssetting'];
             </div>
             </li> -->
 
-                <?php
+            <?php
             } else {
-
             }
             ?>
 
             <?php
             if ($_SESSION['manual'] == '1') {
-                ?>
+            ?>
                 <!-- Divider -->
                 <hr class="sidebar-divider">
 
@@ -179,15 +193,14 @@ $system_setting = $system_row['syssetting'];
                         <i class="fas fa-fw fa-plus-circle"></i>
                         <span>Add Manual</span></a>
                 </li>
-                <?php
+            <?php
             } else {
-
             }
             ?>
 
             <?php
             if ($_SESSION['report'] == '1') {
-                ?>
+            ?>
                 <!-- Divider -->
                 <hr class="sidebar-divider">
 
@@ -220,15 +233,14 @@ $system_setting = $system_row['syssetting'];
                         </div>
                     </div>
                 </li>
-                <?php
+            <?php
             } else {
-
             }
             ?>
 
             <?php
             if ($system_setting == '1') {
-                ?>
+            ?>
                 <!-- Divider -->
                 <hr class="sidebar-divider">
 
@@ -259,9 +271,8 @@ $system_setting = $system_row['syssetting'];
                         </div>
                     </div>
                 </li>
-                <?php
+            <?php
             } else {
-
             }
             ?>
 
@@ -509,7 +520,7 @@ $system_setting = $system_row['syssetting'];
                 </div>
                 <?php if (!empty($_SESSION['pullout_errors'])): ?>
                     <script>
-                        $(document).ready(function () {
+                        $(document).ready(function() {
                             $('#pull-out').modal('show');
                         });
                     </script>
@@ -518,3 +529,10 @@ $system_setting = $system_row['syssetting'];
                 <?php
                 unset($_SESSION['pullout_errors'], $_SESSION['pullout_success']);
                 ?>
+                <script>
+                    document.querySelector('.custom-file-input').addEventListener('change', function(e) {
+                        var fileName = e.target.files[0].name;
+                        var nextSibling = e.target.nextElementSibling;
+                        nextSibling.innerText = fileName;
+                    });
+                </script>
