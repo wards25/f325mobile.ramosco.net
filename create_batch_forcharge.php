@@ -25,10 +25,10 @@ if (isset($_POST['create_batch'])) {
         $prefix = "CH-$yearMonth-";
 
         $sqlLast = "
-            SELECT batchnumber 
+            SELECT batchnumber_forcharging AS batchnumber
             FROM dbraw 
-            WHERE batchnumber LIKE ? 
-            ORDER BY batchnumber DESC 
+            WHERE batchnumber_forcharging LIKE ? 
+            ORDER BY batchnumber_forcharging DESC 
             LIMIT 1
         ";
 
@@ -58,7 +58,7 @@ if (isset($_POST['create_batch'])) {
 
             $stmt = $conn->prepare("
                 UPDATE dbraw 
-                SET batchnumber = ? 
+                SET batchnumber_forcharging = ? 
                 WHERE f325number = ? AND mdccode = ?
             ");
             if (!$stmt) {

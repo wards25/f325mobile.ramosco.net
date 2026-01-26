@@ -14,7 +14,7 @@ if ($type === 'total') {
     $qtyField = 'r.rcvdqty';
     $qtyLabel   = 'Received Qty';
 } else {
-    $qtyField = 'r.forpullout';
+    $qtyField = 'r.forcharging';
     $qtyLabel   = 'Pull-Out Qty';
 }
 
@@ -26,7 +26,7 @@ $headerQuery = "
         c.name
     FROM dbraw r
     LEFT JOIN dbcompany c ON r.vendorcode = c.vendorcode
-    WHERE r.batchnumber_forpullout = '$batchnumber'
+    WHERE r.batchnumber_forcharging = '$batchnumber'
     LIMIT 1
 ";
 $headerResult = mysqli_query($conn, $headerQuery);
@@ -102,12 +102,18 @@ $company   = $header['name'] ?? '';
             width: 200px;
             text-align: center;
         }
+        .date {
+            margin-top: 40px;
+            border-top: 1px solid #000;
+            width: 200px;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body onload="window.print()">
 
-    <div class="title">PULL-OUT SUMMARY</div>
+    <div class="title">FOR CHARGING SUMMARY</div>
 
     <!-- HEADER -->
     <table class="header-table">
@@ -160,7 +166,7 @@ $company   = $header['name'] ?? '';
         r.expiration,
         r.reasoncode,
         r.unitcost,
-        r.forpullout,
+        r.forcharging,
         r.mdccode
     FROM dbraw r
     LEFT JOIN (
@@ -178,14 +184,14 @@ $company   = $header['name'] ?? '';
         FROM dbproduct
         GROUP BY mdccode
     ) p ON r.mdccode = p.mdccode
-    WHERE r.batchnumber_forpullout = '$batchnumber'
+    WHERE r.batchnumber_forcharging = '$batchnumber'
 ";
 
             $result = mysqli_query($conn, $query);
 
             while ($row = mysqli_fetch_assoc($result)) {
                 $totalQty += (float)$row['qty']; 
-                $cost_extended = (float) $row['unitcost'] * $row['forpullout'];
+                $cost_extended = (float) $row['unitcost'] * $row['forcharging'];
                 $subtotal += (float) $cost_extended;
 
             ?>
@@ -221,8 +227,8 @@ $company   = $header['name'] ?? '';
 
     <!-- SIGNATURE -->
     <div style="margin-top: 40px;">
-        <div class="signature">Name of Driver</div>
-        <p>Plate #:</p>
+        <div class="signature">BO Custodian Name</div>
+        <p class="date">Date</p>
     </div>
 
 </body>

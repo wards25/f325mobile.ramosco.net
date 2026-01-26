@@ -23,9 +23,9 @@ include_once("nav.php");
             case 'succ':
                 $statusType = 'alert-success';
                 $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> Upload Attachment successfully.';
-                ?>
+    ?>
                 <!--<meta http-equiv="refresh" content="2.7;url=scheduled.php">-->
-                <?php
+    <?php
                 break;
             case 'verify':
                 $statusType = 'alert-success';
@@ -53,19 +53,19 @@ include_once("nav.php");
         </div>
     <?php } ?>
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">For Charging Batch List</h1>
+        <h1 class="h3 mb-0 text-gray-800">Charged Batch</h1>
     </div>
     <!-- Earnings (Total) Card Example -->
-    <div class="col-xl-12 col-md-12 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
+    <!-- <div class="col-xl-12 col-md-12 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                             Total Amount </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             <?php
-                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forcharging) AS total_cost FROM dbraw WHERE forcharging >=1 AND batchnumber_forcharging <> '' AND status_forcharging = '0'");
+                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forpullout) AS total_cost FROM dbraw WHERE forpullout >=1 AND batchnumber_forcharging <> '' ");
 
                             $row = mysqli_fetch_assoc($scheduled_query);
                             $total_cost = $row['total_cost'] ?? 0;
@@ -73,10 +73,7 @@ include_once("nav.php");
                             echo "₱" . number_format($total_cost, 2);
                             ?>
                         </div>
-                        <small class="mb-0 text-gray-800">as of
-                            <?php echo date("h:i A"); ?> | <a href="charged.php" class="text-decoration-none">BATCH
-                                Charged</a>
-                        </small>
+                        <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="pulledout.php" class="text-decoration-none">BATCH Pulled Out</a></small>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
@@ -84,7 +81,7 @@ include_once("nav.php");
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
     <!-- DataTables Example -->
     <div class="card shadow mb-4">
         <div class="card-body">
@@ -93,10 +90,10 @@ include_once("nav.php");
                 <table class="table table-striped table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead class="table-info text-dark text-center">
                         <tr>
-                            <th>Batch Number</th>
-                            <th>Principal</th>
-                            <th>Amount</th>
-                            <th>Action</th>
+                            <th class="text-center">Batch Number</th>
+                            <th class="text-center">Principal</th>
+                            <th class="text-center">Amount</th>
+                            <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody class="text-center">
@@ -104,12 +101,12 @@ include_once("nav.php");
                         <?php
                         $query = "
                                 SELECT 
-                                    batchnumber_forcharging AS batchnumber, 
+                                    batchnumber_forcharging AS batchnumber,
                                     category,
                                     SUM(unitcost * forcharging) AS total_cost
                                 FROM dbraw
                                 WHERE batchnumber_forcharging IS NOT NULL AND forcharging >= 1
-                                AND batchnumber_forcharging <> ''  AND status_forcharging = '0'
+                                AND batchnumber_forcharging <> '' AND status_forcharging = '1'
                                 GROUP BY batchnumber_forcharging
                                 ORDER BY batchnumber_forcharging ASC
                             ";
@@ -121,7 +118,7 @@ include_once("nav.php");
                                 <td>{$row['category']}</td>
                                 <td>{$row['total_cost']}</td>
                                <td>
-                                <a href='charging_batchlist_details.php?batchnumber={$row['batchnumber']}'
+                                <a href='charged_batchlist_details.php?batchnumber={$row['batchnumber']}'
                                 class='btn btn-primary btn-sm'>
                                     View
                                 </a>
@@ -142,9 +139,10 @@ include_once("nav.php");
 <?php
 include_once("footer.php");
 ?>
+
 <script>
-    window.setTimeout(function () {
-        $(".alert").fadeTo(500, 0).slideUp(500, function () {
+    window.setTimeout(function() {
+        $(".alert").fadeTo(500, 0).slideUp(500, function() {
             $(this).remove();
         });
     }, 2000);

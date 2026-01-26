@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $uploader = $_SESSION['fname'] ?? 'Unknown';
     $uploadDate = date('Y-m-d');
     $uploadTime = date('H:i:s');
-    $driver = mysqli_real_escape_string($conn, $_POST['drivername'] ?? '');
+    $custodian_name = mysqli_real_escape_string($conn, $_POST['custodian_name'] ?? '');
     $logpnumber = mysqli_real_escape_string($conn, $_POST['logpnumber'] ?? '');
     $pullout_date = mysqli_real_escape_string($conn, $_POST['pullout_date'] ?? '');
 
@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hubQuery = "
     SELECT location 
     FROM dbraw 
-    WHERE batchnumber_forpullout = '$batchnumber'
+    WHERE batchnumber_forcharging = '$batchnumber'
     LIMIT 1
 ";
     $hubResult = mysqli_query($conn, $hubQuery);
@@ -26,17 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $batchInsert = "
     INSERT INTO tbl_batch
-        (batchnumber, drivername, logpnumber, hub, pullout_date)
+        (batchnumber, custodian_name, logpnumber, hub, pullout_date)
     VALUES
-        ('$batchnumber', '$driver', '$logpnumber', '$hub', '$pullout_date')
+        ('$batchnumber', '$custodian_name', '$logpnumber', '$hub', '$pullout_date')
 ";
 
     mysqli_query($conn, $batchInsert);
 
     $updateStatus = "
     UPDATE dbraw
-    SET status_forpullout = '1'
-    WHERE batchnumber_forpullout = '$batchnumber'
+    SET status_forcharging = '1'
+    WHERE batchnumber_forcharging = '$batchnumber'
 ";
     mysqli_query($conn, $updateStatus);
 
@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     echo "<script>
     const batchnumber = " . json_encode($batchnumber) . ";
-    window.location.href = 'batchlist.php?status=succ';
+    window.location.href = 'charging_batchlist.php?status=succ';
 </script>";
 
     exit();

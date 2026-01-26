@@ -54,7 +54,7 @@ include_once("nav.php");
                 break;
             case 'err':
                 $statusType = 'alert-danger';
-                $statusMsg = '<i class="fa fa-exclamation-triangle"></i>&nbsp;<b>Error!</b> No data encoded.';
+                $statusMsg = '<i class="fa fa-exclamation-triangle"></i>&nbsp;<b>Error!</b> Please Select Same Location .';
                 break;
             default:
                 $statusType = '';
@@ -156,7 +156,7 @@ include_once("nav.php");
                                 FROM dbraw r
                                 INNER JOIN dbcompany c
                                     ON r.vendorcode = c.vendorcode
-                                WHERE r.forpullout >= 1 AND batchnumber = ''
+                                WHERE r.forpullout >= 1 AND r.batchnumber_forpullout = ''
                                 GROUP BY c.nickname, r.category
                                 ORDER BY r.category ASC
                             ";

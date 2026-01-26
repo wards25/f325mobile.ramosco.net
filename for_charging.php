@@ -107,8 +107,8 @@ include_once("nav.php");
                                         INNER JOIN dbcompany c
                                             ON r.vendorcode = c.vendorcode
                                         WHERE 
-                                            r.forcharging > 1  
-                                        AND batchnumber = ''
+                                            r.forcharging >= 1  
+                                        AND batchnumber_forcharging = ''
                                     ";
 
                                     $result = mysqli_query($conn, $sql);

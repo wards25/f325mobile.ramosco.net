@@ -25,7 +25,7 @@ if (isset($_POST['upload'])) {
                 SET forpullout = ?
                 WHERE mdccode = ? 
                   AND f325number = ? 
-                  AND (batchnumber IS NULL OR batchnumber = '')
+                  AND (batchnumber_forpullout IS NULL OR batchnumber_forpullout = '')
             ");
             if (!$stmtPullout)
                 die("Prepare failed for Pullout: " . $conn->error);
@@ -35,7 +35,7 @@ if (isset($_POST['upload'])) {
                 SET forcharging = ?
                 WHERE mdccode = ? 
                   AND f325number = ? 
-                  AND (batchnumber IS NULL OR batchnumber = '')
+                  AND (batchnumber_forcharging IS NULL OR batchnumber_forcharging = '')
             ");
             if (!$stmtCharge)
                 die("Prepare failed for Charging: " . $conn->error);

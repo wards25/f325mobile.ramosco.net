@@ -27,7 +27,7 @@ include_once("nav.php");
                 <!--<meta http-equiv="refresh" content="2.7;url=scheduled.php">-->
     <?php
                 break;
-            case 'verify':
+            case 'ce':
                 $statusType = 'alert-success';
                 $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> F325 for verification.';
                 break;
@@ -57,15 +57,15 @@ include_once("nav.php");
     </div>
     <!-- Earnings (Total) Card Example -->
     <div class="col-xl-12 col-md-12 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card border-left-warning shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                             Total Amount </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             <?php
-                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forpullout) AS total_cost FROM dbraw WHERE forpullout >=1 AND batchnumber <> '' ");
+                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forpullout) AS total_cost FROM dbraw WHERE forpullout >=1 AND batchnumber_forpullout <> '' AND status_forpullout = '0'");
 
                             $row = mysqli_fetch_assoc($scheduled_query);
                             $total_cost = $row['total_cost'] ?? 0;
@@ -101,14 +101,14 @@ include_once("nav.php");
                         <?php
                         $query = "
                                 SELECT 
-                                    batchnumber,
+                                    batchnumber_forpullout AS batchnumber,
                                     category,
                                     SUM(unitcost * forpullout) AS total_cost
                                 FROM dbraw
-                                WHERE batchnumber IS NOT NULL AND forpullout > 0
-                                AND batchnumber <> ''
-                                GROUP BY batchnumber
-                                ORDER BY batchnumber ASC
+                                WHERE batchnumber_forpullout IS NOT NULL AND forpullout >= 1 
+                                AND batchnumber_forpullout <> '' AND status_forpullout = '0'
+                                GROUP BY batchnumber_forpullout
+                                ORDER BY batchnumber_forpullout ASC
                             ";
                         $result = mysqli_query($conn, $query);
 

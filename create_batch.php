@@ -47,10 +47,10 @@ if (isset($_POST['create_batch'])) {
         $prefix = "PU-$yearMonth-";
 
         $sqlLast = "
-            SELECT batchnumber
+            SELECT batchnumber_forpullout
             FROM dbraw
-            WHERE batchnumber LIKE ?
-            ORDER BY batchnumber DESC
+            WHERE batchnumber_forpullout LIKE ?
+            ORDER BY batchnumber_forpullout DESC
             LIMIT 1
         ";
 
@@ -80,7 +80,7 @@ if (isset($_POST['create_batch'])) {
 
         $sql = "
             UPDATE dbraw
-            SET batchnumber = ?
+            SET batchnumber_forpullout = ?
             WHERE f325number IN ($fPlaceholders)
               AND mdccode IN ($mPlaceholders)
         ";

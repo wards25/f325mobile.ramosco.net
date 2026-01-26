@@ -91,7 +91,7 @@ include_once("nav.php");
                         c.name
                     FROM dbraw r
                     LEFT JOIN dbcompany c ON r.vendorcode = c.vendorcode
-                    WHERE r.batchnumber = '$batchnumber'
+                    WHERE r.batchnumber_forpullout = '$batchnumber'
                     LIMIT 1
                 ";
                 $headerResult = mysqli_query($conn, $headerQuery);
@@ -193,7 +193,7 @@ include_once("nav.php");
                                 GROUP BY mdccode
                             ) p ON r.mdccode = p.mdccode
 
-                            WHERE r.batchnumber = '$batchnumber';
+                            WHERE r.batchnumber_forpullout = '$batchnumber';
                             ";
 
 
