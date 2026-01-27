@@ -10,10 +10,11 @@ $system_setting = $system_row['syssetting'];
 ?>
 
 <body id="page-top">
-
+    <div class="env-banner">
+        DATABASE IS NEUTRALIZED — STAGING ENVIRONMENT
+    </div>
     <!-- Page Wrapper -->
     <div id="wrapper">
-
         <!-- Sidebar -->
         <ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar" style="background-color: #915c83;">
 

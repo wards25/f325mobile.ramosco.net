@@ -73,9 +73,11 @@ include_once("nav.php");
         <div class="col-xl-12 col-md-12 mb-4">
             <div class="card shadow h-100">
                 <div class="card-body">
-                    <form method="POST" action="create_batch_forcharge.php">
+                    <form method="POST" action="create_batch_forcharge.php" id="create-batch-forcharging">
                         <div class="d-flex mb-3">
-                            <button type="submit" name="create_batch" class="btn btn-primary me-2">
+                            <input type="hidden" name="create_batch" value="1">
+                            <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal"
+                                data-bs-target="#confirmBatchModal">
                                 <i class="fas fa-plus-circle"></i> Create Batch
                             </button>
                             <button type="button" id="toggleSelect" class="btn btn-success">
@@ -142,12 +144,35 @@ include_once("nav.php");
     </div>
 
 </div>
-
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmBatchModal" tabindex="-1" aria-labelledby="confirmBatchLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmBatchLabel">Confirm Batch Creation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to create this batch?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="confirmCreateBatch" type="button" class="btn btn-primary">Yes, Create</button>
+            </div>
+        </div>
+    </div>
+</div>
 <?php include_once("footer.php"); ?>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const toggleBtn = document.getElementById("toggleSelect");
         const checkboxes = document.querySelectorAll(".row-checkbox");
+        const confirmBtn = document.getElementById("confirmCreateBatch");
+        const form = document.getElementById("create-batch-forcharging");
+
+        confirmBtn.addEventListener("click", function () {
+            form.submit();
+        });
 
         let allSelected = false;
 

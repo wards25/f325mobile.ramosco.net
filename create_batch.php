@@ -47,7 +47,7 @@ if (isset($_POST['create_batch'])) {
         $prefix = "PU-$yearMonth-";
 
         $sqlLast = "
-            SELECT batchnumber_forpullout
+            SELECT batchnumber_forpullout AS batchnumber
             FROM dbraw
             WHERE batchnumber_forpullout LIKE ?
             ORDER BY batchnumber_forpullout DESC

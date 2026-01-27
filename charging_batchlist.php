@@ -60,7 +60,7 @@ include_once("nav.php");
         <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
+                    <div class="col mr-2 ml-4">
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                             Total Amount </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -78,7 +78,7 @@ include_once("nav.php");
                                 Charged</a>
                         </small>
                     </div>
-                    <div class="col-auto">
+                    <div class="col-auto mr-4">
                         <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
                     </div>
                 </div>
@@ -111,7 +111,7 @@ include_once("nav.php");
                                 WHERE batchnumber_forcharging IS NOT NULL AND forcharging >= 1
                                 AND batchnumber_forcharging <> ''  AND status_forcharging = '0'
                                 GROUP BY batchnumber_forcharging
-                                ORDER BY batchnumber_forcharging ASC
+                                ORDER BY batchnumber_forcharging DESC
                             ";
                         $result = mysqli_query($conn, $query);
 

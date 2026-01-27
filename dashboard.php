@@ -30,7 +30,7 @@ include_once("nav.php");
                             <div class="card border-left-danger shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
+                                        <div class="col mr-2 ml-4">
                                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                                                 Total F325 Open Status</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -42,7 +42,7 @@ include_once("nav.php");
                                             </div>
                                             <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="open.php">View</a></small>
                                         </div>
-                                        <div class="col-auto">
+                                        <div class="col-auto mr-4">
                                             <i class="fas fa-newspaper fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
@@ -55,7 +55,7 @@ include_once("nav.php");
                             <div class="card border-left-warning shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
+                                        <div class="col mr-2 ml-4">
                                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                                 Total F325 Printed Status</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -67,7 +67,7 @@ include_once("nav.php");
                                             </div>
                                             <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="printed.php">View</a></small>
                                         </div>
-                                        <div class="col-auto">
+                                        <div class="col-auto mr-4">
                                             <i class="fas fa-print fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
@@ -80,7 +80,7 @@ include_once("nav.php");
                             <div class="card border-left-primary shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
+                                        <div class="col mr-2 ml-4">
                                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                 Total F325 Scheduled Status</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -92,7 +92,7 @@ include_once("nav.php");
                                             </div>
                                             <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="scheduled.php">View</a></small>
                                         </div>
-                                        <div class="col-auto">
+                                        <div class="col-auto mr-4">
                                             <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
@@ -105,7 +105,7 @@ include_once("nav.php");
                             <div class="card border-left-success shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
+                                        <div class="col mr-2 ml-4">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Total F325 Cleared Status</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -117,7 +117,7 @@ include_once("nav.php");
                                             </div>
                                             <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="cleared.php">View</a></small>
                                         </div>
-                                        <div class="col-auto">
+                                        <div class="col-auto mr-4">
                                             <i class="fas fa-stamp fa-2x text-gray-300"></i>
                                         </div>
                                     </div>

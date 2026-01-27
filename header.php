@@ -56,4 +56,40 @@ date_default_timezone_set("Asia/Manila");
     <!-- Geolocation -->
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
 
+
+    <style>
+        .env-ribbon {
+            position: fixed;
+            top: 35px;
+            right: -70px;
+            width: 300px;
+            text-align: center;
+            background: rgba(252, 25, 0, 0.4);
+            color: #fff;
+            font-weight: bold;
+            font-size: 30px;
+            padding: 15px 0;
+            transform: rotate(45deg);
+            z-index: 9999;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+        }
+
+        .env-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(238, 30, 7, 0.47);
+            color: #fff;
+            text-align: center;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 8px 10px;
+            z-index: 99999;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+        }
+    </style>
+
 </head>

@@ -123,7 +123,7 @@ if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
                         }
                     }
                 }
-                header("Location: import-notepad.php?success=1");
+                header("Location: import-notepad.php?status=succ");
             }
             // Close the open file
             fclose($open_file);
