@@ -152,12 +152,12 @@ $system_setting = $system_row['syssetting'];
                 <hr class="sidebar-divider">
 
                 <!-- Heading -->
-                <!-- <div class="sidebar-heading">
+                <div class="sidebar-heading">
                 Receivables
-            </div> -->
+            </div>
 
                 <!-- Nav Item - Pages Collapse Menu -->
-                <!-- <li class="nav-item">
+                <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSL"
                     aria-expanded="true" aria-controls="collapseSL">
                     <i class="fas fa-fw fa-money-bill"></i>
@@ -170,7 +170,7 @@ $system_setting = $system_row['syssetting'];
                         <a class="collapse-item" href="shortlanded.php">Unpaid F325</a>
                 </div>
             </div>
-            </li> -->
+            </li>
 
             <?php
             } else {

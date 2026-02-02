@@ -107,7 +107,7 @@ include_once("nav.php");
                                 FROM dbraw
                                 WHERE batchnumber_forpullout IS NOT NULL AND forpullout >= 1 
                                 AND batchnumber_forpullout <> '' AND status_forpullout = '0'
-                                GROUP BY batchnumber_forpullout
+                                GROUP BY batchnumber_forpullout, category
                                 ORDER BY batchnumber_forpullout DESC
                             ";
                         $result = mysqli_query($conn, $query);

@@ -11,10 +11,10 @@ $result = mysqli_query($conn, "SELECT admin, semiadmin FROM dbuser WHERE id = " 
 $user = mysqli_fetch_assoc($result);
 
 // If not admin, redirect to dashboard or another page
-if ($user['admin'] != 1) {
-    header("Location: unauthorized_access.php");
-    exit;
-}
+// if ($user['admin'] != 1) {
+//     header("Location: unauthorized_access.php");
+//     exit;
+// }
 ?>
 <style>
     #preloader {
@@ -58,9 +58,9 @@ if ($user['admin'] != 1) {
             case 'succ':
                 $statusType = 'alert-success';
                 $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> Import F325 Notepad successfully.';
-    ?>
+                ?>
                 <!--<meta http-equiv="refresh" content="2.7;url=scheduled.php">-->
-    <?php
+                <?php
                 break;
             case 'ce':
                 $statusType = 'alert-success';
@@ -112,7 +112,7 @@ if ($user['admin'] != 1) {
         <tbody class="tbody-list"></tbody>
     </table>
     <button class="btn btn-warning mt-4 mb-4 text-center btn-upload">Upload</button>
-    <button class="btn btn-outline-secondary">Clear</button>
+    <button class="btn btn-outline-secondary btn-clear">Clear</button>
 </div>
 
 <?php include_once('footer.php'); ?>
@@ -129,6 +129,16 @@ if ($user['admin'] != 1) {
         const $fileInput = $("#fileInput");
 
         $dropArea.on("click", () => $fileInput.trigger("click"));
+        
+        $(".btn-clear").on("click", function () {
+            dataTable.clear().draw();
+            $("#fileInput").val("");
+            $(".btn-upload")
+                .prop("disabled", false)
+                .addClass("btn-warning")
+                .removeClass("btn-secondary");
+
+        });
 
         $fileInput.on("change", function () {
             verifyUPloads(this.files);
@@ -175,11 +185,11 @@ if ($user['admin'] != 1) {
                         const newRow = dataTable.row.add([row.filename, row.f325, row.status]).draw(false).node();
 
                         if (row.status.toLowerCase() === "ready") {
-                             $(newRow).addClass("table-success");
-                        } else if( row.status.toLowerCase() === "uploaded") {
+                            $(newRow).addClass("table-success");
+                        } else if (row.status.toLowerCase() === "uploaded") {
                             $(newRow).addClass("table-warning");
                             disableUpload = true;
-                        } 
+                        }
                         else if (row.status.toLowerCase() === "branch not exist") {
                             $(newRow).addClass("table-danger");
                             disableUpload = true;
@@ -248,8 +258,8 @@ if ($user['admin'] != 1) {
             $("#preloader").fadeOut(200);
         }
     });
-     window.setTimeout(function() {
-        $(".alert").fadeTo(500, 0).slideUp(500, function() {
+    window.setTimeout(function () {
+        $(".alert").fadeTo(500, 0).slideUp(500, function () {
             $(this).remove();
         });
     }, 2000);

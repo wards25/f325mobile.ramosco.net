@@ -157,9 +157,27 @@ include_once("nav.php");
                                 INNER JOIN dbcompany c
                                     ON r.vendorcode = c.vendorcode
                                 WHERE r.forpullout >= 1 AND r.batchnumber_forpullout = ''
-                                GROUP BY c.nickname, r.category
+                                GROUP BY c.nickname, r.category, r.vendorcode
                                 ORDER BY r.category ASC
                             ";
+                            
+                            /*$query = "SELECT 
+                                    c.nickname AS company,
+                                    r.category,
+                                    r.vendorcode,
+                                    SUM(r.forpullout) AS total_qty,
+                                    SUM(r.unitcost * r.forpullout) AS total_cost
+                                FROM dbraw r
+                                INNER JOIN dbcompany c
+                                    ON r.vendorcode = c.vendorcode
+                                WHERE r.forpullout >= 1 
+                                AND r.batchnumber_forpullout = ''
+                                GROUP BY 
+                                    c.nickname,
+                                    r.category,
+                                    r.vendorcode
+                                ORDER BY r.category ASC;
+                                ";*/
 
 
                             $result = mysqli_query($conn, $query);

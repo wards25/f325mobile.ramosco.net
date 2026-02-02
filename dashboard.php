@@ -142,7 +142,7 @@ include_once("nav.php");
                                     </thead>
                                     <tbody class="text-center">
                                         <?php
-                                        $vendor_query = mysqli_query($conn,"SELECT * FROM sl_list GROUP BY vendor");
+                                        $vendor_query = mysqli_query($conn,"SELECT DISTINCT(vendor) FROM sl_list");
                                         while($fetch_vendor = mysqli_fetch_array($vendor_query))
                                             {
                                                 $vendorcode = $fetch_vendor['vendor'];

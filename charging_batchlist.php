@@ -62,7 +62,7 @@ include_once("nav.php");
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2 ml-4">
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Total Amount </div>
+                            Total Amount  Unpaid</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             <?php
                             $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forcharging) AS total_cost FROM dbraw WHERE forcharging >=1 AND batchnumber_forcharging <> '' AND status_forcharging = '0'");
@@ -75,7 +75,7 @@ include_once("nav.php");
                         </div>
                         <small class="mb-0 text-gray-800">as of
                             <?php echo date("h:i A"); ?> | <a href="charged.php" class="text-decoration-none">BATCH
-                                Charged</a>
+                                Paid</a>
                         </small>
                     </div>
                     <div class="col-auto mr-4">
@@ -110,7 +110,7 @@ include_once("nav.php");
                                 FROM dbraw
                                 WHERE batchnumber_forcharging IS NOT NULL AND forcharging >= 1
                                 AND batchnumber_forcharging <> ''  AND status_forcharging = '0'
-                                GROUP BY batchnumber_forcharging
+                                GROUP BY batchnumber_forcharging, category
                                 ORDER BY batchnumber_forcharging DESC
                             ";
                         $result = mysqli_query($conn, $query);

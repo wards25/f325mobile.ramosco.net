@@ -23,9 +23,6 @@ include_once("nav.php");
             case 'succ':
                 $statusType = 'alert-success';
                 $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> Upload Attachment successfully.';
-    ?>
-                <!--<meta http-equiv="refresh" content="2.7;url=scheduled.php">-->
-    <?php
                 break;
             case 'verify':
                 $statusType = 'alert-success';
@@ -53,7 +50,7 @@ include_once("nav.php");
         </div>
     <?php } ?>
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Charged Batch</h1>
+        <h1 class="h3 mb-0 text-gray-800">Batch Paid</h1>
     </div>
     <!-- Earnings (Total) Card Example -->
     <!-- <div class="col-xl-12 col-md-12 mb-4">
@@ -107,7 +104,7 @@ include_once("nav.php");
                                 FROM dbraw
                                 WHERE batchnumber_forcharging IS NOT NULL AND forcharging >= 1
                                 AND batchnumber_forcharging <> '' AND status_forcharging = '1'
-                                GROUP BY batchnumber_forcharging
+                                GROUP BY batchnumber_forcharging, category
                                 ORDER BY batchnumber_forcharging ASC
                             ";
                         $result = mysqli_query($conn, $query);
