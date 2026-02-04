@@ -172,12 +172,12 @@ include_once("nav.php");
                         $cost_extended = 0;
 
                         $query = "
-                            SELECT
+                            SELECT DISTINCT
                                 c.branchname,
                                 c.franchise,
                                 c.code,
                                 r.f325number,
-                                p.description,
+                                CONCAT(r.mdccode, ' - ', p.description) AS description,
                                 r.forpullout,
                                 p.uom,
                                 r.costextended,
@@ -185,20 +185,26 @@ include_once("nav.php");
                                 r.unitcost
                             FROM dbraw r
 
+                            -- Join f325number, pick one row per f325number
                             LEFT JOIN (
-                                SELECT f325number, brcode
+                                SELECT f325number, MAX(brcode) AS brcode
                                 FROM dbf325number
                                 GROUP BY f325number
                             ) f ON r.f325number = f.f325number
 
+                            -- Join branch info, aggregate to satisfy ONLY_FULL_GROUP_BY
                             LEFT JOIN (
-                                SELECT code, franchise, branchname
+                                SELECT 
+                                    code, 
+                                    MAX(franchise) AS franchise, 
+                                    MAX(branchname) AS branchname
                                 FROM dbcensus
                                 GROUP BY code
                             ) c ON f.brcode = c.code
 
+                            -- Join product info, aggregate description and uom
                             LEFT JOIN (
-                                SELECT mdccode, description, uom
+                                SELECT mdccode, MAX(description) AS description, MAX(uom) AS uom
                                 FROM dbproduct
                                 GROUP BY mdccode
                             ) p ON r.mdccode = p.mdccode

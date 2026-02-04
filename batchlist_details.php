@@ -99,7 +99,7 @@ include_once("nav.php");
 
                 $principal = $header['principal'] ?? '';
                 $company = $header['name'] ?? '';
-                $hub       = $header['hub'] ?? '';
+                $hub = $header['hub'] ?? '';
                 ?>
                 <div class="row">
                     <!-- Left Column -->
@@ -137,8 +137,7 @@ include_once("nav.php");
                         </div>
                         <div class="mb-2">
                             <label class="form-label"><strong>Hub:</strong></label>
-                            <input type="text" class="form-control" value="<?= htmlspecialchars($hub) ?>"
-                                readonly>
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($hub) ?>" readonly>
                         </div>
                     </div>
                 </div>
@@ -162,12 +161,12 @@ include_once("nav.php");
                         $cost_extended = 0;
 
                         $query = "
-                            SELECT
+                            SELECT DISTINCT
                                 c.branchname,
                                 c.franchise,
                                 c.code,
                                 r.f325number,
-                                p.description,
+                                CONCAT(r.mdccode, ' - ', p.description) AS description,
                                 r.forpullout,
                                 p.uom,
                                 r.costextended,
@@ -175,20 +174,26 @@ include_once("nav.php");
                                 r.unitcost
                             FROM dbraw r
 
+                            -- Join f325number, pick one row per f325number
                             LEFT JOIN (
-                                SELECT f325number, brcode
+                                SELECT f325number, MAX(brcode) AS brcode
                                 FROM dbf325number
                                 GROUP BY f325number
                             ) f ON r.f325number = f.f325number
 
+                            -- Join branch info, aggregate to satisfy ONLY_FULL_GROUP_BY
                             LEFT JOIN (
-                                SELECT code, franchise, branchname
+                                SELECT 
+                                    code, 
+                                    MAX(franchise) AS franchise, 
+                                    MAX(branchname) AS branchname
                                 FROM dbcensus
                                 GROUP BY code
                             ) c ON f.brcode = c.code
 
+                            -- Join product info, aggregate description and uom
                             LEFT JOIN (
-                                SELECT mdccode, description, uom
+                                SELECT mdccode, MAX(description) AS description, MAX(uom) AS uom
                                 FROM dbproduct
                                 GROUP BY mdccode
                             ) p ON r.mdccode = p.mdccode
@@ -241,7 +246,8 @@ include_once("nav.php");
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="fw-bold">Pull-Out Date <span class="text-danger">*</span></label>
-                                        <input type="date" name="pullout_date" class="form-control" required value="<?= date('Y-m-d') ?>">
+                                        <input type="date" name="pullout_date" class="form-control" required
+                                            value="<?= date('Y-m-d') ?>">
                                     </div>
 
                                     <div class="col-md-6">
@@ -256,15 +262,19 @@ include_once("nav.php");
 
                                     <!-- LogP Images -->
                                     <div class="col-12">
-                                        <label class="fw-bold">Upload LogP Images <span class="text-danger">*</span></label>
-                                        <input type="file" id="logpImages" name="logp_images[]" class="form-control" multiple accept="image/*" required>
+                                        <label class="fw-bold">Upload LogP Images <span
+                                                class="text-danger">*</span></label>
+                                        <input type="file" id="logpImages" name="logp_images[]" class="form-control"
+                                            multiple accept="image/*" required>
                                         <div id="logpPreview" class="d-flex flex-wrap mt-2"></div>
                                     </div>
 
                                     <!-- Pullout Summary Images -->
                                     <div class="col-12">
-                                        <label class="fw-bold">Upload Pull-Out Summary Images <span class="text-danger">*</span></label>
-                                        <input type="file" name="pullout_summary[]" id="summaryImage" class="form-control" multiple accept="image/*" required>
+                                        <label class="fw-bold">Upload Pull-Out Summary Images <span
+                                                class="text-danger">*</span></label>
+                                        <input type="file" name="pullout_summary[]" id="summaryImage"
+                                            class="form-control" multiple accept="image/*" required>
                                         <div id="summaryPreview" class="d-flex flex-wrap mt-2"></div>
                                     </div>
 
@@ -284,18 +294,14 @@ include_once("nav.php");
 
                                 <div class="mb-3">
                                     <label class="fw-bold">Subtotal</label>
-                                    <input type="text"
-                                        class="form-control text-end fw-bold bg-light"
-                                        value="<?= number_format($subtotal, 2) ?>"
-                                        readonly>
+                                    <input type="text" class="form-control text-end fw-bold bg-light"
+                                        value="<?= number_format($subtotal, 2) ?>" readonly>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="fw-bold">Total Quantity</label>
-                                    <input type="text"
-                                        class="form-control text-end fw-bold bg-light"
-                                        value="<?= number_format($totalQty, 2) ?>"
-                                        readonly>
+                                    <input type="text" class="form-control text-end fw-bold bg-light"
+                                        value="<?= number_format($totalQty, 2) ?>" readonly>
                                 </div>
 
                             </div>
@@ -335,7 +341,7 @@ include_once("nav.php");
 
     let logpFiles = []; // store selected files
 
-    logpInput.addEventListener('change', function() {
+    logpInput.addEventListener('change', function () {
         Array.from(this.files).forEach(file => {
             if (file.type.startsWith('image/')) {
                 logpFiles.push(file);
@@ -386,7 +392,7 @@ include_once("nav.php");
 
     let summaryFiles = []; // store selected files
 
-    summaryInput.addEventListener('change', function() {
+    summaryInput.addEventListener('change', function () {
         Array.from(this.files).forEach(file => {
             if (file.type.startsWith('image/')) {
                 summaryFiles.push(file);

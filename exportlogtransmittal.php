@@ -19,7 +19,7 @@ if($_POST['type'] == 2){
     fputcsv($output, array('SKU CODE', 'DESCRIPTION', 'TOTAL QTY', 'CLEARED DATE', 'CLEARED TIME', 'COMPANY', 'LOCATION'));
 
     $query = "
-        SELECT dbraw.mdccode, dbraw.datecleared, SUM(dbraw.rcvdqty) AS totalqty, 
+        SELECT DISTINCT dbraw.mdccode, dbraw.datecleared, SUM(dbraw.rcvdqty) AS totalqty, 
                dbcompany.nickname AS company, dbraw.location, 
                dbproduct.description, dbf325number.cleared_time
         FROM dbraw
@@ -30,7 +30,6 @@ if($_POST['type'] == 2){
             AND dbf325number.cleared_time BETWEEN '$timefrom' AND '$timeto'
             AND dbraw.datecleared = '$cleareddate'
             AND dbraw.location = 'cainta'
-        GROUP BY dbraw.mdccode
         ORDER BY dbf325number.cleared_time;
     ";
 
@@ -57,7 +56,7 @@ if($_POST['type'] == 2){
     fputcsv($output, array('F325 NUMBER', 'SKU CODE', 'DESCRIPTION', 'QTY', 'CLEARED DATE', 'CLEARED TIME', 'COMPANY', 'LOCATION', 'FOR PULL OUT', 'FOR CHARGING'));
 
     $query = "
-        SELECT dbraw.f325number,dbraw.mdccode, dbraw.datecleared, dbraw.rcvdqty, 
+        SELECT DISTINCT dbraw.f325number,dbraw.mdccode, dbraw.datecleared, dbraw.rcvdqty, 
                dbcompany.nickname AS company, dbraw.location, 
                dbproduct.description, dbf325number.cleared_time
         FROM dbraw
@@ -68,7 +67,6 @@ if($_POST['type'] == 2){
             AND dbf325number.cleared_time BETWEEN '$timefrom' AND '$timeto'
             AND dbraw.datecleared = '$cleareddate'
             AND dbraw.location = 'cainta'
-        GROUP BY dbraw.f325number,dbraw.mdccode
         ORDER BY dbf325number.cleared_time;
     ";
 

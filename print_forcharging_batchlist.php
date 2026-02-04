@@ -155,36 +155,47 @@ $company   = $header['name'] ?? '';
             $cost_extended = 0;
 
             $query = "
+    SELECT DISTINCT
+    c.branchname,
+    c.franchise,
+    c.code,
+    r.f325number,
+    CONCAT(r.mdccode, ' - ', p.description) AS description,
+    r.forcharging,
+    $qtyField AS qty,
+    r.reasoncode,
+    r.expiration,
+    p.uom,
+    r.costextended,
+    r.mdccode,
+    r.unitcost
+FROM dbraw r
+
+-- Join f325number, pick one row per f325number
+LEFT JOIN (
+    SELECT f325number, MAX(brcode) AS brcode
+    FROM dbf325number
+    GROUP BY f325number
+) f ON r.f325number = f.f325number
+
+-- Join branch info, aggregate to satisfy ONLY_FULL_GROUP_BY
+LEFT JOIN (
     SELECT 
-        c.branchname,
-        c.franchise,
-        c.code,
-        r.f325number,
-        p.description,
-        $qtyField AS qty,
-        p.uom,
-        r.expiration,
-        r.reasoncode,
-        r.unitcost,
-        r.forcharging,
-        r.mdccode
-    FROM dbraw r
-    LEFT JOIN (
-        SELECT f325number, brcode
-        FROM dbf325number
-        GROUP BY f325number
-    ) f ON r.f325number = f.f325number
-    LEFT JOIN (
-        SELECT code, franchise, branchname
-        FROM dbcensus
-        GROUP BY code
-    ) c ON f.brcode = c.code
-    LEFT JOIN (
-        SELECT mdccode, description, uom
-        FROM dbproduct
-        GROUP BY mdccode
-    ) p ON r.mdccode = p.mdccode
-    WHERE r.batchnumber_forcharging = '$batchnumber'
+        code, 
+        MAX(franchise) AS franchise, 
+        MAX(branchname) AS branchname
+    FROM dbcensus
+    GROUP BY code
+) c ON f.brcode = c.code
+
+-- Join product info, aggregate description and uom
+LEFT JOIN (
+    SELECT mdccode, MAX(description) AS description, MAX(uom) AS uom
+    FROM dbproduct
+    GROUP BY mdccode
+) p ON r.mdccode = p.mdccode
+
+WHERE r.batchnumber_forcharging = '$batchnumber';
 ";
 
             $result = mysqli_query($conn, $query);
