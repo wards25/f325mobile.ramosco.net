@@ -4,11 +4,12 @@ include('dbconnect.php');
 $cleareddate = date("Y-m-d", strtotime($_POST['logdate']));
 $timefrom = $_POST['timefrom'];
 $timeto = $_POST['timeto'];
+$location = $_POST['location'];
 
 //mime type
 header('Content-Type: text/csv');
 //tell browser what's the file name
-header('Content-Disposition: attachment; filename="Log Transmittal '.$cleareddate.'.csv"');
+header('Content-Disposition: attachment; filename="'. $location .' - Log Transmittal '.$cleareddate.'.csv"');
 //no cache
 header('Cache-Control: max-age=0');
 
@@ -29,7 +30,7 @@ if($_POST['type'] == 2){
         WHERE dbraw.status = 'cleared' 
             AND dbf325number.cleared_time BETWEEN '$timefrom' AND '$timeto'
             AND dbraw.datecleared = '$cleareddate'
-            AND dbraw.location = 'cainta'
+            AND dbraw.location = '$location'
         ORDER BY dbf325number.cleared_time;
     ";
 
@@ -66,7 +67,7 @@ if($_POST['type'] == 2){
         WHERE dbraw.status = 'cleared' 
             AND dbf325number.cleared_time BETWEEN '$timefrom' AND '$timeto'
             AND dbraw.datecleared = '$cleareddate'
-            AND dbraw.location = 'cainta'
+            AND dbraw.location = '$location'
         ORDER BY dbf325number.cleared_time;
     ";
 

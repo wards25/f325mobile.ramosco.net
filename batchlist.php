@@ -23,9 +23,9 @@ include_once("nav.php");
             case 'succ':
                 $statusType = 'alert-success';
                 $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> Upload Attachment successfully.';
-    ?>
+                ?>
                 <!--<meta http-equiv="refresh" content="2.7;url=scheduled.php">-->
-    <?php
+                <?php
                 break;
             case 'ce':
                 $statusType = 'alert-success';
@@ -73,7 +73,8 @@ include_once("nav.php");
                             echo "₱" . number_format($total_cost, 2);
                             ?>
                         </div>
-                        <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="pulledout.php" class="text-decoration-none">BATCH Pulled Out</a></small>
+                        <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="pulledout.php"
+                                class="text-decoration-none">BATCH Pulled Out</a></small>
                     </div>
                     <div class="col-auto mr-4">
                         <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
@@ -99,6 +100,20 @@ include_once("nav.php");
                     <tbody class="text-center">
 
                         <?php
+                        $allowed_locations = [];
+
+                        $query = "SELECT id, location FROM dblocation WHERE active = 1 ORDER BY location ASC";
+                        $result = mysqli_query($conn, $query);
+
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            $loc_id = $row['id'];
+
+                            if (!empty($_SESSION['loc' . $loc_id]) && $_SESSION['loc' . $loc_id] == 1) {
+                                $allowed_locations[] = "'" . mysqli_real_escape_string($conn, $row['location']) . "'";
+                            }
+                        }
+                        $location_filter = implode(",", $allowed_locations);
+
                         $query = "
                                 SELECT 
                                     batchnumber_forpullout AS batchnumber,
@@ -107,11 +122,14 @@ include_once("nav.php");
                                 FROM dbraw
                                 WHERE batchnumber_forpullout IS NOT NULL AND forpullout >= 1 
                                 AND batchnumber_forpullout <> '' AND status_forpullout = '0'
+                                AND location IN ($location_filter)
                                 GROUP BY batchnumber_forpullout, category
                                 ORDER BY batchnumber_forpullout DESC
                             ";
                         $result = mysqli_query($conn, $query);
-
+                        if(!$result){
+                            die("Error executing query: " . mysqli_error($conn));
+                        }
                         while ($row = mysqli_fetch_assoc($result)) {
                             echo "<tr>
                                 <td>{$row['batchnumber']}</td>
@@ -141,8 +159,8 @@ include_once("footer.php");
 ?>
 
 <script>
-    window.setTimeout(function() {
-        $(".alert").fadeTo(500, 0).slideUp(500, function() {
+    window.setTimeout(function () {
+        $(".alert").fadeTo(500, 0).slideUp(500, function () {
             $(this).remove();
         });
     }, 2000);

@@ -52,6 +52,7 @@ $vendorcode = isset($_GET['vc']) ? mysqli_real_escape_string($conn, $_GET['vc'])
                             <tr>
                                 <th class="text-center">f325number</th>
                                 <th class="text-center">Mdccode</th>
+                                <th class="text-center">Location</th>
                                 <th class="text-center">Received Quantity</th>
                                 <th class="text-center">Pullout Quantity</th>
                                 <th class="text-center">Total</th>
@@ -60,10 +61,25 @@ $vendorcode = isset($_GET['vc']) ? mysqli_real_escape_string($conn, $_GET['vc'])
                         </thead>
                         <tbody class="text-center">
                             <?php
+                            $allowed_locations = [];
+
+                            $query = "SELECT id, location FROM dblocation WHERE active = 1 ORDER BY location ASC";
+                            $result = mysqli_query($conn, $query);
+
+                            while ($row = mysqli_fetch_assoc($result)) {
+                                $loc_id = $row['id'];
+
+                                if (!empty($_SESSION['loc' . $loc_id]) && $_SESSION['loc' . $loc_id] == 1) {
+                                    $allowed_locations[] = "'" . mysqli_real_escape_string($conn, $row['location']) . "'";
+                                }
+                            }
+                            $location_filter = implode(",", $allowed_locations);
+
                             $sql = "
                             SELECT 
                                 r.f325number,
                                 r.mdccode,
+                                r.location,
                                 r.rcvdqty,
                                 r.forpullout,
                                 r.unitcost * r.forpullout AS total_cost,
@@ -81,6 +97,8 @@ $vendorcode = isset($_GET['vc']) ? mysqli_real_escape_string($conn, $_GET['vc'])
                                 AND r.category = '$category'
                                 AND c.nickname = '$company'
                                 AND p.vendor = '$vendorcode'
+                                AND r.location IN ($location_filter)
+
                         ";
 
                             $result = mysqli_query($conn, $sql);
@@ -100,6 +118,7 @@ $vendorcode = isset($_GET['vc']) ? mysqli_real_escape_string($conn, $_GET['vc'])
                                     <tr>
                                         <td>{$row['f325number']}</td>
                                         <td>{$row['mdccode']} - {$row['description']}</td>
+                                        <td>{$row['location']}</td>
                                         <td>{$row['rcvdqty']}</td>
                                         <td>{$row['forpullout']}</td>
                                         <td>₱" . number_format($row['total_cost'], 2) . "</td>
@@ -108,14 +127,12 @@ $vendorcode = isset($_GET['vc']) ? mysqli_real_escape_string($conn, $_GET['vc'])
                                             class='form-check-input row-checkbox big-checkbox' 
                                             name='items[]' 
                                              value='{$row['f325number']}|{$row['mdccode']}'>
-
                                         </td>
                                     </tr>
                                     ";
                                 }
                             }
                             ?>
-
                         </tbody>
                     </table>
                 </div>

@@ -80,7 +80,7 @@ $system_setting = $system_row['syssetting'];
             <!-- Nav Item - Pages Collapse Menu -->
             <?php
             if ($_SESSION['import'] == '1') {
-            ?>
+                ?>
                 <li class="nav-item">
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
                         aria-expanded="true" aria-controls="collapseTwo">
@@ -95,7 +95,7 @@ $system_setting = $system_row['syssetting'];
                         </div>
                     </div>
                 </li>
-            <?php
+                <?php
             } else {
             }
             ?>
@@ -125,61 +125,59 @@ $system_setting = $system_row['syssetting'];
                         } else {
                         }
                         ?>
-                        <h6 class="collapse-header">Bacth List:</h6>
-                        <?php
-                        if ($_SESSION['pulloutdoc'] == '1') {
-                            echo '<a class="collapse-item" href="for_pullout.php">For Pull Out</a>';
-                            echo '<a class="collapse-item" href="batchlist.php">Pull Out Batch List</a>';
-                        }
-                        if ($_SESSION['payment'] == '1') {
-                            echo '<a class="collapse-item" href="for_charging.php">For Charging</a>';
-                            echo '<a class="collapse-item" href="charging_batchlist.php">Charging Batch List</a>';
-                        }
+                        <?php if ($_SESSION['pulloutdoc'] == '1'): ?>
+                            <h6 class="collapse-header">Pull-Out</h6>
+                            <a class="collapse-item" href="for_pullout.php">For Pull Out</a>
+                            <a class="collapse-item" href="batchlist.php">For Pull Out Batch List</a>
+                        <?php endif; ?>
 
-                        if ($_SESSION['print'] == '1') {
-                            // echo '<a class="collapse-item" href="borf.php">BORF F325</a>';
-                        } else {
-                        }
-                        ?>
+                        <?php if ($_SESSION['payment'] == '1'): ?>
+
+                            <h6 class="collapse-header">Charging</h6>
+                            <a class="collapse-item" href="for_charging.php">For Charging</a>
+                            <a class="collapse-item" href="charging_batchlist.php">For Charging Batch List</a>
+
+                        <?php endif; ?>
+
                     </div>
                 </div>
             </li>
 
             <?php
             if ($_SESSION['payment'] == '1') {
-            ?>
+                ?>
                 <!-- Divider -->
                 <hr class="sidebar-divider">
 
                 <!-- Heading -->
                 <div class="sidebar-heading">
-                Receivables
-            </div>
+                    Receivables
+                </div>
 
                 <!-- Nav Item - Pages Collapse Menu -->
                 <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSL"
-                    aria-expanded="true" aria-controls="collapseSL">
-                    <i class="fas fa-fw fa-money-bill"></i>
-                    <span>Shortlanded</span>
-                </a>
-                <div id="collapseSL" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Shortlanded:</h6>
-                        <a class="collapse-item" href="shortlanded_complete.php">Shortlanded List</a>
-                        <a class="collapse-item" href="shortlanded.php">Unpaid F325</a>
-                </div>
-            </div>
-            </li>
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSL"
+                        aria-expanded="true" aria-controls="collapseSL">
+                        <i class="fas fa-fw fa-money-bill"></i>
+                        <span>Shortlanded</span>
+                    </a>
+                    <div id="collapseSL" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <h6 class="collapse-header">Shortlanded:</h6>
+                            <a class="collapse-item" href="shortlanded_complete.php">Shortlanded List</a>
+                            <a class="collapse-item" href="shortlanded.php">Unpaid F325</a>
+                        </div>
+                    </div>
+                </li>
 
-            <?php
+                <?php
             } else {
             }
             ?>
 
             <?php
             if ($_SESSION['manual'] == '1') {
-            ?>
+                ?>
                 <!-- Divider -->
                 <hr class="sidebar-divider">
 
@@ -194,14 +192,14 @@ $system_setting = $system_row['syssetting'];
                         <i class="fas fa-fw fa-plus-circle"></i>
                         <span>Add Manual</span></a>
                 </li>
-            <?php
+                <?php
             } else {
             }
             ?>
 
             <?php
             if ($_SESSION['report'] == '1') {
-            ?>
+                ?>
                 <!-- Divider -->
                 <hr class="sidebar-divider">
 
@@ -234,14 +232,14 @@ $system_setting = $system_row['syssetting'];
                         </div>
                     </div>
                 </li>
-            <?php
+                <?php
             } else {
             }
             ?>
 
             <?php
             if ($system_setting == '1') {
-            ?>
+                ?>
                 <!-- Divider -->
                 <hr class="sidebar-divider">
 
@@ -272,7 +270,7 @@ $system_setting = $system_row['syssetting'];
                         </div>
                     </div>
                 </li>
-            <?php
+                <?php
             } else {
             }
             ?>
@@ -424,6 +422,28 @@ $system_setting = $system_row['syssetting'];
                                     <div class="form-group">
                                         <div class="form-row">
                                             <div class="col-12">
+                                                <div class="form-group">
+                                                    <div class="form-row">
+                                                        <div class="col-12">
+                                                            <label>Select Location:</label>
+                                                            <select class="form-control form-control-sm" name="location"
+                                                                required>
+                                                                <option value="">-- Select Location --</option>
+                                                                <?php
+                                                                $query = "SELECT * FROM dblocation WHERE active = 1 ORDER BY location ASC";
+                                                                $result = mysqli_query($conn, $query);
+
+                                                                while ($row = mysqli_fetch_assoc($result)) {
+                                                                    $loc_id = $row['id'];
+                                                                    if (!empty($_SESSION['loc' . $loc_id]) && $_SESSION['loc' . $loc_id] == 1) {
+                                                                        echo '<option value="' . $row['location'] . '">' . $row['location'] . '</option>';
+                                                                    }
+                                                                }
+                                                                ?>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <label>Select Cleared Date:</label>
                                                 <input type="date" class="form-control form-control-sm" name="logdate"
                                                     required>
@@ -487,7 +507,8 @@ $system_setting = $system_row['syssetting'];
 
                                         <?php foreach ($_SESSION['pullout_errors'] as $error): ?>
                                             <div class="alert alert-danger alert-dismissible">
-                                                <strong><i class="fas fa-exclamation-circle mr-1"></i>Error:</strong> <?= htmlspecialchars($error) ?>
+                                                <strong><i class="fas fa-exclamation-circle mr-1"></i>Error:</strong>
+                                                <?= htmlspecialchars($error) ?>
                                                 <button type="button" class="close" data-dismiss="alert">
                                                     <span>&times;</span>
                                                 </button>
@@ -521,7 +542,7 @@ $system_setting = $system_row['syssetting'];
                 </div>
                 <?php if (!empty($_SESSION['pullout_errors'])): ?>
                     <script>
-                        $(document).ready(function() {
+                        $(document).ready(function () {
                             $('#pull-out').modal('show');
                         });
                     </script>
@@ -531,7 +552,7 @@ $system_setting = $system_row['syssetting'];
                 unset($_SESSION['pullout_errors'], $_SESSION['pullout_success']);
                 ?>
                 <script>
-                    document.querySelector('.custom-file-input').addEventListener('change', function(e) {
+                    document.querySelector('.custom-file-input').addEventListener('change', function (e) {
                         var fileName = e.target.files[0].name;
                         var nextSibling = e.target.nextElementSibling;
                         nextSibling.innerText = fileName;

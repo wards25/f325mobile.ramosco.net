@@ -62,7 +62,7 @@ include_once("nav.php");
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2 ml-4">
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Total Amount  Unpaid</div>
+                            Total Amount Unpaid</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             <?php
                             $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forcharging) AS total_cost FROM dbraw WHERE forcharging >=1 AND batchnumber_forcharging <> '' AND status_forcharging = '0'");
@@ -102,6 +102,20 @@ include_once("nav.php");
                     <tbody class="text-center">
 
                         <?php
+                        $allowed_locations = [];
+
+                        $query = "SELECT id, location FROM dblocation WHERE active = 1 ORDER BY location ASC";
+                        $result = mysqli_query($conn, $query);
+
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            $loc_id = $row['id'];
+
+                            if (!empty($_SESSION['loc' . $loc_id]) && $_SESSION['loc' . $loc_id] == 1) {
+                                $allowed_locations[] = "'" . mysqli_real_escape_string($conn, $row['location']) . "'";
+                            }
+                        }
+                        $location_filter = implode(",", $allowed_locations);
+
                         $query = "
                                 SELECT 
                                     batchnumber_forcharging AS batchnumber, 
@@ -110,11 +124,15 @@ include_once("nav.php");
                                 FROM dbraw
                                 WHERE batchnumber_forcharging IS NOT NULL AND forcharging >= 1
                                 AND batchnumber_forcharging <> ''  AND status_forcharging = '0'
+                                AND location IN ($location_filter)
                                 GROUP BY batchnumber_forcharging, category
                                 ORDER BY batchnumber_forcharging DESC
                             ";
                         $result = mysqli_query($conn, $query);
+                        if(!$result){
+                            die("Error executing query: " . mysqli_error($conn));
 
+                        }
                         while ($row = mysqli_fetch_assoc($result)) {
                             echo "<tr>
                                 <td>{$row['batchnumber']}</td>

@@ -9,6 +9,7 @@ if (!isset($_GET['batchnumber'])) {
 $batchnumber = mysqli_real_escape_string($conn, $_GET['batchnumber']);
 $type = $_GET['type'] ?? 'pullout'; 
 $dateProcessed = $_GET['date_processed'] ?? date('Y-m-d');
+$location = $_GET['hub'] ?? '';
 
 if ($type === 'total') {
     $qtyField = 'r.rcvdqty';
@@ -120,7 +121,7 @@ $company   = $header['name'] ?? '';
             <td class="text-right">
                 <p><strong>Reference #:</strong><?= $batchnumber ?></p>
                 <p><strong>Date Processed:</strong> <?= $dateProcessed ?></p>
-                <p><strong>Hub:</strong></p>
+                <p><strong>Hub:</strong> <?= htmlspecialchars($location) ?></p>
             </td>
         </tr>
     </table>
@@ -154,6 +155,7 @@ $company   = $header['name'] ?? '';
     c.franchise,
     c.code,
     r.f325number,
+    r.location,
     CONCAT(r.mdccode, ' - ', p.description) AS description,
     r.forpullout,
     $qtyField AS qty,

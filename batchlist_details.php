@@ -328,10 +328,12 @@ include_once("nav.php");
 <script>
     function printBatch(type) {
         const batchnumber = "<?= htmlspecialchars($batchnumber) ?>";
+        const hub = "<?= htmlspecialchars($hub) ?>";
         window.location.href =
             "print_batch_details.php?batchnumber=" +
             encodeURIComponent(batchnumber) +
-            "&type=" + type;
+            "&type=" + type +
+            "&hub=" + encodeURIComponent(hub);
     }
 
     const logpInput = document.getElementById('logpImages');

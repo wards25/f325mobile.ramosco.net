@@ -25,8 +25,8 @@ include_once("nav.php");
     }
 
     .preview-img {
-        width: 100px;
-        height: 100px;
+        width: 425px;
+        height: 425px;
         object-fit: cover;
         border-radius: 6px;
         border: 1px solid #ddd;
@@ -399,7 +399,7 @@ include_once("nav.php");
 
 <!-- print out sumarry Images -->
 <div class="modal fade" id="pulloutModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-md">
         <div class="modal-content logp-modal-content">
 
             <div class="modal-header">
@@ -470,9 +470,8 @@ include_once("nav.php");
         logpWrapper.innerHTML = `
         <div class="preview-wrapper d-inline-block">
             <a href="${img.path}" target="_blank">
-                <img src="${img.path}" class="preview-img" style="width:300px;height:auto;">
+                <img src="${img.path}" class="preview-img">
             </a>
-            <div class="mt-2 fw-bold">LOGP ${img.sequence}</div>
         </div>
     `;
 
@@ -527,9 +526,8 @@ include_once("nav.php");
         pulloutWrapper.innerHTML = `
         <div class="preview-wrapper d-inline-block">
             <a href="${img.path}" target="_blank">
-                <img src="${img.path}" class="preview-img" style="width:300px;height:auto;">
+                <img src="${img.path}" class="preview-img">
             </a>
-            <div class="mt-2 fw-bold">PRINT-OUT ${img.sequence}</div>
         </div>
     `;
 

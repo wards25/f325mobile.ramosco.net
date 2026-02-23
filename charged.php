@@ -96,6 +96,20 @@ include_once("nav.php");
                     <tbody class="text-center">
 
                         <?php
+                        $allowed_locations = [];
+
+                        $query = "SELECT id, location FROM dblocation WHERE active = 1 ORDER BY location ASC";
+                        $result = mysqli_query($conn, $query);
+
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            $loc_id = $row['id'];
+
+                            if (!empty($_SESSION['loc' . $loc_id]) && $_SESSION['loc' . $loc_id] == 1) {
+                                $allowed_locations[] = "'" . mysqli_real_escape_string($conn, $row['location']) . "'";
+                            }
+                        }
+                        $location_filter = implode(",", $allowed_locations);
+
                         $query = "
                                 SELECT 
                                     batchnumber_forcharging AS batchnumber,
@@ -104,11 +118,14 @@ include_once("nav.php");
                                 FROM dbraw
                                 WHERE batchnumber_forcharging IS NOT NULL AND forcharging >= 1
                                 AND batchnumber_forcharging <> '' AND status_forcharging = '1'
+                                AND location IN ($location_filter)
                                 GROUP BY batchnumber_forcharging, category
                                 ORDER BY batchnumber_forcharging ASC
                             ";
                         $result = mysqli_query($conn, $query);
-
+                        if(!$result){
+                            die("Error executing query: " . mysqli_error($conn));
+                        }
                         while ($row = mysqli_fetch_assoc($result)) {
                             echo "<tr>
                                 <td>{$row['batchnumber']}</td>

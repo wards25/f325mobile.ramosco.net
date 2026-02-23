@@ -146,6 +146,20 @@ include_once("nav.php");
                         </thead>
                         <tbody class="text-center">
                             <?php
+                            $allowed_locations = [];
+
+                            $query = "SELECT id, location FROM dblocation WHERE active = 1 ORDER BY location ASC";
+                            $result = mysqli_query($conn, $query);
+
+                            while ($row = mysqli_fetch_assoc($result)) {
+                                $loc_id = $row['id'];
+
+                                if (!empty($_SESSION['loc' . $loc_id]) && $_SESSION['loc' . $loc_id] == 1) {
+                                    $allowed_locations[] = "'" . mysqli_real_escape_string($conn, $row['location']) . "'";
+                                }
+                            }
+                            $location_filter = implode(",", $allowed_locations);
+
                             $query = "
                                 SELECT 
                                     c.nickname AS company,
@@ -157,6 +171,7 @@ include_once("nav.php");
                                 INNER JOIN dbcompany c
                                     ON r.vendorcode = c.vendorcode
                                 WHERE r.forpullout >= 1 AND r.batchnumber_forpullout = ''
+                                AND r.location IN ($location_filter)
                                 GROUP BY c.nickname, r.category, r.vendorcode
                                 ORDER BY r.category ASC
                             ";

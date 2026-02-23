@@ -98,6 +98,20 @@ include_once("nav.php");
                                 </thead>
                                 <tbody class="text-center">
                                     <?php
+                                    $allowed_locations = [];
+
+                                    $query = "SELECT id, location FROM dblocation WHERE active = 1 ORDER BY location ASC";
+                                    $result = mysqli_query($conn, $query);
+
+                                    while ($row = mysqli_fetch_assoc($result)) {
+                                        $loc_id = $row['id'];
+
+                                        if (!empty($_SESSION['loc' . $loc_id]) && $_SESSION['loc' . $loc_id] == 1) {
+                                            $allowed_locations[] = "'" . mysqli_real_escape_string($conn, $row['location']) . "'";
+                                        }
+                                    }
+                                    $location_filter = implode(",", $allowed_locations);
+
                                     $sql = "
                                         SELECT 
                                             r.f325number,
@@ -111,10 +125,10 @@ include_once("nav.php");
                                         WHERE 
                                             r.forcharging >= 1  
                                         AND batchnumber_forcharging = ''
+                                        AND r.location IN ($location_filter)
                                     ";
 
                                     $result = mysqli_query($conn, $sql);
-
                                     if (!$result) {
                                         die("SQL Error: " . mysqli_error($conn));
                                     }
