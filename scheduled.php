@@ -22,6 +22,10 @@ include_once("nav.php");
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
         <h4 class="mb-0">Schedule</h4>
+        <div>
+            <button class="btn btn-sm btn-primary export-csv">Export CSV</button>
+            <button class="btn btn-sm btn-success import-csv">Import CSV</button>
+        </div>
     </div>
 
     <div class="card shadow-lg border-0 rounded-4">
@@ -104,7 +108,8 @@ include_once("nav.php");
                                         <div class="btn-group gap-2">
                                             <button type="button" class="btn btn-outline-primary button-reopen-notepad"
                                                 onclick="reScheduleNotepad()">Re-Open</button>
-                                            <button type="button" class="btn btn-outline-primary button-schedule-notepad"
+                                            <button type="button"
+                                                class="btn btn-outline-primary button-schedule-notepad"
                                                 onclick="scheduleNotepad()">Scheduled</button>
                                             <!-- History Dropdown -->
                                             <div class="btn-group">
@@ -192,25 +197,26 @@ include_once("nav.php");
                                                     <h6 class="fw-bold mb-3">Transport Details</h6>
 
                                                     <div class="mb-3">
-                                                        <label class="fw-bold">TM Number<span class="text-danger"> *</span></label>
-                                                        <input type="text" class="form-control input-tmnumber"
-                                                           >
+                                                        <label class="fw-bold">TM Number<span class="text-danger">
+                                                                *</span></label>
+                                                        <input type="text" class="form-control input-tmnumber">
                                                     </div>
 
                                                     <div class="mb-3">
-                                                        <label class="fw-bold">Driver<span class="text-danger"> *</span></label>
-                                                        <input type="text" class="form-control input-driver"
-                                                           >
+                                                        <label class="fw-bold">Driver<span class="text-danger">
+                                                                *</span></label>
+                                                        <input type="text" class="form-control input-driver">
                                                     </div>
 
                                                     <div class="mb-3">
-                                                        <label class="fw-bold">Plate Number<span class="text-danger"> *</span></label>
-                                                        <input type="text" class="form-control input-platenumber"
-                                                           >
+                                                        <label class="fw-bold">Plate Number<span class="text-danger">
+                                                                *</span></label>
+                                                        <input type="text" class="form-control input-platenumber">
                                                     </div>
 
                                                     <div class="mb-2">
-                                                        <label class="fw-bold">Date Scheduled<span class="text-danger"> *</span></label>
+                                                        <label class="fw-bold">Date Scheduled<span class="text-danger">
+                                                                *</span></label>
                                                         <input type="date" class="form-control input-datesched"
                                                             value="<?php echo date('Y-m-d'); ?>">
                                                     </div>
@@ -293,5 +299,17 @@ include_once("nav.php");
         </div>
     </div>
 </div>
-<?php include_once("footer.php");?>
+<?php include_once("footer.php"); ?>
 <?php $conn->close(); ?>
+
+<script>
+    $(document).ready(function () {
+        exportCSV();
+    });
+
+    function exportCSV() {
+        $(".export-csv").on("click", function () {
+            window.location.href = "/exportprinted.php";
+        });
+    }
+</script>
