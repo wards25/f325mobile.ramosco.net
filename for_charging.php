@@ -91,8 +91,10 @@ include_once("nav.php");
                                     <tr>
                                         <th class="text-center">f325number</th>
                                         <th class="text-center">Mdccode</th>
+                                        <th class="text-center">Principal</th>
                                         <th class="text-center">For Charge Quantity</th>
                                         <th class="text-center">Amount</th>
+                                        <th class="text-center">Date Cleared</th>
                                         <th class="text-center">Action</th>
                                     </tr>
                                 </thead>
@@ -118,13 +120,20 @@ include_once("nav.php");
                                             r.mdccode,
                                             r.forcharging,
                                             r.unitcost,
-                                            r.costextended
+                                            r.costextended,
+                                            r.datecleared,
+                                            p.description,
+                                            c.name
                                         FROM dbraw r
                                         INNER JOIN dbcompany c
                                             ON r.vendorcode = c.vendorcode
+                                        INNER JOIN dbproduct p
+                                            ON r.mdccode = p.mdccode
+                                            AND r.vendorcode = p.vendor
                                         WHERE 
                                             r.forcharging >= 1  
                                         AND batchnumber_forcharging = ''
+                                        AND r.statusout = 'CLEARED'
                                         AND r.location IN ($location_filter)
                                     ";
 
@@ -137,9 +146,11 @@ include_once("nav.php");
                                         while ($row = mysqli_fetch_assoc($result)) {
                                             echo "<tr>
                                                 <td>{$row['f325number']}</td>
-                                                <td>{$row['mdccode']}</td>
+                                                <td>{$row['mdccode']} - {$row['description']}</td>
+                                                <td>{$row['name']}</td>
                                                 <td>{$row['forcharging']}</td>
                                                 <td>₱" . number_format($row['unitcost'], 2) . "</td>
+                                                <td>{$row['datecleared']}</td>
                                                 <td>
                                                     <input type='checkbox' class='form-check-input row-checkbox big-checkbox' 
                                                         name='items[]' value='{$row['f325number']}|{$row['mdccode']}'>

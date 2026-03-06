@@ -306,10 +306,10 @@ include_once("nav.php");
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <img src="filepicture/dbfile/<?php echo $f325number;?>.jpg" class="img-fluid">
+                                            <img src="uploads/disposed/<?php echo $f325number;?>.jpg" class="img-fluid">
                                         </div>
                                         <div class="modal-footer">
-                                            <a class="btn btn-success btn-sm" type="button" onclick="window.open('download_f325.php?f325number=<?php echo $f325number; ?>&folder=dbfile')"><i class="fa fa-sm fa-download"></i> Download</a>
+                                            <a class="btn btn-success btn-sm" type="button" onclick="window.open('download_f325.php?f325number=<?php echo $f325number; ?>&folder=disposed')"><i class="fa fa-sm fa-download"></i> Download</a>
                                             <button class="btn btn-secondary btn-sm" type="button" data-dismiss="modal">Cancel</button>
                                         </div>
                                     </div>

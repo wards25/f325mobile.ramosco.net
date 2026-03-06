@@ -62,12 +62,16 @@ include_once("nav.php");
 
 
         <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-success btn-md" onclick="printBatch('pullout')">
+            <button class="btn btn-primary btn-sm" onclick="printBatch('pullout')">
                 <i class="bi bi-printer me-1"></i> Print For Charging QTY
             </button>
 
-            <button class="btn btn-success btn-md" onclick="printBatch('total')">
+            <button class="btn btn-success btn-sm" onclick="printBatch('total')">
                 <i class="bi bi-printer me-1"></i> Print Total QTY
+            </button>
+
+            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#historyModal">
+                <i class="bi bi-clock-history me-1"></i> View History
             </button>
 
 
@@ -81,42 +85,51 @@ include_once("nav.php");
         <div class="card-body">
             <div class="table-responsive">
                 <?php
-                $preparedBy = $_SESSION['fname'] ?? '';
-                $dateProcessed = $_GET['date_processed'] ?? date('Y-m-d');
-                $headerQuery = "
-                    SELECT 
-                        r.category AS principal,
-                        r.location AS hub,
-                        c.name
-                    FROM dbraw r
-                    LEFT JOIN dbcompany c ON r.vendorcode = c.vendorcode
-                    WHERE r.batchnumber_forcharging = '$batchnumber'
-                    LIMIT 1
-                ";
-                $headerResult = mysqli_query($conn, $headerQuery);
-                $header = mysqli_fetch_assoc($headerResult);
+                // Fetch all columns from dbpullout for the given batchnumber
+                $query = "SELECT * FROM dbpullout WHERE reference = '$batchnumber' LIMIT 1";
+                $result = mysqli_query($conn, $query);
+                if (!$result) {
+                    die("Query failed: " . mysqli_error($conn));
+                }
 
-                $principal = $header['principal'] ?? '';
-                $company = $header['name'] ?? '';
-                $hub = $header['hub'] ?? '';
+                // Fetch associative array of all fields
+                $row = mysqli_fetch_assoc($result);
+
+                // Assign variables from fetched row, with fallback to empty string
+                $preparedby = $row['preparedby'] ?? '';
+                $dateProcessed = $row['dateprocessed'] ?? date('Y-m-d');
+                $reference = $row['reference'] ?? '';
+                $principal = $row['principal'] ?? '';
+                $vendorcode = $row['company'] ?? '';
+                $dateProcessedValue = $row['dateprocessed'] ?? '';
+                $location = $row['location'] ?? '';
+                // Fetch company data based on vendorcode
+                $queryCompany = "SELECT * FROM dbcompany WHERE vendorcode = '$vendorcode' LIMIT 1";
+                $resultCompany = mysqli_query($conn, $queryCompany);
+
+                if (!$resultCompany) {
+                    die("Query failed: " . mysqli_error($conn));
+                }
+                $companyRow = mysqli_fetch_assoc($resultCompany);
+                $company = $companyRow['name'] ?? '';
                 ?>
+
                 <div class="row">
                     <!-- Left Column -->
                     <div class="col-md-6">
+                        <div class="mb-2">
+                            <label class="form-label"><strong>Reference #:</strong></label>
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($reference) ?>"
+                                readonly>
+                        </div>
                         <div class="mb-2">
                             <label class="form-label"><strong>Principal Name:</strong></label>
                             <input type="text" class="form-control" value="<?= htmlspecialchars($principal) ?>"
                                 readonly>
                         </div>
-
-                        <div class="mb-2">
-                            <label class="form-label"><strong>Company:</strong></label>
-                            <input type="text" class="form-control" value="<?= htmlspecialchars($company) ?>" readonly>
-                        </div>
-
                         <div class="mb-3">
                             <label class="form-label"><strong>Prepared By:</strong></label>
-                            <input type="text" class="form-control" value="<?= htmlspecialchars($preparedBy) ?>"
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($preparedby) ?>"
                                 readonly>
                         </div>
                     </div>
@@ -124,20 +137,19 @@ include_once("nav.php");
                     <!-- Right Column -->
                     <div class="col-md-6">
                         <div class="mb-2">
-                            <label class="form-label"><strong>Reference #:</strong></label>
-                            <input type="text" id="ref-number" class="form-control"
-                                value="<?= htmlspecialchars($batchnumber) ?>" readonly>
-                        </div>
-
-                        <div class="mb-2">
                             <label class="form-label"><strong>Date Processed:</strong></label>
-                            <input type="text" class="form-control" value="<?= htmlspecialchars($dateProcessed) ?>"
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($dateProcessedValue) ?>"
                                 readonly>
                         </div>
                         <div class="mb-2">
-                            <label class="form-label"><strong>Hub:</strong></label>
-                            <input type="text" class="form-control" value="<?= htmlspecialchars($hub) ?>" readonly>
+                            <label class="form-label"><strong>Company:</strong></label>
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($company) ?>" readonly>
                         </div>
+                        <div class="mb-2">
+                            <label class="form-label"><strong>Location:</strong></label>
+                            <input type="text" class="form-control" value="<?= htmlspecialchars($location) ?>" readonly>
+                        </div>
+
                     </div>
                 </div>
 
@@ -245,14 +257,15 @@ include_once("nav.php");
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="fw-bold">Charge Date <span class="text-danger">*</span></label>
-                                        <input type="date" name="pullout_date" class="form-control" required
+                                        <input type="date" name="charge_date" class="form-control" required
                                             value="<?= date('Y-m-d') ?>">
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="fw-bold">BO Custodian Name<span
                                                 class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="custodian_name" required>
+                                        <input type="text" class="form-control text-uppercase" name="custodian_name"
+                                            oninput="this.value = this.value.toUpperCase()" required>
                                     </div>
 
                                     <div class="col-md-12">
@@ -314,8 +327,8 @@ include_once("nav.php");
                 <!-- CENTERED BUTTON -->
                 <div class="row mt-4">
                     <div class="col text-center">
-                        <button class="btn btn-success px-5" type="submit">
-                            <i class="fas fa-upload me-1"></i> Upload
+                        <button class="btn btn-success btn-sm" type="submit">
+                            <i class="fas fa-upload me-1"></i> Paid
                         </button>
                     </div>
                 </div>
@@ -325,13 +338,86 @@ include_once("nav.php");
 </div>
 
 <?php include_once("footer.php"); ?>
+<!-- History Modal -->
+<div class="modal fade" id="historyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Charging History - <?= htmlspecialchars($batchnumber) ?>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-info text-center">
+                            <tr>
+                                <th>F325 Number</th>
+                                <th>Processed</th>
+                                <th>User</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            <?php
+                            $historyQuery = "
+                            SELECT h.*
+                            FROM dbhistory h
+                            INNER JOIN dbraw r ON h.processnumber = r.f325number
+                            WHERE r.batchnumber_forcharging = '$batchnumber'
+                            ORDER BY h.dateprocessed DESC, h.timeprocessed DESC
+                        ";
+
+                            $historyResult = mysqli_query($conn, $historyQuery);
+
+                            if (mysqli_num_rows($historyResult) > 0) {
+                                while ($h = mysqli_fetch_assoc($historyResult)) {
+
+                                    echo "<tr>
+                                    <td class='text-center'>{$h['processnumber']}</td>
+                                    <td>{$h['processed']}</td>
+                                    <td>{$h['name']}</td>
+                                    <td class='text-center'>{$h['dateprocessed']}</td>
+                                    <td class='text-center'>{$h['timeprocessed']}</td>
+                                </tr>";
+                                }
+                            } else {
+                                echo "<tr>
+                                <td colspan='5' class='text-center text-muted'>
+                                    No history found
+                                </td>
+                            </tr>";
+                            }
+                            ?>
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
 <script>
     function printBatch(type) {
         const batchnumber = "<?= htmlspecialchars($batchnumber) ?>";
+        const hub = "<?= htmlspecialchars($location) ?>";
+        const company = "<?= htmlspecialchars($vendorcode) ?>";
+        const dateProcessed = "<?= htmlspecialchars($dateProcessed) ?>";
         window.location.href =
             "print_forcharging_batchlist.php?batchnumber=" +
             encodeURIComponent(batchnumber) +
-            "&type=" + type;
+            "&vendor=" + encodeURIComponent(company) +
+            "&type=" + type +
+            "&hub=" + encodeURIComponent(hub) +
+            "&date_processed=" + encodeURIComponent(dateProcessed);
     }
 
     const logpInput = document.getElementById('logpImages');

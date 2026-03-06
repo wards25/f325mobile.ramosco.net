@@ -27,7 +27,8 @@ if($_POST['type'] == 2){
         LEFT JOIN dbcompany ON dbraw.vendorcode = dbcompany.vendorcode
         LEFT JOIN dbproduct ON dbraw.mdccode = dbproduct.mdccode
         LEFT JOIN dbf325number ON dbraw.f325number = dbf325number.f325number
-        WHERE dbraw.status = 'cleared' 
+        WHERE dbraw.status = 'CLEARED' 
+            AND status_out = 'CLEARED'
             AND dbf325number.cleared_time BETWEEN '$timefrom' AND '$timeto'
             AND dbraw.datecleared = '$cleareddate'
             AND dbraw.location = '$location'

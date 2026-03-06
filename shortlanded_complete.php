@@ -69,7 +69,7 @@ include_once("nav.php");
                                         $now = date('Y-m-d');
                                         $datetime2 = new DateTime($now);
 
-                                        $result = mysqli_query($conn,"SELECT * FROM sl_number GROUP BY f325no");
+                                        $result = mysqli_query($conn,"SELECT f325no, dateprocessed, slno, paymentstatus FROM sl_number GROUP BY f325no, slno, dateprocessed, paymentstatus");
                                         while($row = mysqli_fetch_array($result))
                                             {
                                                 $datetime1 = new DateTime($row['dateprocessed']);

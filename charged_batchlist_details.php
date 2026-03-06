@@ -455,7 +455,6 @@ include_once("nav.php");
             <a href="${img.path}" target="_blank">
                 <img src="${img.path}" class="preview-img" style="width:300px;height:auto;">
             </a>
-            <div class="mt-2 fw-bold">LOGP ${img.sequence}</div>
         </div>
     `;
 
@@ -512,7 +511,6 @@ include_once("nav.php");
             <a href="${img.path}" target="_blank">
                 <img src="${img.path}" class="preview-img" style="width:300px;height:auto; object-fit: cover; border-radius: 0px;">
             </a>
-            <div class="mt-2 fw-bold">PRINT-OUT ${img.sequence}</div>
         </div>
     `;
 

@@ -120,8 +120,9 @@ $system_setting = $system_row['syssetting'];
 
                         if ($_SESSION['clearing'] == '1') {
                             // echo '<a class="collapse-item" href="cleared.php">Cleared F325</a>';
-                            // echo '<a class="collapse-item" href="disposed.php">Disposed F325</a>';
                             echo '<a class="collapse-item" href="clearing.php">Clearing</a>';
+                            echo '<a class="collapse-item" href="verification.php">Verification</a>';
+                            echo '<a class="collapse-item" href="disposed.php">Disposed F325</a>';
                         } else {
                         }
                         ?>

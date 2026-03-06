@@ -89,11 +89,12 @@ $vendorcode = isset($_GET['vc']) ? mysqli_real_escape_string($conn, $_GET['vc'])
                             INNER JOIN dbcompany c
                                 ON r.vendorcode = c.vendorcode
                             INNER JOIN dbproduct p 
-                             ON r.mdccode = p.mdccode
+                                ON r.mdccode = p.mdccode
+                                AND r.vendorcode = p.vendor
                             WHERE 
                                 r.forpullout >= 1
                                 AND r.batchnumber_forpullout = ''
-                                AND r.status_forpullout = '0'
+                                AND r.statusout = 'CLEARED'
                                 AND r.category = '$category'
                                 AND c.nickname = '$company'
                                 AND p.vendor = '$vendorcode'

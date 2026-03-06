@@ -14,4 +14,4 @@ if (isset($_POST['submit']))
 	$qstring = '?status=verify';
 }
 
-header("Location: scheduled.php".$qstring);
+header("Location: clearing.php".$qstring);

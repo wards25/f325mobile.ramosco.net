@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $uploadTime = date('H:i:s');
     $custodian_name = mysqli_real_escape_string($conn, $_POST['custodian_name'] ?? '');
     $logpnumber = mysqli_real_escape_string($conn, $_POST['logpnumber'] ?? '');
-    $pullout_date = mysqli_real_escape_string($conn, $_POST['pullout_date'] ?? '');
+    $charging_date = mysqli_real_escape_string($conn, $_POST['charge_date'] ?? '');
 
 
     $hub = '';
@@ -25,17 +25,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $batchInsert = "
-    INSERT INTO tbl_batch
-        (batchnumber, custodian_name, logpnumber, hub, pullout_date)
-    VALUES
-        ('$batchnumber', '$custodian_name', '$logpnumber', '$hub', '$pullout_date')
+    UPDATE dbpullout
+    SET status = 'PAID', reference = '$batchnumber', custodian_name = '$custodian_name', logp_number = '$logpnumber', charge_date = '$charging_date'
+    WHERE reference = '$batchnumber'
 ";
 
-    mysqli_query($conn, $batchInsert);
-
+    $query = mysqli_query($conn, $batchInsert);
+    if (!$query) {
+        die("Error inserting batch: " . mysqli_error($conn));
+    }
     $updateStatus = "
     UPDATE dbraw
-    SET status_forcharging = '1'
+    SET statusout = 'PAID'
     WHERE batchnumber_forcharging = '$batchnumber'
 ";
     mysqli_query($conn, $updateStatus);
@@ -105,6 +106,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+     // ===== INSERT HISTORY LOG FOR PAID ATTACHMENT =====
+    $username = $uploader;
+    $dateprocessed = $uploadDate;
+    $timeprocessed = $uploadTime;
+    $processed = 'Upload Paid Attachment';
+
+    mysqli_query($conn, "
+        INSERT INTO dbhistory(processnumber, name, processed, dateprocessed, timeprocessed) 
+        VALUES ('$batchnumber', '$username', '$processed', '$dateprocessed', '$timeprocessed')
+    ");
 
     echo "<script>
     const batchnumber = " . json_encode($batchnumber) . ";

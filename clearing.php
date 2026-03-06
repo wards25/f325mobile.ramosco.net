@@ -77,15 +77,15 @@ include_once("nav.php");
 
         <!-- Earnings (Monthly) Card Example -->
         <div class="col-xl-12 col-md-12 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total F325 For Clearing Status</div>
+                        <div class="col ml-4 mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Total F325 For Clear Status</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <?php
-                                $scheduled_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE status = 'scheduled' AND emaildate BETWEEN '2024-01-01' AND NOW()");
+                                $scheduled_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE status = 'SCHEDULED' AND emaildate BETWEEN '2024-01-01' AND NOW()");
                                 $scheduled_count = mysqli_num_rows($scheduled_query);
                                 echo number_format($scheduled_count);
                                 ?>
@@ -93,7 +93,7 @@ include_once("nav.php");
                             <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a
                                     href="cleared.php">F325 Cleared</a></small>
                         </div>
-                        <div class="col-auto">
+                        <div class="col-auto mr-4">
                             <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
                         </div>
                     </div>
@@ -175,13 +175,13 @@ include_once("nav.php");
                                 $now = date('Y-m-d');
                                 $datetime2 = new DateTime($now);
 
-                                $result = mysqli_query($conn, "SELECT * FROM dbf325number WHERE location IN (" . $location . ") AND status = 'scheduled' AND emaildate BETWEEN '2023-01-01' AND NOW()");
+                                $result = mysqli_query($conn, "SELECT * FROM dbf325number WHERE location IN (" . $location . ") AND status = 'scheduled' AND verificationdate IS NOT NULL AND emaildate BETWEEN '2023-01-01' AND NOW()");
                                 while ($row = mysqli_fetch_array($result)) {
                                     $datetime1 = new DateTime($row['datesched']);
                                     $difference = $datetime1->diff($datetime2);
                                     $diff = $difference->format('%a');
 
-                                    if ($row['verificationdate'] == '0000-00-00') {
+                                    if ($row['verificationdate'] == NULL) {
                                         echo '<tr>';
                                     } else {
                                         echo '<tr class="table-warning">';
@@ -245,7 +245,7 @@ include_once("nav.php");
                                     $difference = $datetime1->diff($datetime2);
                                     $diff = $difference->format('%a');
 
-                                    if ($row['verificationdate'] == '0000-00-00') {
+                                    if ($row['verificationdate'] == NULL) {
                                         echo '<tr>';
                                     } else {
                                         echo '<tr class="table-warning">';
@@ -323,7 +323,7 @@ include_once("nav.php");
                                 $difference = $datetime1->diff($datetime2);
                                 $diff = $difference->format('%a');
 
-                                if ($row['verificationdate'] == '0000-00-00') {
+                                if ($row['verificationdate'] == NULL) {
                                     echo '<tr>';
                                 } else {
                                     echo '<tr class="table-warning">';

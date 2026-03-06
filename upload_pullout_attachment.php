@@ -1,46 +1,52 @@
 <?php
 session_start();
 include_once('dbconnect.php');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $batchnumber = mysqli_real_escape_string($conn, $_POST['batchnumber']);
     $uploader = $_SESSION['fname'] ?? 'Unknown';
     $uploadDate = date('Y-m-d');
     $uploadTime = date('H:i:s');
+
     $driver = mysqli_real_escape_string($conn, $_POST['drivername'] ?? '');
     $logpnumber = mysqli_real_escape_string($conn, $_POST['logpnumber'] ?? '');
     $pullout_date = mysqli_real_escape_string($conn, $_POST['pullout_date'] ?? '');
 
-
     $hub = '';
 
     $hubQuery = "
-    SELECT location 
-    FROM dbraw 
-    WHERE batchnumber_forpullout = '$batchnumber'
-    LIMIT 1
-";
+        SELECT location 
+        FROM dbraw 
+        WHERE batchnumber_forpullout = '$batchnumber'
+        LIMIT 1
+    ";
     $hubResult = mysqli_query($conn, $hubQuery);
+
     if ($hubRow = mysqli_fetch_assoc($hubResult)) {
         $hub = mysqli_real_escape_string($conn, $hubRow['location']);
     }
 
     $batchInsert = "
-    INSERT INTO tbl_batch
-        (batchnumber, drivername, logpnumber, hub, pullout_date)
-    VALUES
-        ('$batchnumber', '$driver', '$logpnumber', '$hub', '$pullout_date')
-";
+        UPDATE dbpullout
+        SET status = 'PULL-OUT', driver_name = '$driver', logp_number = '$logpnumber', pullout_date = '$pullout_date'    
+        WHERE reference = '$batchnumber'
+    ";
 
-    mysqli_query($conn, $batchInsert);
-
+    $query = mysqli_query($conn, $batchInsert);
+    if (!$query) {
+        die("Error updating pullout details: " . mysqli_error($conn));
+    }
     $updateStatus = "
-    UPDATE dbraw
-    SET status_forpullout = '1'
-    WHERE batchnumber_forpullout = '$batchnumber'
-";
+        UPDATE dbraw
+        SET statusout = 'PULL-OUT'
+        WHERE batchnumber_forpullout = '$batchnumber'
+    ";
+
     mysqli_query($conn, $updateStatus);
 
     $uploadDir = "uploads/attachments/$batchnumber/";
+
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
@@ -75,12 +81,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     VALUES 
                     ('$batchnumber', $sequence, '$targetPath', 'LOGP', '$uploader', '$uploadDate', '$uploadTime')
                 ";
-                mysqli_query($conn, $insert);
+
+                $query = mysqli_query($conn, $insert);
+
+                if (!$query) {
+                    die("Error inserting attachment: " . mysqli_error($conn));
+                }
             }
         }
     }
+
+
     // ===== FOR UPLOAD PULLOUT SUMMARY =====
-    if (!empty($_FILES['pullout_summary']['name'][0])) { // check first file
+    if (!empty($_FILES['pullout_summary']['name'][0])) {
 
         foreach ($_FILES['pullout_summary']['tmp_name'] as $index => $tmpName) {
 
@@ -95,21 +108,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 move_uploaded_file($tmpName, $targetPath);
 
                 $insert = "
-                INSERT INTO tbl_attachments 
-                (batchnumber, sequence_no, path, document_type, uploader, upload_date, upload_time)
-                VALUES 
-                ('$batchnumber', $sequence, '$targetPath', 'PRINT OUT', '$uploader', '$uploadDate', '$uploadTime')
-            ";
+                    INSERT INTO tbl_attachments 
+                    (batchnumber, sequence_no, path, document_type, uploader, upload_date, upload_time)
+                    VALUES 
+                    ('$batchnumber', $sequence, '$targetPath', 'PRINT OUT', '$uploader', '$uploadDate', '$uploadTime')
+                ";
+
                 mysqli_query($conn, $insert);
             }
         }
     }
 
 
+    // ===== INSERT HISTORY LOG =====
+    $username = $uploader;
+    $dateprocessed = $uploadDate;
+    $timeprocessed = $uploadTime;
+    $processed = 'Upload Attachment';
+
+    mysqli_query($conn,"INSERT INTO dbhistory(processnumber,name,processed,dateprocessed,timeprocessed) 
+    VALUES ('$batchnumber','$username','$processed','$dateprocessed','$timeprocessed')");
+
+
     echo "<script>
     const batchnumber = " . json_encode($batchnumber) . ";
     window.location.href = 'batchlist.php?status=succ';
-</script>";
+    </script>";
 
     exit();
 }
+?>

@@ -93,6 +93,7 @@ include_once("nav.php");
                             <th class="text-center">Batch Number</th>
                             <th class="text-center">Principal</th>
                             <th class="text-center">Amount</th>
+                            <th class="text-center">Date Pulled Out</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
@@ -114,17 +115,21 @@ include_once("nav.php");
                         $location_filter = implode(",", $allowed_locations);
 
                         $query = "
-                                SELECT 
-                                    batchnumber_forpullout AS batchnumber,
-                                    category,
-                                    SUM(unitcost * forpullout) AS total_cost
-                                FROM dbraw
-                                WHERE batchnumber_forpullout IS NOT NULL AND forpullout > 0
-                                AND batchnumber_forpullout <> '' AND status_forpullout = '1'
-                                AND location IN ($location_filter)
-                                GROUP BY batchnumber_forpullout, category
-                                ORDER BY batchnumber_forpullout ASC
-                            ";
+                            SELECT 
+                                r.batchnumber_forpullout AS batchnumber,
+                                r.category,
+                                p.pullout_date,
+                                SUM(r.unitcost * r.forpullout) AS total_cost
+                            FROM dbraw r
+                            INNER JOIN dbpullout p 
+                                ON r.batchnumber_forpullout = p.reference
+                            WHERE r.batchnumber_forpullout IS NOT NULL 
+                                AND r.batchnumber_forpullout <> '' 
+                                AND r.statusout = 'PULL-OUT'
+                                AND r.location IN ($location_filter)
+                            GROUP BY r.batchnumber_forpullout, r.category, p.pullout_date
+                            ORDER BY r.batchnumber_forpullout DESC
+                        ";
                         $result = mysqli_query($conn, $query);
                         if(!$result){
                             die("Error executing query: " . mysqli_error($conn));
@@ -134,6 +139,7 @@ include_once("nav.php");
                                 <td>{$row['batchnumber']}</td>
                                 <td>{$row['category']}</td>
                                 <td>{$row['total_cost']}</td>
+                                <td>{$row['pullout_date']}</td>
                                <td>
                                 <a href='pulledout_batchlist_details.php?batchnumber={$row['batchnumber']}'
                                 class='btn btn-primary btn-sm'>

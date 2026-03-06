@@ -30,7 +30,7 @@ include_once("nav.php");
                             <div class="card border-left-success shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
+                                        <div class="col ml-4 mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Total F325 Cleared Status</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -42,7 +42,7 @@ include_once("nav.php");
                                             </div>
                                             <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?></small>
                                         </div>
-                                        <div class="col-auto">
+                                        <div class="col-auto mr-4">
                                             <i class="fas fa-stamp  fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
@@ -181,24 +181,6 @@ include_once("nav.php");
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-
-    <!-- Bootstrap core JavaScript-->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
-
-    <!-- Page level plugins -->
-    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-    <!-- Page level custom scripts -->
-    <script src="js/demo/datatables-demo.js"></script>
-
 </body>
 
 </html>

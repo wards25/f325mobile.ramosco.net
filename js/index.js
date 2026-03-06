@@ -81,10 +81,12 @@ function UpdateCompany() {
         setTimeout(function () {
           $(".alert-success").fadeOut();
         }, 3000);
-      }
-      else {
-        $(".alert-success").removeClass("alert-success").addClass("alert-danger")
-          .text("Error updating company. Please try again.").fadeIn();
+      } else {
+        $(".alert-success")
+          .removeClass("alert-success")
+          .addClass("alert-danger")
+          .text("Error updating company. Please try again.")
+          .fadeIn();
         setTimeout(function () {
           $(".alert-danger").fadeOut();
         }, 3000);
@@ -93,7 +95,7 @@ function UpdateCompany() {
     complete: function () {
       // Re-enable the update button after request completion
       $(".button-update-company").prop("disabled", false);
-    }
+    },
   });
 
   return false;
@@ -137,10 +139,12 @@ function UpdateLocation() {
           setTimeout(function () {
             $(".alert-success").fadeOut();
           }, 3000);
-        }
-        else {
-          $(".alert-success").removeClass("alert-success").addClass("alert-danger")
-            .text("Error updating location. Please try again.").fadeIn();
+        } else {
+          $(".alert-success")
+            .removeClass("alert-success")
+            .addClass("alert-danger")
+            .text("Error updating location. Please try again.")
+            .fadeIn();
           setTimeout(function () {
             $(".alert-danger").fadeOut();
           }, 3000);
@@ -257,7 +261,10 @@ function LoadNotepadDetail() {
         id: _0x460cf7,
       },
       success: function (_0x3fc222) {
-        $("#order-detail-modal").fadeIn();
+        var modal = new bootstrap.Modal(
+          document.getElementById("order-detail-modal"),
+        );
+        modal.show();
         obj = JSON.parse(_0x3fc222);
         $(".input-customer").val(obj.branchname);
         $(".input-company").val(obj.vendorname);
@@ -305,7 +312,10 @@ function LoadNotepadDetail() {
 }
 
 function UnloadNotepadDetail() {
-  $("#order-detail-modal").fadeOut();
+  var modal = new bootstrap.Modal(
+    document.getElementById("order-detail-modal"),
+  );
+  modal.hide();
 }
 function LoadSKU() {
   const f325number = $(".input-ordernumber").val();
@@ -371,19 +381,31 @@ function ReOpenNotepad() {
   });
 }
 function scheduleNotepad() {
+  let tmnumber = $(".input-tmnumber").val().trim();
+  let datesched = $(".input-datesched").val().trim();
+  let driver = $(".input-driver").val().trim();
+  let platenumber = $(".input-platenumber").val().trim();
+
+  if (!tmnumber || !datesched || !driver || !platenumber) {
+    alert("Please complete all Transport Details before scheduling.");
+    return;
+  }
+
   $.ajax({
     type: "POST",
     url: "scheduled-notepad.php",
     data: {
       f325number: $(".input-ordernumber").val(),
-      tmnumber: $(".input-tmnumber").val(),
-      datesched: $(".input-datesched").val(),
-      driver: $(".input-driver").val(),
-      platenumber: $(".input-platenumber").val(),
+      tmnumber: tmnumber,
+      datesched: datesched,
+      driver: driver,
+      platenumber: platenumber,
       remarks: $(".input-remarks").val(),
     },
     success: function (response) {
-      console.log(response);
+      if (response === "success") {
+        window.location.href = "scheduled.php?status=succ";
+      }
     },
   });
 }
@@ -399,23 +421,22 @@ function reScheduleNotepad() {
     },
   });
 }
-$('#updateUserForm').on('submit', function(e) {
-        e.preventDefault(); // prevent default form submission
+$("#updateUserForm").on("submit", function (e) {
+  e.preventDefault(); // prevent default form submission
 
-        // Serialize form data
-        var formData = $(this).serialize();
+  // Serialize form data
+  var formData = $(this).serialize();
 
-        $.ajax({
-            url: 'update-user.php',
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-                // Show response message
-                alert(response);
-            },
-            error: function(xhr, status, error) {
-                alert("An error occurred: " + error);
-            }
-        });
-    });
-    
+  $.ajax({
+    url: "update-user.php",
+    type: "POST",
+    data: formData,
+    success: function (response) {
+      // Show response message
+      alert(response);
+    },
+    error: function (xhr, status, error) {
+      alert("An error occurred: " + error);
+    },
+  });
+});

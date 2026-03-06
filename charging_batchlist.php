@@ -65,7 +65,7 @@ include_once("nav.php");
                             Total Amount Unpaid</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             <?php
-                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forcharging) AS total_cost FROM dbraw WHERE forcharging >=1 AND batchnumber_forcharging <> '' AND status_forcharging = '0'");
+                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forcharging) AS total_cost FROM dbraw WHERE forcharging >=1 AND batchnumber_forcharging <> '' AND statusout = 'FOR CHARGING' AND status = 'CLEARED'");
 
                             $row = mysqli_fetch_assoc($scheduled_query);
                             $total_cost = $row['total_cost'] ?? 0;
@@ -95,6 +95,7 @@ include_once("nav.php");
                         <tr>
                             <th>Batch Number</th>
                             <th>Principal</th>
+                            <th>Location</th>
                             <th>Amount</th>
                             <th>Action</th>
                         </tr>
@@ -120,12 +121,14 @@ include_once("nav.php");
                                 SELECT 
                                     batchnumber_forcharging AS batchnumber, 
                                     category,
+                                    location,
                                     SUM(unitcost * forcharging) AS total_cost
                                 FROM dbraw
                                 WHERE batchnumber_forcharging IS NOT NULL AND forcharging >= 1
-                                AND batchnumber_forcharging <> ''  AND status_forcharging = '0'
+                                AND batchnumber_forcharging <> ''  AND statusout = 'FOR CHARGING' 
+                                AND status = 'CLEARED'
                                 AND location IN ($location_filter)
-                                GROUP BY batchnumber_forcharging, category
+                                GROUP BY batchnumber_forcharging, category, location
                                 ORDER BY batchnumber_forcharging DESC
                             ";
                         $result = mysqli_query($conn, $query);
@@ -137,7 +140,8 @@ include_once("nav.php");
                             echo "<tr>
                                 <td>{$row['batchnumber']}</td>
                                 <td>{$row['category']}</td>
-                                <td>{$row['total_cost']}</td>
+                                <td>{$row['location']}</td>
+                                <td>₱" . number_format($row['total_cost'], 2) . "</td>
                                <td>
                                 <a href='charging_batchlist_details.php?batchnumber={$row['batchnumber']}'
                                 class='btn btn-primary btn-sm'>

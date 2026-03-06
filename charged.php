@@ -62,7 +62,7 @@ include_once("nav.php");
                             Total Amount </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             <?php
-                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forpullout) AS total_cost FROM dbraw WHERE forpullout >=1 AND batchnumber_forcharging <> '' ");
+                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forpullout) AS total_cost FROM dbraw WHERE forpullout >=1 AND batchnumber_forcharging <> '' AND statusout = 'PAID'");
 
                             $row = mysqli_fetch_assoc($scheduled_query);
                             $total_cost = $row['total_cost'] ?? 0;
@@ -90,6 +90,7 @@ include_once("nav.php");
                             <th class="text-center">Batch Number</th>
                             <th class="text-center">Principal</th>
                             <th class="text-center">Amount</th>
+                            <th class="text-center">Date Paid</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
@@ -112,15 +113,20 @@ include_once("nav.php");
 
                         $query = "
                                 SELECT 
-                                    batchnumber_forcharging AS batchnumber,
-                                    category,
-                                    SUM(unitcost * forcharging) AS total_cost
-                                FROM dbraw
-                                WHERE batchnumber_forcharging IS NOT NULL AND forcharging >= 1
-                                AND batchnumber_forcharging <> '' AND status_forcharging = '1'
-                                AND location IN ($location_filter)
-                                GROUP BY batchnumber_forcharging, category
-                                ORDER BY batchnumber_forcharging ASC
+                                    r.batchnumber_forcharging AS batchnumber,
+                                    r.category,
+                                    p.charge_date,
+                                    SUM(r.unitcost * r.forcharging) AS total_cost
+                                FROM dbraw r
+                                INNER JOIN dbpullout p 
+                                    ON r.batchnumber_forcharging = p.reference
+                                WHERE r.batchnumber_forcharging IS NOT NULL 
+                                    AND r.forcharging >= 1
+                                    AND r.batchnumber_forcharging <> '' 
+                                    AND r.statusout = 'PAID'
+                                    AND r.location IN ($location_filter)
+                                GROUP BY r.batchnumber_forcharging, r.category, p.charge_date
+                                ORDER BY r.batchnumber_forcharging ASC
                             ";
                         $result = mysqli_query($conn, $query);
                         if(!$result){
@@ -131,6 +137,7 @@ include_once("nav.php");
                                 <td>{$row['batchnumber']}</td>
                                 <td>{$row['category']}</td>
                                 <td>{$row['total_cost']}</td>
+                                <td>{$row['charge_date']}</td>
                                <td>
                                 <a href='charged_batchlist_details.php?batchnumber={$row['batchnumber']}'
                                 class='btn btn-primary btn-sm'>

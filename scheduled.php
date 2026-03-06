@@ -19,12 +19,75 @@ $userRow = mysqli_fetch_array($res);
 include_once('header.php');
 include_once("nav.php");
 ?>
-<div class="container my-5">
+<?php
+// Get status message
+if (!empty($_GET['status'])) {
+    switch ($_GET['status']) {
+        case 'succ':
+            $statusType = 'alert-success';
+            $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> F325 Scheduled successfully.';
+            ?>
+            <?php
+            break;
+        case 'exist':
+            $statusType = 'alert-warning';
+            $statusMsg = '<i class="fa fa-exclamation-triangle"></i>&nbsp;<b>Error!</b> F325 number exists.';
+            break;
+        case 'err':
+            $statusType = 'alert-danger';
+            $statusMsg = '<i class="fa fa-exclamation-triangle"></i>&nbsp;<b>Error!</b> No data encoded.';
+            break;
+        default:
+            $statusType = '';
+            $statusMsg = '';
+    }
+}
+?>
+
+<!-- Display status message -->
+<?php if (!empty($statusMsg)) { ?>
+    <div class="alert <?php echo $statusType; ?> alert-dismissible fade show" role="alert">
+        <?php echo $statusMsg; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php } ?>
+<div class="container my-2">
     <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
         <h4 class="mb-0">Schedule</h4>
         <div>
-            <button class="btn btn-sm btn-primary export-csv">Export CSV</button>
-            <button class="btn btn-sm btn-success import-csv">Import CSV</button>
+            <button class="btn btn-sm btn-primary export-csv">
+                <i class="fas fa-file-export me-1"></i> Export CSV
+            </button>
+
+            <button class="btn btn-sm btn-success import-csv">
+                <i class="fas fa-file-import me-1"></i> Import CSV
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <!-- Earnings (Monthly) Card Example -->
+        <div class="col-xl-12 col-md-12 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col ml-4 mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total F325 For Schedule Status</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <?php
+                                $open_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE status = 'PRINTED' AND emaildate BETWEEN '2024-01-01' AND NOW()");
+                                $open_count = mysqli_num_rows($open_query);
+                                echo number_format($open_count);
+                                ?>
+                            </div>
+                            <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?></small>
+                        </div>
+                        <div class="col-auto mr-4">
+                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -136,13 +199,10 @@ include_once("nav.php");
                                             </div>
                                         </div>
                                     </div>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                                        onclick="UnloadNotepadDetail()">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <div class="container py-4">
+                                    <div class="container py-2">
                                         <!-- Vendor & Reference Info -->
                                         <div class="row g-3 mb-4">
                                             <!-- Vendor Info -->
@@ -199,26 +259,27 @@ include_once("nav.php");
                                                     <div class="mb-3">
                                                         <label class="fw-bold">TM Number<span class="text-danger">
                                                                 *</span></label>
-                                                        <input type="text" class="form-control input-tmnumber">
+                                                        <input type="text" class="form-control input-tmnumber" required>
                                                     </div>
 
                                                     <div class="mb-3">
                                                         <label class="fw-bold">Driver<span class="text-danger">
                                                                 *</span></label>
-                                                        <input type="text" class="form-control input-driver">
+                                                        <input type="text" class="form-control input-driver" required>
                                                     </div>
 
                                                     <div class="mb-3">
                                                         <label class="fw-bold">Plate Number<span class="text-danger">
                                                                 *</span></label>
-                                                        <input type="text" class="form-control input-platenumber">
+                                                        <input type="text" class="form-control input-platenumber"
+                                                            required>
                                                     </div>
 
                                                     <div class="mb-2">
                                                         <label class="fw-bold">Date Scheduled<span class="text-danger">
                                                                 *</span></label>
                                                         <input type="date" class="form-control input-datesched"
-                                                            value="<?php echo date('Y-m-d'); ?>">
+                                                            value="<?php echo date('Y-m-d'); ?>" required>
                                                     </div>
                                                 </div>
                                             </div>
@@ -305,11 +366,16 @@ include_once("nav.php");
 <script>
     $(document).ready(function () {
         exportCSV();
+        setTimeout(function () {
+        $(".alert").fadeTo(500, 0).slideUp(500, function () {
+            $(this).remove();
+        });
+    }, 3000); 
     });
 
     function exportCSV() {
         $(".export-csv").on("click", function () {
-            window.location.href = "/exportprinted.php";
+            window.location.href = "exportprinted.php";
         });
     }
 </script>

@@ -41,7 +41,11 @@ include_once("nav.php");
                                     <div class="col-12">
                                     <label>Principal:</label>
                                     <?php 
-                                        $query ="SELECT * FROM dbproduct GROUP BY category ORDER BY category ASC";
+                                        $query ="SELECT DISTINCT category FROM dbproduct GROUP BY category ORDER BY category ASC";
+                                        if(!$result = $conn->query($query)){
+                                            die('Error executing query: ' . mysqli_error($conn));
+
+                                        }
                                         $result = $conn->query($query);
                                         if($result->num_rows> 0){
                                           $options= mysqli_fetch_all($result, MYSQLI_ASSOC);?>

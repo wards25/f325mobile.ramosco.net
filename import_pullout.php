@@ -7,6 +7,7 @@ if (isset($_POST['upload'])) {
     $errors = [];
     $updated = 0;
     $rowNumber = 1;
+    $f325List = []; // store all f325 numbers
 
     // Check file upload
     if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] != 0) {
@@ -44,12 +45,16 @@ if (isset($_POST['upload'])) {
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                 $rowNumber++;
 
-                // --- Adjust column indices to match your CSV ---
-                $f325Number = trim($data[0] ?? '');   // column 1
-                $mdccode = trim($data[1] ?? '');   // column 0
-                $qty = (int) ($data[3] ?? 0);   // column 7 → total qty
-                $forpullout = (int) ($data[8] ?? 0);  // column 22 → pullout
-                $forcharging = (int) ($data[9] ?? 0);  // column 23 → charging
+                $f325Number = trim($data[0] ?? '');
+                $mdccode = trim($data[1] ?? '');
+                $qty = (int) ($data[3] ?? 0);
+                $forpullout = (int) ($data[8] ?? 0);
+                $forcharging = (int) ($data[9] ?? 0);
+
+                // Save f325 for logging later
+                if (!empty($f325Number)) {
+                    $f325List[] = $f325Number;
+                }
 
                 // --- Validations ---
                 if ($qty <= 0) {
@@ -66,6 +71,7 @@ if (isset($_POST['upload'])) {
                 if ($forpullout > 0) {
                     $stmtPullout->bind_param("iss", $forpullout, $mdccode, $f325Number);
                     $stmtPullout->execute();
+
                     if ($stmtPullout->affected_rows > 0) {
                         $updated += $forpullout;
                     } else {
@@ -77,6 +83,7 @@ if (isset($_POST['upload'])) {
                 if ($forcharging > 0) {
                     $stmtCharge->bind_param("iss", $forcharging, $mdccode, $f325Number);
                     $stmtCharge->execute();
+
                     if ($stmtCharge->affected_rows > 0) {
                         $updated += $forcharging;
                     } else {
@@ -91,9 +98,29 @@ if (isset($_POST['upload'])) {
         }
     }
 
+    // ---- LOGGING HISTORY (UNIQUE F325 NUMBERS) ----
+    $uniqueF325 = array_unique($f325List);
+
+    foreach ($uniqueF325 as $f325) {
+
+        $processed = 'Import Pullout and Charging.';
+        $username = $_SESSION['fname'] ?? 'Unknown';
+        $dateprocessed = date("Y-m-d");
+        $timeprocessed = date("H:i:s");
+
+        $sql1 = "INSERT INTO dbhistory(processnumber,name,processed,dateprocessed,timeprocessed) 
+                 VALUES ('$f325','$username','$processed','$dateprocessed','$timeprocessed')";
+
+        if (!mysqli_query($conn, $sql1)) {
+            echo "ERROR inserting history: " . mysqli_error($conn);
+        }
+    }
+
     // Store results in session
     $_SESSION['pullout_errors'] = $errors;
     $_SESSION['pullout_success'] = $updated;
+
     header("Location: " . $_SERVER['HTTP_REFERER']);
     exit;
 }
+?>

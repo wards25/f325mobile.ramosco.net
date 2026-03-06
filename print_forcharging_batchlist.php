@@ -9,6 +9,7 @@ if (!isset($_GET['batchnumber'])) {
 $batchnumber = mysqli_real_escape_string($conn, $_GET['batchnumber']);
 $type = $_GET['type'] ?? 'pullout'; 
 $dateProcessed = $_GET['date_processed'] ?? date('Y-m-d');
+$location = $_GET['hub'] ?? '';
 
 if ($type === 'total') {
     $qtyField = 'r.rcvdqty';
@@ -19,21 +20,29 @@ if ($type === 'total') {
 }
 
 $preparedBy = $_SESSION['fname'] ?? '';
-
+$vendorcode = mysqli_real_escape_string($conn, $_GET['vendor'] ?? '');
 $headerQuery = "
     SELECT 
-        r.category AS principal,
-        c.name
-    FROM dbraw r
-    LEFT JOIN dbcompany c ON r.vendorcode = c.vendorcode
-    WHERE r.batchnumber_forcharging = '$batchnumber'
+        p.*,
+        c.name AS company_name
+    FROM dbpullout p
+    INNER JOIN dbcompany c ON $vendorcode = c.vendorcode    
+    WHERE p.reference = '$batchnumber'
+    
     LIMIT 1
 ";
-$headerResult = mysqli_query($conn, $headerQuery);
-$header = mysqli_fetch_assoc($headerResult);
+if (!$headerResult = mysqli_query($conn, $headerQuery)) {
+    die("SQL Error: " . mysqli_error($conn));
+}
 
-$principal = $header['principal'] ?? '';
-$company   = $header['name'] ?? '';
+$headerResult = mysqli_query($conn, $headerQuery);
+$header       = mysqli_fetch_assoc($headerResult);
+
+$principal    = $header['principal'] ?? '';
+$company      = $header['company_name'] ?? '';
+$preparedBy   = $header['preparedby'] ?? $_SESSION['fname'] ?? '';
+$dateProcessed= $header['dateprocessed'] ?? $dateProcessed;
+$location     = $header['location'] ?? $location;
 ?>
 
 <!DOCTYPE html>
@@ -117,19 +126,44 @@ $company   = $header['name'] ?? '';
 
     <!-- HEADER -->
     <table class="header-table">
-        <tr>
-            <td>
-                <p><strong>Principal Name:</strong> <?= htmlspecialchars($principal) ?></p>
-                <p><strong>Company:</strong> <?= htmlspecialchars($company) ?></p>
-                <p><strong>Prepared By:</strong> <?= htmlspecialchars($preparedBy) ?></p>
-            </td>
-            <td class="text-right">
-                <p><strong>Reference #:</strong><?= $batchnumber ?></p>
-                <p><strong>Date Processed:</strong> <?= $dateProcessed ?></p>
-                <p><strong>Hub:</strong></p>
-            </td>
-        </tr>
-    </table>
+    <tr>
+        <!-- LEFT SIDE -->
+        <td width="60%">
+            <table class="header-inner">
+                <tr>
+                    <td><strong>Principal Name:</strong></td>
+                    <td><?= htmlspecialchars($principal) ?></td>
+                </tr>
+                <tr>
+                    <td><strong>Company:</strong></td>
+                    <td><?= htmlspecialchars($company) ?></td>
+                </tr>
+                <tr>
+                    <td><strong>Prepared By:</strong></td>
+                    <td><?= htmlspecialchars($preparedBy) ?></td>
+                </tr>
+            </table>
+        </td>
+
+        <!-- RIGHT SIDE -->
+        <td width="40%" align="right">
+            <table class="header-inner" style="float:right;">
+                <tr>
+                    <td><strong>Reference #:</strong></td>
+                    <td><?= htmlspecialchars($batchnumber) ?></td>
+                </tr>
+                <tr>
+                    <td><strong>Date Processed:</strong></td>
+                    <td><?= htmlspecialchars($dateProcessed) ?></td>
+                </tr>
+                <tr>
+                    <td><strong>Hub:</strong></td>
+                    <td><?= htmlspecialchars($location) ?></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 
     <hr>
 
@@ -155,47 +189,47 @@ $company   = $header['name'] ?? '';
             $cost_extended = 0;
 
             $query = "
-    SELECT DISTINCT
-    c.branchname,
-    c.franchise,
-    c.code,
-    r.f325number,
-    CONCAT(r.mdccode, ' - ', p.description) AS description,
-    r.forcharging,
-    $qtyField AS qty,
-    r.reasoncode,
-    r.expiration,
-    p.uom,
-    r.costextended,
-    r.mdccode,
-    r.unitcost
-FROM dbraw r
+                SELECT DISTINCT
+                c.branchname,
+                c.franchise,
+                c.code,
+                r.f325number,
+                CONCAT(r.mdccode, ' - ', p.description) AS description,
+                r.forcharging,
+                $qtyField AS qty,
+                r.reasoncode,
+                r.expiration,
+                p.uom,
+                r.costextended,
+                r.mdccode,
+                r.unitcost
+            FROM dbraw r
 
--- Join f325number, pick one row per f325number
-LEFT JOIN (
-    SELECT f325number, MAX(brcode) AS brcode
-    FROM dbf325number
-    GROUP BY f325number
-) f ON r.f325number = f.f325number
+            -- Join f325number, pick one row per f325number
+            LEFT JOIN (
+                SELECT f325number, MAX(brcode) AS brcode
+                FROM dbf325number
+                GROUP BY f325number
+            ) f ON r.f325number = f.f325number
 
--- Join branch info, aggregate to satisfy ONLY_FULL_GROUP_BY
-LEFT JOIN (
-    SELECT 
-        code, 
-        MAX(franchise) AS franchise, 
-        MAX(branchname) AS branchname
-    FROM dbcensus
-    GROUP BY code
-) c ON f.brcode = c.code
+            -- Join branch info, aggregate to satisfy ONLY_FULL_GROUP_BY
+            LEFT JOIN (
+                SELECT 
+                    code, 
+                    MAX(franchise) AS franchise, 
+                    MAX(branchname) AS branchname
+                FROM dbcensus
+                GROUP BY code
+            ) c ON f.brcode = c.code
 
--- Join product info, aggregate description and uom
-LEFT JOIN (
-    SELECT mdccode, MAX(description) AS description, MAX(uom) AS uom
-    FROM dbproduct
-    GROUP BY mdccode
-) p ON r.mdccode = p.mdccode
+            -- Join product info, aggregate description and uom
+            LEFT JOIN (
+                SELECT mdccode, MAX(description) AS description, MAX(uom) AS uom
+                FROM dbproduct
+                GROUP BY mdccode
+            ) p ON r.mdccode = p.mdccode
 
-WHERE r.batchnumber_forcharging = '$batchnumber';
+            WHERE r.batchnumber_forcharging = '$batchnumber';
 ";
 
             $result = mysqli_query($conn, $query);
@@ -209,14 +243,14 @@ WHERE r.batchnumber_forcharging = '$batchnumber';
                 <tr>
                     <td><?= "{$row['franchise']} {$row['code']} - {$row['branchname']}" ?></td>
                     <td class="text-center"><?= $row['f325number'] ?></td>
-                    <td><?= "{$row['mdccode']} - {$row['description']} "?></td>
+                    <td><?= "{$row['description']} "?></td>
                     <td class="text-right"><?= $row['qty'] ?></td>
                     <td class="text-center"><?= $row['reasoncode'] ?></td>
                     <td class="text-right"><?= $row['expiration'] ?></td>
                     <td class="text-center"><?= $row['uom'] ?></td>
                     <td class="text-right"><?= number_format($row['unitcost'], 2) ?></td>
                 </tr>
-            <?php } ?>
+            <?php } ?> 
         </tbody>
     </table>
 

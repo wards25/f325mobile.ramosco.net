@@ -4,17 +4,48 @@ include('dbconnect.php');
 ?>
 <?php include_once('header.php'); ?>
 <?php include_once('nav.php'); ?>
-<div class="container my-5">
-    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+
+<div class="container my-2">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
         <h4 class="mb-0">Print Notepad</h4>
-        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-            <form class="form-export" method="POST" action="export-notepad.php" target="_blank">
-                <label class="lbl-style">Date Export:</label>
-                <input type="date" class="form-control input-withBorder input-date-export" name="name-export"
+
+        <form class="d-flex align-items-end gap-2" method="POST" action="export-notepad.php" target="_blank">
+            <button class="btn btn-primary button-withBorder button-export-printed btn-sm">
+                Export Printed Summary
+            </button>
+            <div>
+                <label class="lbl-style mb-1">Date Export:</label>
+                <input type="date"
+                    class="form-control input-withBorder input-date-export"
+                    name="name-export"
                     value="<?php echo date("Y-m-d"); ?>">
-                <button class="btn btn-primary button-withBorder button-export-printed mt-2">Export Printed
-                    Summary</button>
-            </form>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+        <!-- Earnings (Monthly) Card Example -->
+        <div class="col-xl-12 col-md-12 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col ml-4 mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Total F325 For Open Status</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <?php
+                                $open_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE status = 'open' AND emaildate BETWEEN '2024-01-01' AND NOW()");
+                                $open_count = mysqli_num_rows($open_query);
+                                echo number_format($open_count);
+                                ?>
+                            </div>
+                            <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?></small>
+                        </div>
+                        <div class="col-auto mr-4">
+                            <i class="fas fa-newspaper fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -38,7 +69,7 @@ include('dbconnect.php');
                             <label class="lbl-style">Status:</label>
                             <select class="form-select select-withBorder select-status" onchange="LoadNotepadList();">
                                 <option value="OPEN">Open</option>
-                                <option value="PRINTED">Print</option>
+                                <option value="PRINTED">Printed</option>
                             </select>
                         </div>
                         <div class="form-group col-md-6">
@@ -65,11 +96,11 @@ include('dbconnect.php');
 
                                 $vendor_query = mysqli_query($conn, $company_query);
                                 while ($fetch_vendor = mysqli_fetch_array($vendor_query)) {
-                                    ?>
+                                ?>
                                     <option value="<?php echo $fetch_vendor['vendorcode']; ?>">
                                         <?php echo $fetch_vendor['name']; ?>
                                     </option>
-                                    <?php
+                                <?php
                                 }
                                 ?>
                             </select>

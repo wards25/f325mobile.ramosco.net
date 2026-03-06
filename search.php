@@ -82,6 +82,7 @@ include_once("nav.php");
                                             <th>Email Date</th>
                                             <th>Document No.</th>
                                             <th>View</th>
+                                            <th>Bypass</th>
                                         </tr>
                                     </thead>
                                     <tbody class="text-center">
@@ -114,7 +115,18 @@ include_once("nav.php");
                                         <tr>
                                             <?php echo '<td>'.$row['emaildate'].'</td>'; ?>
                                             <?php echo '<td>'.$row['f325number'].'</td>'; ?>
-                                            <td><center><a type="submit" name="view" class="data btn-sm btn-success" onclick="window.open('view_f325.php?f325number=<?php echo $row['f325number'] ?>')">View</a></center></td>
+                                            <td><center><a type="submit" name="view" class="data btn-sm btn-primary" onclick="window.open('view_f325.php?f325number=<?php echo $row['f325number'] ?>')">View</a></center></td>
+                                            <?php
+                                            if($row['status'] == 'OPEN' || $row['status'] == 'SCHEDULED' || $row['status'] == 'PRINTED'){
+                                            ?>
+                                            <td><center><a type="submit" name="bypass" class="data btn-sm btn-success" onclick="window.open('view_scheduled.php?f325number=<?php echo $row['f325number'] ?>&emaildate=<?php echo urlencode($row['emaildate']); ?>&company=<?php echo urlencode($row['vendor']); ?>')">Bypass</a></center></td>
+                                            <?php
+                                            }else{
+                                                ?>
+                                            <td><center><span class="badge bg-success">Cleared</span></center></td>
+                                            <?php
+                                            }
+                                            ?>
                                         </tr>
                                     <?php
                                         }

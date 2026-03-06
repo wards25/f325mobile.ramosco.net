@@ -39,7 +39,7 @@ include_once("nav.php");
         switch ($_GET['status']) {
             case 'succ':
                 $statusType = 'alert-success';
-                $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> Import Pullout successfully.';
+                $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> Create A Batch successfully.';
     ?>
                 <!--<meta http-equiv="refresh" content="2.7;url=scheduled.php">-->
     <?php
@@ -52,7 +52,7 @@ include_once("nav.php");
                 $statusType = 'alert-success';
                 $statusMsg = '<i class="fa fa-check-circle"></i>&nbsp;<b>Success!</b> F325 disposed successfully.';
                 break;
-            case 'err':
+            case 'error':
                 $statusType = 'alert-danger';
                 $statusMsg = '<i class="fa fa-exclamation-triangle"></i>&nbsp;<b>Error!</b> Please Select Same Location .';
                 break;
