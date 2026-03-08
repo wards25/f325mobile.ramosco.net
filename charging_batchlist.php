@@ -97,6 +97,7 @@ include_once("nav.php");
                             <th>Principal</th>
                             <th>Location</th>
                             <th>Amount</th>
+                            <th>Date Created</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -119,16 +120,20 @@ include_once("nav.php");
 
                         $query = "
                                 SELECT 
-                                    batchnumber_forcharging AS batchnumber, 
-                                    category,
-                                    location,
-                                    SUM(unitcost * forcharging) AS total_cost
-                                FROM dbraw
-                                WHERE batchnumber_forcharging IS NOT NULL AND forcharging >= 1
-                                AND batchnumber_forcharging <> ''  AND statusout = 'FOR CHARGING' 
-                                AND status = 'CLEARED'
-                                AND location IN ($location_filter)
-                                GROUP BY batchnumber_forcharging, category, location
+                                    r.batchnumber_forcharging AS batchnumber, 
+                                    r.category,
+                                    r.location,
+                                    p.dateprocessed,
+                                    SUM(r.unitcost * r.forcharging) AS total_cost
+                                FROM dbraw r
+                                INNER JOIN dbpullout p 
+                                    ON r.batchnumber_forcharging = p.reference
+                                WHERE r.batchnumber_forcharging IS NOT NULL AND r.forcharging >= 1
+                                AND r.batchnumber_forcharging <> ''  AND r.statusout = 'FOR CHARGING' 
+                                AND r.statusout = 'FOR CHARGING'
+                                AND r.status = 'CLEARED'
+                                AND r.location IN ($location_filter)
+                                GROUP BY r.batchnumber_forcharging, r.category, r.location, p.dateprocessed
                                 ORDER BY batchnumber_forcharging DESC
                             ";
                         $result = mysqli_query($conn, $query);
@@ -142,6 +147,7 @@ include_once("nav.php");
                                 <td>{$row['category']}</td>
                                 <td>{$row['location']}</td>
                                 <td>₱" . number_format($row['total_cost'], 2) . "</td>
+                                <td>{$row['dateprocessed']}</td>
                                <td>
                                 <a href='charging_batchlist_details.php?batchnumber={$row['batchnumber']}'
                                 class='btn btn-primary btn-sm'>

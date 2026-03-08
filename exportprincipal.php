@@ -72,10 +72,10 @@ include_once("nav.php");
                                             <option value="cancelled">CANCELLED</option>
                                             <option value="cleared">CLEARED</option>
                                             <option value="disposed">DISPOSED</option>
-                                            <option value="for billed">FOR BILLED</option>
-                                            <option value="for billing">FOR BILLING</option>
+                                            <option value="FOR CHARGING">FOR CHARGING</option>
+                                            <option value="for pull">FOR BILLING</option>
                                             <option value="for payment">FOR PAYMENT</option>
-                                            <option value="okfordeduct">OKFORDEDUCT</option>
+                                            <option value="PAID">PAID</option>
                                             <option value="open">OPEN</option>
                                             <option value="printed">PRINTED</option>
                                             <option value="scheduled">SCHEDULED</option>

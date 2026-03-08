@@ -116,7 +116,7 @@ if (isset($_POST['create_batch'])) {
 
         $sql = "
             UPDATE dbraw
-            SET batchnumber_forpullout = ?
+            SET batchnumber_forpullout = ?, statusout = 'FOR PULL-OUT'
             WHERE f325number IN ($fPlaceholders)
             AND mdccode IN ($mPlaceholders)
         ";

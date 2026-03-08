@@ -16,157 +16,67 @@ if (isset($_POST['create_batch'])) {
     }
 
     $items = $_POST['items'];
-    $username = $_SESSION['fname'];
 
     $conn->begin_transaction();
 
     try {
+        // Generate batch number: CHG-YYYYMM-000001
+        $yearMonth = date('y'); 
+        $prefix = "CH-$yearMonth-";
 
-        $groups = [];
+        $sqlLast = "
+            SELECT batchnumber 
+            FROM dbraw 
+            WHERE batchnumber LIKE ? 
+            ORDER BY batchnumber DESC 
+            LIMIT 1
+        ";
 
-        /* STEP 1: GET CATEGORY + LOCATION + VENDOR */
-
-        foreach ($items as $item) {
-
-            list($f325, $mdc) = explode('|', $item);
-
-            $stmtInfo = $conn->prepare("
-                SELECT category, location, vendorcode
-                FROM dbraw
-                WHERE f325number = ? AND mdccode = ?
-            ");
-
-            $stmtInfo->bind_param("ii", $f325, $mdc);
-            $stmtInfo->execute();
-            $resultInfo = $stmtInfo->get_result();
-
-            if ($row = $resultInfo->fetch_assoc()) {
-
-                $key = $row['category'] . '|' . $row['location'];
-
-                $groups[$key]['category'] = $row['category'];
-                $groups[$key]['location'] = $row['location'];
-                $groups[$key]['vendorcode'] = $row['vendorcode'];
-
-                $groups[$key]['rows'][] = [
-                    'f325' => $f325,
-                    'mdc'  => $mdc
-                ];
-            }
-
-            $stmtInfo->close();
+        $stmtLast = $conn->prepare($sqlLast);
+        if (!$stmtLast) {
+            throw new Exception("Prepare failed: " . $conn->error);
         }
 
-        /* STEP 2: PROCESS EACH GROUP */
+        $like = $prefix . '%';
+        $stmtLast->bind_param('s', $like);
+        $stmtLast->execute();
+        $result = $stmtLast->get_result();
 
-        foreach ($groups as $group) {
+        $nextNumber = 1;
+        if ($row = $result->fetch_assoc()) {
+            $lastNumber = intval(substr($row['batchnumber'], -6));
+            $nextNumber = $lastNumber + 1;
+        }
+        $stmtLast->close();
 
-            $rows = $group['rows'];
-            $category = $group['category'];
-            $location = $group['location'];
-            $vendorcode = $group['vendorcode'];
+        $sequence = str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+        $batchNumber = $prefix . $sequence;
 
-            $year = date('y');
-            $prefix = "CH-$year-";
+        // Update each selected item individually to ensure exact pairings
+        foreach ($items as $item) {
+            list($f325, $mdc) = explode('|', $item);
 
-            $stmtLast = $conn->prepare("
-                SELECT batchnumber_forcharging
-                FROM dbraw
-                WHERE batchnumber_forcharging LIKE ?
-                ORDER BY batchnumber_forcharging DESC
-                LIMIT 1
+            $stmt = $conn->prepare("
+                UPDATE dbraw 
+                SET batchnumber = ? 
+                WHERE f325number = ? AND mdccode = ?
             ");
-
-            $like = $prefix . '%';
-            $stmtLast->bind_param("s", $like);
-            $stmtLast->execute();
-            $result = $stmtLast->get_result();
-
-            $nextNumber = 1;
-
-            if ($rowLast = $result->fetch_assoc()) {
-                $lastNumber = intval(substr($rowLast['batchnumber_forcharging'], -6));
-                $nextNumber = $lastNumber + 1;
+            if (!$stmt) {
+                throw new Exception("Prepare failed: " . $conn->error);
             }
 
-            $stmtLast->close();
-
-            $sequence = str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
-            $batchNumber = $prefix . $sequence;
-
-            /* UPDATE ROWS */
-
-            foreach ($rows as $r) {
-
-                $stmtUpdate = $conn->prepare("
-                    UPDATE dbraw
-                    SET batchnumber_forcharging = ?, statusout = 'FOR CHARGING'
-                    WHERE f325number = ? AND mdccode = ?
-                ");
-
-                $stmtUpdate->bind_param("sii", $batchNumber, $r['f325'], $r['mdc']);
-                $stmtUpdate->execute();
-                $stmtUpdate->close();
-
-                /* INSERT HISTORY */
-
-                $dateprocessed = date("Y-m-d");
-                $timeprocessed = date("H:i:s");
-                $processed = "Created Charging Batch: $batchNumber";
-
-                $stmtHistory = $conn->prepare("
-                    INSERT INTO dbhistory
-                    (processnumber, name, processed, dateprocessed, timeprocessed)
-                    VALUES (?,?,?,?,?)
-                ");
-
-                $stmtHistory->bind_param(
-                    "issss",
-                    $r['f325'],
-                    $username,
-                    $processed,
-                    $dateprocessed,
-                    $timeprocessed
-                );
-
-                $stmtHistory->execute();
-                $stmtHistory->close();
-            }
-
-            /* INSERT INTO DBPULLOUT */
-
-            $status = "FOR CHARGING";
-            $dateprocessed = date("Y-m-d");
-
-            $stmtPullout = $conn->prepare("
-                INSERT INTO dbpullout
-                (reference, principal, company, preparedby, dateprocessed, location, status)
-                VALUES (?,?,?,?,?,?,?)
-            ");
-
-            $stmtPullout->bind_param(
-                "sssssss",
-                $batchNumber,
-                $category,
-                $vendorcode,
-                $username,
-                $dateprocessed,
-                $location,
-                $status
-            );
-
-            $stmtPullout->execute();
-            $stmtPullout->close();
+            $stmt->bind_param("sii", $batchNumber, $f325, $mdc);
+            $stmt->execute();
+            $stmt->close();
         }
 
         $conn->commit();
 
-        $_SESSION['success'] = "Charging batches created successfully!";
+        $_SESSION['success'] = "Batch created successfully! Batch Number: $batchNumber";
         header("Location: for_charging.php?status=succ");
         exit();
 
     } catch (Exception $e) {
-
         $conn->rollback();
         $_SESSION['error'] = "Error: " . $e->getMessage();
         header("Location: for_charging.php");
@@ -174,4 +84,3 @@ if (isset($_POST['create_batch'])) {
     }
 }
 ?>
-```

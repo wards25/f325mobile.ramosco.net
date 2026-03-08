@@ -65,7 +65,7 @@ include_once("nav.php");
                             Total Amount </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             <?php
-                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forpullout) AS total_cost FROM dbraw WHERE forpullout >=1 AND batchnumber_forpullout <> '' AND statusout = 'CLEARED'");
+                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forpullout) AS total_cost FROM dbraw WHERE forpullout >=1 AND batchnumber_forpullout <> '' AND statusout = 'FOR PULL-OUT' AND status = 'CLEARED'");
 
                             $row = mysqli_fetch_assoc($scheduled_query);
                             $total_cost = $row['total_cost'] ?? 0;
@@ -127,7 +127,8 @@ include_once("nav.php");
                             WHERE r.batchnumber_forpullout IS NOT NULL 
                                 AND r.forpullout >= 1 
                                 AND r.batchnumber_forpullout <> '' 
-                                AND r.statusout = 'CLEARED'
+                                AND r.statusout = 'FOR PULL-OUT'
+                                AND r.status = 'CLEARED'
                                 AND r.location IN ($location_filter)
                             GROUP BY r.batchnumber_forpullout, r.category, p.dateprocessed
                             ORDER BY r.batchnumber_forpullout DESC

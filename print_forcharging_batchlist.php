@@ -16,7 +16,7 @@ if ($type === 'total') {
     $qtyLabel   = 'Received Qty';
 } else {
     $qtyField = 'r.forcharging';
-    $qtyLabel   = 'Pull-Out Qty';
+    $qtyLabel   = 'For Charging Qty';
 }
 
 $preparedBy = $_SESSION['fname'] ?? '';
@@ -244,11 +244,11 @@ $location     = $header['location'] ?? $location;
                     <td><?= "{$row['franchise']} {$row['code']} - {$row['branchname']}" ?></td>
                     <td class="text-center"><?= $row['f325number'] ?></td>
                     <td><?= "{$row['description']} "?></td>
-                    <td class="text-right"><?= $row['qty'] ?></td>
+                    <td class="text-center"><?= $row['qty'] ?></td>
                     <td class="text-center"><?= $row['reasoncode'] ?></td>
                     <td class="text-right"><?= $row['expiration'] ?></td>
                     <td class="text-center"><?= $row['uom'] ?></td>
-                    <td class="text-right"><?= number_format($row['unitcost'], 2) ?></td>
+                    <td class="text-center"><?= number_format($row['unitcost'], 2) ?></td>
                 </tr>
             <?php } ?> 
         </tbody>

@@ -46,7 +46,35 @@ include_once("nav.php");
         cursor: pointer;
         line-height: 18px;
     }
+
+    /* PRELOADER */
+    #preloader {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        z-index: 9999;
+    }
+
+    #preloader .preloader-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 100%;
+    }
 </style>
+<div id="preloader">
+    <div class="preloader-content">
+        <div class="spinner-border text-primary" style="width:3rem;height:3rem;"></div>
+        <div class="mt-3 fw-bold">Uploading attachments...</div>
+    </div>
+</div>
 <div class="container-fluid">
 
     <div
@@ -236,7 +264,7 @@ include_once("nav.php");
                 </table>
             </div>
             <hr>
-            <form method="POST" enctype="multipart/form-data" action="upload_pullout_attachment.php">
+            <form id="pullout-upload" method="POST" enctype="multipart/form-data" action="upload_pullout_attachment.php">
                 <input type="hidden" name="batchnumber" value="<?= htmlspecialchars($batchnumber) ?>">
                 <div class="row g-4 align-items-start">
 
@@ -356,7 +384,7 @@ include_once("nav.php");
                         <tbody>
 
                             <?php
-                           $historyQuery = "
+                            $historyQuery = "
                                 SELECT h.*
                                 FROM dbhistory h
                                 INNER JOIN dbraw r 
@@ -421,7 +449,7 @@ include_once("nav.php");
 
     let logpFiles = []; // store selected files
 
-    logpInput.addEventListener('change', function () {
+    logpInput.addEventListener('change', function() {
         Array.from(this.files).forEach(file => {
             if (file.type.startsWith('image/')) {
                 logpFiles.push(file);
@@ -472,7 +500,7 @@ include_once("nav.php");
 
     let summaryFiles = []; // store selected files
 
-    summaryInput.addEventListener('change', function () {
+    summaryInput.addEventListener('change', function() {
         Array.from(this.files).forEach(file => {
             if (file.type.startsWith('image/')) {
                 summaryFiles.push(file);
@@ -520,4 +548,9 @@ include_once("nav.php");
         summaryFiles.forEach(file => dataTransfer.items.add(file));
         summaryInput.files = dataTransfer.files;
     }
+    document.getElementById("pullout-upload").addEventListener("submit", function() {
+        const loader = document.getElementById("preloader");
+        loader.style.display = "block";
+
+    });
 </script>

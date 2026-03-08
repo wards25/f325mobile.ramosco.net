@@ -66,6 +66,7 @@ if($_POST['type'] == 2){
         LEFT JOIN dbproduct ON dbraw.mdccode = dbproduct.mdccode
         LEFT JOIN dbf325number ON dbraw.f325number = dbf325number.f325number
         WHERE dbraw.status = 'cleared' 
+            AND status_out = 'cleared'
             AND dbf325number.cleared_time BETWEEN '$timefrom' AND '$timeto'
             AND dbraw.datecleared = '$cleareddate'
             AND dbraw.location = '$location'
