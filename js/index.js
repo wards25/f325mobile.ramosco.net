@@ -81,10 +81,12 @@ function UpdateCompany() {
         setTimeout(function () {
           $(".alert-success").fadeOut();
         }, 3000);
-      }
-      else {
-        $(".alert-success").removeClass("alert-success").addClass("alert-danger")
-          .text("Error updating company. Please try again.").fadeIn();
+      } else {
+        $(".alert-success")
+          .removeClass("alert-success")
+          .addClass("alert-danger")
+          .text("Error updating company. Please try again.")
+          .fadeIn();
         setTimeout(function () {
           $(".alert-danger").fadeOut();
         }, 3000);
@@ -93,7 +95,7 @@ function UpdateCompany() {
     complete: function () {
       // Re-enable the update button after request completion
       $(".button-update-company").prop("disabled", false);
-    }
+    },
   });
 
   return false;
@@ -137,10 +139,12 @@ function UpdateLocation() {
           setTimeout(function () {
             $(".alert-success").fadeOut();
           }, 3000);
-        }
-        else {
-          $(".alert-success").removeClass("alert-success").addClass("alert-danger")
-            .text("Error updating location. Please try again.").fadeIn();
+        } else {
+          $(".alert-success")
+            .removeClass("alert-success")
+            .addClass("alert-danger")
+            .text("Error updating location. Please try again.")
+            .fadeIn();
           setTimeout(function () {
             $(".alert-danger").fadeOut();
           }, 3000);
@@ -257,7 +261,10 @@ function LoadNotepadDetail() {
         id: _0x460cf7,
       },
       success: function (_0x3fc222) {
-        $("#order-detail-modal").fadeIn();
+        var modal = new bootstrap.Modal(
+          document.getElementById("order-detail-modal"),
+        );
+        modal.show();
         obj = JSON.parse(_0x3fc222);
         $(".input-customer").val(obj.branchname);
         $(".input-company").val(obj.vendorname);
@@ -305,7 +312,10 @@ function LoadNotepadDetail() {
 }
 
 function UnloadNotepadDetail() {
-  $("#order-detail-modal").fadeOut();
+  var modal = new bootstrap.Modal(
+    document.getElementById("order-detail-modal"),
+  );
+  modal.hide();
 }
 function LoadSKU() {
   const f325number = $(".input-ordernumber").val();
@@ -371,19 +381,31 @@ function ReOpenNotepad() {
   });
 }
 function scheduleNotepad() {
+  let tmnumber = $(".input-tmnumber").val().trim();
+  let datesched = $(".input-datesched").val().trim();
+  let driver = $(".input-driver").val().trim();
+  let platenumber = $(".input-platenumber").val().trim();
+
+  if (!tmnumber || !datesched || !driver || !platenumber) {
+    alert("Please complete all Transport Details before scheduling.");
+    return;
+  }
+
   $.ajax({
     type: "POST",
     url: "scheduled-notepad.php",
     data: {
       f325number: $(".input-ordernumber").val(),
-      tmnumber: $(".input-tmnumber").val(),
-      datesched: $(".input-datesched").val(),
-      driver: $(".input-driver").val(),
-      platenumber: $(".input-platenumber").val(),
+      tmnumber: tmnumber,
+      datesched: datesched,
+      driver: driver,
+      platenumber: platenumber,
       remarks: $(".input-remarks").val(),
     },
     success: function (response) {
-      console.log(response);
+      if (response === "success") {
+        window.location.href = "scheduled.php?status=succ";
+      }
     },
   });
 }
@@ -399,295 +421,22 @@ function reScheduleNotepad() {
     },
   });
 }
-$('#updateUserForm').on('submit', function(e) {
-        e.preventDefault(); // prevent default form submission
+$("#updateUserForm").on("submit", function (e) {
+  e.preventDefault(); // prevent default form submission
 
-        // Serialize form data
-        var formData = $(this).serialize();
+  // Serialize form data
+  var formData = $(this).serialize();
 
-        $.ajax({
-            url: 'update-user.php',
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-                // Show response message
-                alert(response);
-            },
-            error: function(xhr, status, error) {
-                alert("An error occurred: " + error);
-            }
-        });
-    });
-function getcategory() {
-            var vendorcode = $('.vendorcode').val();
-            $.ajax({
-                type: "POST",
-                url: "manual_product.php",
-                data:'company_id='+vendorcode,
-                success: function(data){
-                    $("#category-list").html(data);
-                }
-            });
-        }
-        getcategory();
-
-        // item list
-        function ItemList() {
-            $.ajax({
-                type: "post",
-                url: "cleared_list.php",
-                success: function(data) {
-                    $('#item-list').html(data);
-                    ClearedUpdate();
-                }
-            });
-        }
-        ItemList();
-
-        // submit item
-        $('#ItemForm').submit(function(e){
-            e.preventDefault();
-            var item = $('#ItemForm').serialize();
-            $.ajax({
-                type: "post",
-                url: "cleared_add.php",
-                data: item,
-                success: function(data) {
-                    $('#ItemForm')[0].reset();
-                    
-                    if(data == '') {
-                        ItemList();
-                        ClearedUpdate();
-                    } else {
-                        $('#alert').show();
-                        $('#alert').html(data);
-                        window.setTimeout(function() {
-                            $(".alert").fadeTo(500, 0).slideUp(500, function(){
-                                $(this).remove(); 
-                            });
-                        }, 2000);
-                    }
-                }
-            });
-        }); 
-
-        // scan item
-        $('#ScanForm').submit(function(e){
-            e.preventDefault();
-            var item = $('#ScanForm').serialize();
-            $.ajax({
-                type: "post",
-                url: "scan_add.php",
-                data: item,
-                success: function(data) {
-                    $('#ScanForm')[0].reset();
-                    if(data == '') {
-                        ClearedUpdate();
-                        ItemList();
-
-                    } else {
-                        $('#alert2').show();
-                        $('#alert2').html(data);
-                        window.setTimeout(function() {
-                            $(".alert2").fadeTo(500, 0).slideUp(500, function(){
-                                $(this).remove(); 
-                            });
-                        }, 2000);
-                    }
-                }
-            });
-        });
-
-       // delete item
-       /*
-        $(document).on('click', '.btn-remove', function(){
-            var id = $(this).data("id");
-            $.ajax({
-                type: "post",
-                url: "cleared_delete.php",
-                data: {id:id},
-                success: function() {
-                    ItemList();
-                }
-            });
-            
-        });
-        */
-        $('.search-product').select2({
-            theme: "bootstrap",
-            dropdownParent: $("#itemModal")
-        });
-
-        // on click delete-btn
-        $(document).on('click','.delete-btn',function(){
-            var id = $(this).data('id');
-            $.ajax({
-                type: "post",
-                url: "cleared_id.php",
-                data: {id:id},
-                dataType: "json",
-                success: function(data){
-                    $('#deleteModal').modal('show');
-                    $('.cleared-id').val(data.id);
-                }
-            });
-        });
-        
-        // delete item
-        $('#DeleteItem').submit(function(e){
-            e.preventDefault();
-            var delete_id = $('#DeleteItem').serialize();
-            $.ajax({
-                type: "post",
-                url: "cleared_delete.php",
-                data: delete_id,
-                success: function(){
-                    $('#deleteModal').modal('hide');
-                    ItemList();
-                    ClearedUpdate();
-                }
-            });
-        });
-
-        // keyup update received qty
-        $(document).on('keyup','.received-qty',function(){
-            var id = $(this).data('id');
-            var val = $(this).val();
-            var branchcode = $('#branchcode').val();
-            var field = 'received';
-            var slno = $('#slno');
-            $.ajax({
-                type: "post",
-                url: "cleared_update.php",
-                data: {id:id,value:val,field:field,code:branchcode},
-                success: function(data) {
-                    $('#slno').val(data);
-
-                    if(slno.val() =='') {
-                        $('#document').attr('disabled',true);
-                        $('#document').val('');
-                    } else {
-                        $('#document').attr('required','required');
-                        $('#document').removeAttr('disabled');
-                    }
-                }
-            });
-        });
-
-        // keyup update quantity
-        $(document).on('keyup','.quantity',function(){
-            var id = $(this).data('id');
-            var val = $(this).val();
-            var branchcode = $('#branchcode').val();
-            var field = 'quantity';
-            $.ajax({
-                type: "post",
-                url: "cleared_update.php",
-                data: {id: id,value:val,field:field,code:branchcode},
-                success: function() {
-                }
-            });
-        });
-
-        // keyup update unit cost
-        $(document).on('keyup','.unitcost',function(){
-            var id = $(this).data('id');
-            var val = $(this).val();
-            var branchcode = $('#branchcode').val();
-            var field = 'unitcost';
-            $.ajax({
-                type: "post",
-                url: "cleared_update.php",
-                data: {id: id,value:val,field:field,code:branchcode},
-                success: function() {
-                }
-            });
-        });
-
-        // keyup update reason
-        $(document).on('change','.reason',function(){
-            var id = $(this).data('id');
-            var val = $(this).val();
-            var branchcode = $('#branchcode').val();
-            var field = 'reason';
-            $.ajax({
-                type: "post",
-                url: "cleared_update.php",
-                data: {id: id,value:val,field:field,code:branchcode},
-                success: function() {
-                }
-            });
-        });
-
-        // keyup update bbd
-        $(document).on('change','.bbd',function(){
-            var id = $(this).data('id');
-            var val = $(this).val();
-            var branchcode = $('#branchcode').val();
-            var field = 'bbd';
-            $.ajax({
-                type: "post",
-                url: "cleared_update.php",
-                data: {id: id,value:val,field:field,code:branchcode},
-                success: function() {
-                }
-            });
-        });
-
-        // keyup update dmpireason
-        $(document).on('keyup','.dmpireason',function(){
-            var id = $(this).data('id');
-            var val = $(this).val();
-            var branchcode = $('#branchcode').val();
-            var field = 'dmpireason';
-            $.ajax({
-                type: "post",
-                url: "cleared_update.php",
-                data: {id: id,value:val,field:field,code:branchcode},
-                success: function() {
-                }
-            });
-        });
-
-        function ClearedUpdate() {
-            var id = $('.received-qty').data('id');
-            var val = $('.received-qty').val();
-            var branchcode = $('#branchcode').val();
-            var field = 'received';
-            var slno = $('#slno');
-            $.ajax({
-                type: "post",
-                url: "cleared_update.php",
-                data: {id:id,value:val,field:field,code:branchcode},
-                success: function(data) {
-                    slno.val(data);
-                    
-                    if(slno.val() =='') {
-                        $('#document').attr('disabled',true);
-                        $('#document').val('');
-                    } else {
-                        $('#document').attr('required','required');
-                        $('#document').removeAttr('disabled');
-                    }
-                }
-            });
-        }
-
-        // on change item code
-        $(document).on('change','#category-list',function(){
-            var mdccode = $(this).val();
-            $.ajax({
-                type: "post",
-                url: "fetch_dmpi.php",
-                data: {mdccode:mdccode},
-                dataType: "json",
-                success: function(data) {
-                    if(data.category == 'DMPI') {
-                        $('#dmpi-reason').show();
-                    } else {
-                        $('#dmpi-reason').hide();
-                    }
-                }
-            });
-        });
-        
+  $.ajax({
+    url: "update-user.php",
+    type: "POST",
+    data: formData,
+    success: function (response) {
+      // Show response message
+      alert(response);
+    },
+    error: function (xhr, status, error) {
+      alert("An error occurred: " + error);
+    },
+  });
+});

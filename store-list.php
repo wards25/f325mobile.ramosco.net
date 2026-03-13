@@ -64,14 +64,15 @@ if (isset($_GET['edit_id'])) {
             <div class="table-responsive">
 
                 <?php
-                $query = "SELECT id, code, branchname, region, status, location FROM dbcensus";
+                $query = "SELECT id, code, branchname, region, location FROM dbcensus WHERE status = '1' ";
                 $result = $conn->query($query);
                 ?>
 
                 <table id="storeTable" class="table table-striped table-bordered">
                     <thead class="table-dark">
                         <tr>
-                            <th>#</th>
+                            <th hidden>#</th>
+                            <th>Branch Code</th>
                             <th>Branch Name</th>
                             <th>Region</th>
                             <th>Action</th>
@@ -80,7 +81,8 @@ if (isset($_GET['edit_id'])) {
                     <tbody>
                         <?php while ($row = $result->fetch_assoc()): ?>
                             <tr>
-                                <td><?= $row['code']; ?></td>
+                                <td hidden><?= $row['id']; ?></td>
+                                <td><?= htmlspecialchars($row['code']); ?></td>
                                 <td><?= htmlspecialchars($row['branchname']); ?></td>
                                 <td><?= htmlspecialchars($row['region']); ?></td>
                                 <td>
@@ -401,12 +403,11 @@ if (isset($_GET['edit_id'])) {
             var table = $('#storeTable').DataTable();
 
             // Filter by Region
-            $('#filterRegion').on('change', function() {
-                table.column(2).search(this.value).draw();
-            });
-
             $('#filterLocation').on('change', function() {
                 table.column(2).search(this.value).draw();
+            });
+             $('#filterRegion').on('change', function() {
+                table.column(3).search(this.value).draw();
             });
         });
     </script>

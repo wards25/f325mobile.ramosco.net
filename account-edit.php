@@ -1,35 +1,112 @@
 <?php
-//error_reporting(0);
 session_start();
 include_once("header.php");
 include_once("dbconnect.php");
-$username = $_SESSION['fname'];
 
+$username = $_SESSION['fname'];
 if (!isset($_SESSION['id'])) {
     header("Location: index.php");
+    exit;
 }
 
+// Only admins
 $result = mysqli_query($conn, "SELECT admin, semiadmin FROM dbuser WHERE id = " . $_SESSION['id']);
 $user = mysqli_fetch_assoc($result);
-
-// If not admin, redirect to dashboard or another page
 if ($user['admin'] != 1) {
     header("Location: unauthorized_access.php");
     exit;
 }
 
-// Get the ID of the user to update
+// Get the user to edit
 if (!isset($_GET['id'])) {
     header("Location: account.php");
     exit;
 }
 $id = intval($_GET['id']);
 
-// Fetch the specific user's data
-$query = mysqli_query($conn, "SELECT * FROM dbuser WHERE id = '$id'");
-$editUser = mysqli_fetch_assoc($query);
-?>
-<?php
+// Default: fetch current user permissions
+$editUser = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM dbuser WHERE id = '$id'"));
+
+// Handle copy permissions
+if (isset($_POST['copy_permissions']) && !empty($_POST['copy_user_id'])) {
+    $copyUserId = intval($_POST['copy_user_id']);
+    $copyUser = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM dbuser WHERE id = '$copyUserId'"));
+    if ($copyUser) {
+        // Copy companies
+        $company_query = mysqli_query($conn, "SELECT id FROM dbcompany");
+        while ($c = mysqli_fetch_assoc($company_query)) {
+            $editUser['comp' . $c['id']] = $copyUser['comp' . $c['id']];
+        }
+
+        // Copy modules
+        $modules = [
+            'store',
+            'inventory',
+            'import',
+            'importdop',
+            'print',
+            'schedule',
+            'clearing',
+            'manual',
+            'fordeduct',
+            'borfapps',
+            'dmpiraw',
+            'deduction',
+            'deductdoc',
+            'paiddeduction',
+            'payment',
+            'returntosupplier',
+            'pulloutdoc',
+            'report',
+            'syssetting'
+        ];
+        foreach ($modules as $mod) {
+            $editUser[$mod] = $copyUser[$mod];
+        }
+    }
+}
+
+// Handle update permissions
+if (isset($_POST['save_changes'])) {
+    // Reset all company permissions first
+    $company_query = mysqli_query($conn, "SELECT id FROM dbcompany");
+    while ($c = mysqli_fetch_assoc($company_query)) {
+        $compField = 'comp' . $c['id'];
+        $value = (isset($_POST['company']) && in_array($c['id'], $_POST['company'])) ? 1 : 0;
+        mysqli_query($conn, "UPDATE dbuser SET $compField = $value WHERE id = $id");
+    }
+
+    // Reset all modules
+    $modules = [
+        'store',
+        'inventory',
+        'import',
+        'importdop',
+        'print',
+        'schedule',
+        'clearing',
+        'manual',
+        'fordeduct',
+        'borfapps',
+        'dmpiraw',
+        'deduction',
+        'deductdoc',
+        'paiddeduction',
+        'payment',
+        'returntosupplier',
+        'pulloutdoc',
+        'report',
+        'syssetting'
+    ];
+    foreach ($modules as $mod) {
+        $value = (isset($_POST['modules']) && in_array($mod, $_POST['modules'])) ? 1 : 0;
+        mysqli_query($conn, "UPDATE dbuser SET $mod = $value WHERE id = $id");
+    }
+
+    header("Location: account-edit.php?id=$id&success=1");
+    exit;
+}
+
 include_once("nav.php");
 ?>
 
@@ -41,163 +118,131 @@ include_once("nav.php");
         </a>
     </div>
 
+    <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+        <div id="success-alert" class='alert alert-success'>Permissions updated successfully!</div>
+    <?php endif; ?>
+
+
     <div class="card shadow-lg border-0 rounded-4">
         <div class="card-body p-4">
-            <form class="row g-2 p-4" id="updateUserForm">
-                <input type="text" name="id" value="<?php echo $id; ?>" hidden>
+            <form class="row g-2 p-4" method="POST">
+                <input type="hidden" name="id" value="<?php echo $id; ?>">
+
                 <div class="col-md-6">
                     <label class="form-label">Name:</label>
-                    <input type="text" class="form-control input-withBorder input-form-field input-fname"
-                        value="<?php echo htmlspecialchars($editUser['fname']); ?>" required>
+                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($editUser['fname']); ?>" readonly>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">Username:</label>
-                    <input type="text" maxlength="15"
-                        class="form-control input-withBorder input-form-field input-username"
-                        value="<?php echo htmlspecialchars($editUser['username']); ?>" required>
+                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($editUser['username']); ?>" readonly>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">Status:</label>
-                    <select class="form-select input-withBorder input-form-field input-active" required>
-                        <option disabled>Select user status</option>
-                        <option value="1" <?php echo ($editUser['active'] == 1) ? 'selected' : ''; ?>>Active</option>
-                        <option value="0" <?php echo ($editUser['active'] == 0) ? 'selected' : ''; ?>>Inactive</option>
-                    </select>
+                    <input type="text" class="form-control" value="<?php echo ($editUser['active'] == 1) ? 'Active' : 'Inactive'; ?>" readonly>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">User Access:</label>
-                    <select class="form-select input-withBorder input-form-field input-access" required>
-                        <option <?php echo ($editUser['admin'] == 0 && $editUser['semiadmin'] == 0) ? 'selected' : ''; ?>
-                            disabled>Select user access</option>
-                        <option value="1" <?php echo ($editUser['admin'] == 1) ? 'selected' : ''; ?>>Admin</option>
-                        <option value="2" <?php echo ($editUser['semiadmin'] == 1) ? 'selected' : ''; ?>>Semi Admin
-                        </option>
-                    </select>
+                    <input type="text" class="form-control" value="<?php
+                                                                    echo ($editUser['admin'] == 1) ? 'Admin' : (($editUser['semiadmin'] == 1) ? 'Semi Admin' : 'User'); ?>" readonly>
                 </div>
 
                 <div class="col-md-12">
                     <label class="form-label">Password:</label>
-                    <input type="password" class="form-control input-withBorder input-form-field input-password"
-                        maxlength="10" value="<?php echo htmlspecialchars($editUser['password']); ?>" required>
+                    <input type="password" class="form-control" value="<?php echo htmlspecialchars($editUser['password']); ?>" readonly>
                 </div>
 
-                <div class="col-md-12 text-end mt-3">
-                    <button type="submit" class="btn btn-primary px-4">Save Changes</button>
-                </div>
                 <hr class="my-4">
+
+                <!-- Copy Permissions -->
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label class="form-label">Copy Permissions From:</label>
+                        <div class="input-group">
+                            <select class="form-select" name="copy_user_id">
+                                <option value="" selected disabled>Select a user</option>
+                                <?php
+                                $users_query = mysqli_query($conn, "SELECT id, fname, username FROM dbuser WHERE id != $id");
+                                while ($u = mysqli_fetch_assoc($users_query)) {
+                                    echo "<option value='{$u['id']}'>{$u['fname']}</option>";
+                                }
+                                ?>
+                            </select>
+                            <button type="submit" name="copy_permissions" class="btn btn-md btn-success ms-3"><i class="bi bi-clipboard"></i> Copy</button>
+                        </div>
+                    </div>
+                </div>
 
                 <h5 class="mb-3">Access Permissions</h5>
 
-                <div class="row">
-                    <!-- Location Access Table -->
-                    <div class="col-md-4">
-                        <div class="table-responsive mb-4">
-                            <table class="table table-bordered align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="text-center">Company Access</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    $company_query = mysqli_query($conn, "SELECT * FROM dbcompany");
-                                    while ($company = mysqli_fetch_assoc($company_query)) {
-                                        $user_has_access = ($editUser['comp' . $company['id']] == 1) ? 'checked' : '';
-                                        echo "
-                                            <tr>
-                                            <td><label class='form-check-label ms-2'>{$company['name']}</label></td>
-                                                <td class='text-center'>
-                                                    <div class='form-check form-switch d-flex justify-content-center'>
-                                                        <input class='form-check-input company-switch' type='checkbox' name='company[]' value='{$company['id']}' $user_has_access>
-                                                    </div>
-                                                </td>
-                                            </tr>";
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <!-- Location Access Table -->
-                    <div class="col-md-4">
-                        <div class="table-responsive mb-4">
-                            <table class="table table-bordered align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="text-center">Location Access</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    $location_query = mysqli_query($conn, "SELECT * FROM dblocation");
-                                    while ($loc = mysqli_fetch_assoc($location_query)) {
-                                        $user_has_access = ($editUser['loc' . $loc['id']] == 1) ? 'checked' : '';
-                                        echo "
-                                        <tr>
-                                        <td><label class='form-check-label ms-2'>{$loc['location']}</label></td>
-                                            <td class='text-center'>
-                                                <div class='form-check form-switch d-flex justify-content-center'>
-                                                    <input class='form-check-input location-switch' type='checkbox' name='location[]' value='{$loc['id']}' $user_has_access>
-                                                </div>
-                                            </td>
-                                        </tr>";
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="table-responsive col-md-4">
-                        <table class="table table-bordered align-middle">
-                            <thead class="table-light">
+                <div class="table-responsive mb-4" style="max-height: 300px; overflow-y:auto;">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Type</th>
+                                <th>Name</th>
+                                <th class="text-center">Access</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // Companies
+                            $company_query = mysqli_query($conn, "SELECT * FROM dbcompany");
+                            while ($company = mysqli_fetch_assoc($company_query)) {
+                                $checked = ($editUser['comp' . $company['id']] == 1) ? 'checked' : '';
+                                echo "
                                 <tr>
-                                    <th>Module</th>
-                                    <th class="text-center">Access</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $modules = [
-                                    'store' => 'store',
-                                    'inventory' => 'Inventory',
-                                    'import' => 'Import',
-                                    'importdop' => 'Import DOP',
-                                    'print' => 'Print',
-                                    'schedule' => 'Schedule',
-                                    'clearing' => 'Clearing',
-                                    'manual' => 'Manual',
-                                    'fordeduct' => 'For Deduction',
-                                    'borfapps' => 'BORF Apps',
-                                    'dmpiraw' => 'DMI Praw',
-                                    'deduction' => 'Deduction',
-                                    'deductdoc' => 'Deduct Doc',
-                                    'paiddeduction' => 'Paid Deduction',
-                                    'payment' => 'Payment',
-                                    'returntosupplier' => 'Return to Supplier',
-                                    'pulloutdoc' => 'Pullout Doc',
-                                    'report' => 'Report',
-                                    'syssetting' => 'System Setting',
-                                ];
-
-                                foreach ($modules as $key => $label) {
-                                    $checked = ($editUser[$key] == 1) ? 'checked' : '';
-                                    echo "
-                                <tr>
-                                    <td>$label</td>
+                                    <td>Company</td>
+                                    <td>{$company['name']}</td>
                                     <td class='text-center'>
-                                        <div class='form-check form-switch d-flex justify-content-center'>
-                                            <input class='form-check-input module-switch' type='checkbox' name='$key' id='$key' $checked>
-                                        </div>
+                                        <input type='checkbox' name='company[]' value='{$company['id']}' $checked>
                                     </td>
                                 </tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
+                            }
+
+                            // Modules
+                            $modules = [
+                                'store' => 'Store',
+                                'inventory' => 'Inventory',
+                                'import' => 'Import',
+                                'importdop' => 'Import DOP',
+                                'print' => 'Print',
+                                'schedule' => 'Schedule',
+                                'clearing' => 'Clearing',
+                                'manual' => 'Manual',
+                                'fordeduct' => 'For Deduction',
+                                'borfapps' => 'BORF Apps',
+                                'dmpiraw' => 'DMI Praw',
+                                'deduction' => 'Deduction',
+                                'deductdoc' => 'Deduct Doc',
+                                'paiddeduction' => 'Paid Deduction',
+                                'payment' => 'Payment',
+                                'returntosupplier' => 'Return to Supplier',
+                                'pulloutdoc' => 'Pullout Doc',
+                                'report' => 'Report',
+                                'syssetting' => 'System Setting'
+                            ];
+
+                            foreach ($modules as $key => $label) {
+                                $checked = ($editUser[$key] == 1) ? 'checked' : '';
+                                echo "
+                                <tr>
+                                    <td>Module</td>
+                                    <td>$label</td>
+                                    <td class='text-center'>
+                                        <input type='checkbox' name='modules[]' value='$key' $checked>
+                                    </td>
+                                </tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-md-12 text-end mt-3">
+                    <button type="submit" name="save_changes" class="btn btn-primary px-4">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -206,24 +251,14 @@ include_once("nav.php");
 
 <?php include_once("footer.php"); ?>
 <script>
-$(document).ready(function() {
-    $('#updateUserForm').on('submit', function(e) {
-        e.preventDefault(); // prevent default form submission
-
-        // Serialize form data
-        var formData = $(this).serialize();
-
-        $.ajax({
-            url: 'update-user.php',
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-               console.log(response);
-            },
-            error: function(xhr, status, error) {
-                alert("An error occurred: " + error);
-            }
-        });
-    });
-});
+    setTimeout(function() {
+        var alert = document.getElementById('success-alert');
+        if (alert) {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.remove();
+            }, 500); 
+        }
+    }, 1000);
 </script>

@@ -1,60 +1,63 @@
 <?php
-include('dbconnect.php');
+session_start();
+include_once('dbconnect.php');
 
+// Only logged-in admins can update
+if (!isset($_SESSION['id'])) {
+    header("Location: index.php");
+    exit;
+}
+
+// Get POST data
 $id = intval($_POST['id']);
-$username = $_POST['username'] ?? '';
-$password = $_POST['password'] ?? '';
-$fname = $_POST['fname'] ?? '';
-$active = isset($_POST['active']) ? 1 : 0;
+$fname = mysqli_real_escape_string($conn, $_POST['fname']);
+$username = mysqli_real_escape_string($conn, $_POST['username']);
+$active = intval($_POST['active']);
+$access = intval($_POST['access']);
+$password = $_POST['password']; // plain text now
 
-// Admin / Semi Admin
-$admin = ($_POST['access'] ?? '') == 1 ? 1 : 0;
-$semiadmin = ($_POST['access'] ?? '') == 2 ? 1 : 0;
+// Determine admin/semiadmin
+$admin = 0;
+$semiadmin = 0;
+if ($access === 1) $admin = 1;
+elseif ($access === 2) $semiadmin = 1;
 
-// Companies
-$companies = [];
-$result = mysqli_query($conn, "SELECT id FROM dbcompany");
-while($row = mysqli_fetch_assoc($result)) {
-    $compId = $row['id'];
-    $companies['comp'.$compId] = in_array($compId, $_POST['company'] ?? []) ? 1 : 0;
+// Location checkboxes (loc1-loc10)
+$locs = [];
+for ($i = 1; $i <= 10; $i++) {
+    $locs[$i] = isset($_POST['location'][$i]) ? 1 : 0;
 }
 
-// Locations
-$locations = [];
-$result = mysqli_query($conn, "SELECT id FROM dblocation");
-while($row = mysqli_fetch_assoc($result)) {
-    $locId = $row['id'];
-    $locations['loc'.$locId] = in_array($locId, $_POST['location'] ?? []) ? 1 : 0;
+// Password update
+$password_sql = '';
+if (!empty($password)) {
+    $password_sql = ", password='" . mysqli_real_escape_string($conn, $password) . "'";
 }
 
-// Modules
-$modules = [
-    'store','inventory','import','importdop','print','schedule','clearing','manual','fordeduct','borfapps',
-    'dmpiraw','deduction','deductdoc','paiddeduction','payment','returntosupplier','pulloutdoc','report','syssetting'
-];
-$moduleUpdates = [];
-foreach($modules as $mod) {
-    $moduleUpdates[$mod] = isset($_POST[$mod]) ? 1 : 0;
-}
+$sql = "UPDATE dbuser SET
+    fname='$fname',
+    username='$username',
+    active=$active,
+    admin=$admin,
+    semiadmin=$semiadmin,
+    loc1={$locs[1]},
+    loc2={$locs[2]},
+    loc3={$locs[3]},
+    loc4={$locs[4]},
+    loc5={$locs[5]},
+    loc6={$locs[6]},
+    loc7={$locs[7]},
+    loc8={$locs[8]},
+    loc9={$locs[9]},
+    loc10={$locs[10]}
+    $password_sql
+    WHERE id=$id";
 
-// Build update query
-$updateFields = [
-    "username='$username'",
-    "password='$password'",
-    "fname='$fname'",
-    "admin='$admin'",
-    "semiadmin='$semiadmin'",
-    "active='$active'"
-];
-$updateFields = array_merge($updateFields, $companies, $locations, $moduleUpdates);
-
-$updateSQL = "UPDATE dbuser SET " . implode(',', $updateFields) . " WHERE id='$id'";
-
-if(mysqli_query($conn, $updateSQL)){
-    echo "User updated successfully!";
+if (mysqli_query($conn, $sql)) {
+    header("Location: account.php?success=1");
+    exit;
 } else {
     echo "Error: " . mysqli_error($conn);
 }
 
 $conn->close();
-?>

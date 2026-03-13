@@ -80,10 +80,16 @@ if (isset($_POST['submit']))
 
 			if($quantity == $received || $quantity < $received){
 				// insert raw data
-				mysqli_query($conn,"INSERT INTO dbraw(f325number,mdccode,category,vendorcode,deducttype,dmpiclass,quantity,expiration,unitcost,costextended,reasoncode,arnumber,arreason,dmpireason,rcvdqty,dmpiref,deductref,deductqty,deductcostextended,datecleared,pulloutref,location,status,statusout,paymentstatus,skustatus,slstatus,skutype) VALUES ('$ordernumber','$mdccode','$category','$vendorcode','$deducttype','','$quantity','$bbd','$unitcost','$costextended','$reasoncode','','','$dmpireason','$received','','','0','0.00','$dateprocessed','','$location','CLEARED','','','1','','Manual')");
+				$query = mysqli_query($conn,"INSERT INTO dbraw(f325number,mdccode,category,vendorcode,deducttype,dmpiclass,quantity,expiration,unitcost,costextended,reasoncode,arnumber,arreason,dmpireason,rcvdqty,dmpiref,deductref,deductqty,deductcostextended,datecleared,pulloutref,location,status,statusout,paymentstatus,skustatus,slstatus,skutype, forpullout, forcharging) VALUES ('$ordernumber','$mdccode','$category','$vendorcode','$deducttype','','$quantity','$bbd','$unitcost','$costextended','$reasoncode','','','$dmpireason','$received','','','0','0.00','$dateprocessed','','$location','CLEARED','','','1','','Manual', '0', '0')");
+				if(!$query){
+					die("Error: " . mysqli_error($conn));
+				}
 			}else{
 				// insert raw data
-				mysqli_query($conn,"INSERT INTO dbraw(f325number,mdccode,category,vendorcode,deducttype,dmpiclass,quantity,expiration,unitcost,costextended,reasoncode,arnumber,arreason,dmpireason,rcvdqty,dmpiref,deductref,deductqty,deductcostextended,datecleared,pulloutref,location,status,statusout,paymentstatus,skustatus,slstatus,skutype) VALUES ('$ordernumber','$mdccode','$category','$vendorcode','$deducttype','','$quantity','$bbd','$unitcost','$costextended','$reasoncode','$arnumber','','$dmpireason','$received','','','0','0.00','$dateprocessed','','$location','CLEARED','','','1','UNPAID','Manual')");
+				$query = mysqli_query($conn,"INSERT INTO dbraw(f325number,mdccode,category,vendorcode,deducttype,dmpiclass,quantity,expiration,unitcost,costextended,reasoncode,arnumber,arreason,dmpireason,rcvdqty,dmpiref,deductref,deductqty,deductcostextended,datecleared,pulloutref,location,status,statusout,paymentstatus,skustatus,slstatus,skutype) VALUES ('$ordernumber','$mdccode','$category','$vendorcode','$deducttype','','$quantity','$bbd','$unitcost','$costextended','$reasoncode','$arnumber','','$dmpireason','$received','','','0','0.00','$dateprocessed','','$location','CLEARED','','','1','UNPAID','Manual')");
+				if(!$query){
+					die("Error: " . mysqli_error($conn));
+				}
 
 				//insert sl list
 				$short = $quantity - $received;
@@ -99,16 +105,18 @@ if (isset($_POST['submit']))
 	  			$ext = pathinfo($filename, PATHINFO_EXTENSION);
 	  			$new_file_name = $ordernumber.'.'.$ext;
 				//$filelocation = "C:/public/www/f325.ramosco.net/filepicture/dbapps/";
-				$filelocation = "C:/xampp/htdocs/f325.ramosco.net/filepicture/dbapps/";
+				$filelocation = "uploads/shortlanded/";
 				move_uploaded_file($_FILES["image"]["tmp_name"], $filelocation.$new_file_name);
 			}
 
 			// insert to dbf325number
-			mysqli_query($conn,"INSERT INTO dbf325number(f325number,brcode,preparedby,issuedby,emaildate,f325date,vendor,tmnumber,drivername,platenumber,datesched,datecleared,arnumber,pageno,printremarks,logisticremarks,clearingremarks,cluster,location,deducttype,status,process,verificationdate,verificationreason,ilrno,stamped,cleared_time) VALUES ('$ordernumber','$code','$prepared','$issued','$emaildate','$orderdate','$company','$tmnumber','$driver','$platenumber','0000-00-00','$dateprocessed','','','','','','$cluster','$location','$deducttype','$status','MANUAL','0000-00-00','','$ilrno','$stamped','$timeprocessed')");
-
+			$query = mysqli_query($conn,"INSERT INTO dbf325number(f325number,brcode,preparedby,issuedby,emaildate,f325date,vendor,tmnumber,drivername,platenumber,datesched,datecleared,arnumber,pageno,printremarks,logisticremarks,clearingremarks,cluster,location,deducttype,status,process,verificationdate,verificationreason,ilrno,stamped,cleared_time) VALUES ('$ordernumber','$code','$prepared','$issued','$emaildate','$orderdate','$company','$tmnumber','$driver','$platenumber', NULL ,'$dateprocessed','','','','','','$cluster','$location','$deducttype','$status','MANUAL',NULL,'','$ilrno','$stamped','$timeprocessed')");
+			if(!$query){
+				die("Error: " . mysqli_error($conn));
+			}
 			// insert to dbhistory
 			$processed = 'Cleared';
-			mysqli_query($conn,"INSERT INTO dbhistory(processnumber,name,processed,dateprocessed,timeprocessed) VALUES ('$ordernumber','$username','$processed','$dateprocessed','$timeprocessed')");
+			 mysqli_query($conn,"INSERT INTO dbhistory(processnumber,name,processed,dateprocessed,timeprocessed) VALUES ('$ordernumber','$username','$processed','$dateprocessed','$timeprocessed')");
 
 			$qstring = '?status=succ';
 

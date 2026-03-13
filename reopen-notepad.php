@@ -20,7 +20,7 @@ mysqli_query($conn,"UPDATE dbraw SET status='$status' WHERE f325number='$f325num
 $processed = 'Re-open';
 mysqli_query($conn,"INSERT INTO dbhistory(processnumber,name,processed,dateprocessed,timeprocessed) VALUES ('$f325number','$username','$processed','$dateprocessed','$timeprocessed')");
 
-echo 'Update successfully!';
+echo 'Reopen successfully!';
 
 $conn->close();
 ?>

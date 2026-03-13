@@ -27,11 +27,11 @@ include_once("nav.php");
 
                         <!-- Earnings (Monthly) Card Example -->
                         <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-danger shadow h-100 py-2">
+                            <div class="card border-left-warning shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                        <div class="col mr-2 ml-4">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                                 Total F325 Open Status</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                                 <?php
@@ -40,35 +40,10 @@ include_once("nav.php");
                                                     echo number_format($open_count);
                                                 ?>
                                             </div>
-                                            <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="open.php">View</a></small>
+                                            <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="print-notepad.php">View</a></small>
                                         </div>
-                                        <div class="col-auto">
+                                        <div class="col-auto mr-4">
                                             <i class="fas fa-newspaper fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Earnings (Monthly) Card Example -->
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-warning shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                Total F325 Printed Status</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                <?php
-                                                    $printed_query = mysqli_query($conn,"SELECT * FROM dbf325number WHERE status = 'printed' AND emaildate BETWEEN '2024-01-01' AND NOW()");
-                                                    $printed_count = mysqli_num_rows($printed_query);
-                                                    echo number_format($printed_count);
-                                                ?>
-                                            </div>
-                                            <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="printed.php">View</a></small>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-print fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -80,7 +55,7 @@ include_once("nav.php");
                             <div class="card border-left-primary shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
+                                        <div class="col mr-2 ml-4">
                                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                 Total F325 Scheduled Status</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -92,7 +67,7 @@ include_once("nav.php");
                                             </div>
                                             <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="scheduled.php">View</a></small>
                                         </div>
-                                        <div class="col-auto">
+                                        <div class="col-auto mr-4">
                                             <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
@@ -105,7 +80,7 @@ include_once("nav.php");
                             <div class="card border-left-success shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
+                                        <div class="col mr-2 ml-4">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Total F325 Cleared Status</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -117,8 +92,33 @@ include_once("nav.php");
                                             </div>
                                             <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="cleared.php">View</a></small>
                                         </div>
-                                        <div class="col-auto">
+                                        <div class="col-auto mr-4">
                                             <i class="fas fa-stamp fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-danger shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2 ml-4">
+                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                                Total F325 Disposed Status</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                <?php
+                                                    $printed_query = mysqli_query($conn,"SELECT * FROM dbf325number WHERE status = 'disposed' AND emaildate BETWEEN '2024-01-01' AND NOW()");
+                                                    $printed_count = mysqli_num_rows($printed_query);
+                                                    echo number_format($printed_count);
+                                                ?>
+                                            </div>
+                                            <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="disposed.php">View</a></small>
+                                        </div>
+                                        <div class="col-auto mr-4">
+                                            <i class="fas fa-trash fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -142,7 +142,7 @@ include_once("nav.php");
                                     </thead>
                                     <tbody class="text-center">
                                         <?php
-                                        $vendor_query = mysqli_query($conn,"SELECT * FROM sl_list GROUP BY vendor");
+                                        $vendor_query = mysqli_query($conn,"SELECT DISTINCT(vendor) FROM sl_list");
                                         while($fetch_vendor = mysqli_fetch_array($vendor_query))
                                             {
                                                 $vendorcode = $fetch_vendor['vendor'];
@@ -190,23 +190,6 @@ include_once("nav.php");
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-
-    <!-- Bootstrap core JavaScript-->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
-
-    <!-- Page level plugins -->
-    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-    <!-- Page level custom scripts -->
-    <script src="js/demo/datatables-demo.js"></script>
 
 </body>
 

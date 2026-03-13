@@ -4,11 +4,12 @@ include('dbconnect.php');
 $cleareddate = date("Y-m-d", strtotime($_POST['logdate']));
 $timefrom = $_POST['timefrom'];
 $timeto = $_POST['timeto'];
+$location = $_POST['location'];
 
 //mime type
 header('Content-Type: text/csv');
 //tell browser what's the file name
-header('Content-Disposition: attachment; filename="Log Transmittal '.$cleareddate.'.csv"');
+header('Content-Disposition: attachment; filename="'. $location .' - Log Transmittal '.$cleareddate.'.csv"');
 //no cache
 header('Cache-Control: max-age=0');
 
@@ -19,18 +20,18 @@ if($_POST['type'] == 2){
     fputcsv($output, array('SKU CODE', 'DESCRIPTION', 'TOTAL QTY', 'CLEARED DATE', 'CLEARED TIME', 'COMPANY', 'LOCATION'));
 
     $query = "
-        SELECT dbraw.mdccode, dbraw.datecleared, SUM(dbraw.rcvdqty) AS totalqty, 
+        SELECT DISTINCT dbraw.mdccode, dbraw.datecleared, SUM(dbraw.rcvdqty) AS totalqty, 
                dbcompany.nickname AS company, dbraw.location, 
                dbproduct.description, dbf325number.cleared_time
         FROM dbraw
         LEFT JOIN dbcompany ON dbraw.vendorcode = dbcompany.vendorcode
         LEFT JOIN dbproduct ON dbraw.mdccode = dbproduct.mdccode
         LEFT JOIN dbf325number ON dbraw.f325number = dbf325number.f325number
-        WHERE dbraw.status = 'cleared' 
+        WHERE dbraw.status = 'CLEARED' 
+            AND statusout = 'CLEARED'
             AND dbf325number.cleared_time BETWEEN '$timefrom' AND '$timeto'
             AND dbraw.datecleared = '$cleareddate'
-            AND dbraw.location = 'cainta'
-        GROUP BY dbraw.mdccode
+            AND dbraw.location = '$location'
         ORDER BY dbf325number.cleared_time;
     ";
 
@@ -54,26 +55,27 @@ if($_POST['type'] == 2){
 
 }else{
 
-    fputcsv($output, array('F325 NUMBER', 'SKU CODE', 'DESCRIPTION', 'QTY', 'CLEARED DATE', 'CLEARED TIME', 'COMPANY', 'LOCATION'));
+    fputcsv($output, array('F325 NUMBER', 'SKU CODE', 'DESCRIPTION', 'QTY', 'CLEARED DATE', 'CLEARED TIME', 'COMPANY', 'LOCATION', 'FOR PULL OUT', 'FOR CHARGING'));
 
     $query = "
-        SELECT dbraw.f325number,dbraw.mdccode, dbraw.datecleared, dbraw.rcvdqty, 
+        SELECT DISTINCT dbraw.f325number,dbraw.mdccode, dbraw.datecleared, dbraw.rcvdqty, 
                dbcompany.nickname AS company, dbraw.location, 
                dbproduct.description, dbf325number.cleared_time
         FROM dbraw
         LEFT JOIN dbcompany ON dbraw.vendorcode = dbcompany.vendorcode
-        LEFT JOIN dbproduct ON dbraw.mdccode = dbproduct.mdccode
+        LEFT JOIN dbproduct ON dbraw.mdccode = dbproduct.mdccode AND vendor = dbraw.vendorcode
         LEFT JOIN dbf325number ON dbraw.f325number = dbf325number.f325number
         WHERE dbraw.status = 'cleared' 
+            AND statusout = 'cleared'
             AND dbf325number.cleared_time BETWEEN '$timefrom' AND '$timeto'
             AND dbraw.datecleared = '$cleareddate'
-            AND dbraw.location = 'cainta'
-        GROUP BY dbraw.f325number,dbraw.mdccode
+            AND dbraw.location = '$location'
         ORDER BY dbf325number.cleared_time;
     ";
 
     $result = mysqli_query($conn, $query);
-
+    $for_pullout = '0';
+    $for_charging = '0';
     if ($result) {
         while ($row = mysqli_fetch_assoc($result)) {
             fputcsv($output, array(
@@ -84,7 +86,9 @@ if($_POST['type'] == 2){
                 $row['datecleared'], 
                 $row['cleared_time'],
                 $row['company'], 
-                $row['location']
+                $row['location'],
+                $for_pullout,
+                $for_charging
             ));
         }
     } else {

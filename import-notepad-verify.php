@@ -20,7 +20,6 @@ if (isset($_FILES['files'])) {
             if (preg_match('/Branch\s*-\s*(\d+)/', $line, $m)) $brcode = trim($m[1]);
             if (preg_match('/\((\d{3,})\s*\)/', $line, $m)) $vendor = trim($m[1]);
         }
-
         // Branch check
         $census_query = mysqli_query($conn, "SELECT code, status FROM dbcensus WHERE code='$brcode'");
         $fetch_census = mysqli_fetch_assoc($census_query);
@@ -38,7 +37,7 @@ if (isset($_FILES['files'])) {
             else {
                 $process_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE f325number='$f325number'");
                 $fetch_process = mysqli_fetch_assoc($process_query);
-                $status = $fetch_process ? $fetch_process['process'] : "Ready";
+                $status = $fetch_process ? $fetch_process['process'] : "READY";
             }
         }
 

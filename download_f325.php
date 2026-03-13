@@ -2,7 +2,7 @@
 // Define the path to the image folder (replace with your actual path)
 $module = $_GET['folder'];
 
-$image_folder = "filepicture/".$module."/";
+$image_folder = "uploads/".$module."/";
 
 // Get the filename from the URL parameter (if available)
 $filename = $_GET['f325number'].'.jpg';

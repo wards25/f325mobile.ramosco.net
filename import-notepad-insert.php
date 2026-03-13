@@ -34,13 +34,44 @@ if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
 
             // Process the file content (extract details)
             $secondline = fgets($open_file);
-            $brcode = preg_replace("/[^\d+$]\b\w+/", "", trim(str_replace(array('Branch - ', '.', ']', '[', '(', ')'), '', $secondline)));
+
+            // Extract first number only
+            if (preg_match('/Branch\s*-\s*(\d+)/i', $secondline, $match)) {
+                $brcode = $match[1]; // e.g., "918"
+            } else {
+                $brcode = ''; // fallback if not found
+            }
+
+            // Optional: trim whitespace
+            $brcode = trim($brcode);
+            var_dump($secondline, $brcode);
             $thirdline = fgets($open_file);
-            $preparedby = trim(substr_replace(str_replace('Prepared by - ', '', $thirdline), '', strpos(str_replace('Prepared by - ', '', $thirdline), ' on ')));
+            $preparedby = trim(str_replace('Prepared by - ', '', $thirdline));
+            $preparedby = preg_replace('/\s+on\s+\d{2}\/\d{2}\/\d{4}$/', '', $preparedby); // remove "on 03/07/2026"
+
+            // Detect encoding and convert to UTF-8
+            $preparedby = mb_convert_encoding($preparedby, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252');
+
+            // Replace accented/special characters with ASCII equivalents
+            $preparedby = iconv('UTF-8', 'ASCII//TRANSLIT', $preparedby);
+
+            // Remove any remaining non-printable characters
+            $preparedby = preg_replace('/[^\x20-\x7E]/', '', $preparedby);
+            var_dump($thirdline, $preparedby);
             preg_match_all('/\d{2}\/\d{2}\/\d{4}/', $thirdline, $datef325);
             $f325date = date('Y-m-d', strtotime(trim(str_replace('"', '', preg_replace('/\\\\/', '', preg_replace('/(\[|\]){2}/', '', json_encode($datef325)))))));
             fgets($open_file);
             $issuedby = trim(fgets($open_file));
+            $issuedby = trim($issuedby);
+
+            // Convert encoding to UTF-8 safely
+            $issuedby = mb_convert_encoding($issuedby, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252');
+
+            // Replace accented/special characters with ASCII equivalents
+            $issuedby = iconv('UTF-8', 'ASCII//TRANSLIT', $issuedby);
+
+            // Remove any remaining non-printable characters
+            $issuedby = preg_replace('/[^\x20-\x7E]/', '', $issuedby);
             fgets($open_file);
             fgets($open_file);
             $vendor = trim(preg_replace("/[^-0-9]+/", "", str_replace('Shipped To - ', ' ', fgets($open_file))));
@@ -60,7 +91,7 @@ if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
 
                 // Insert data into dbf325number table
                 $sql = "INSERT INTO dbf325number(f325number,brcode,preparedby,issuedby,emaildate,f325date,vendor,tmnumber,drivername,platenumber,datesched,datecleared,arnumber,pageno,printremarks,logisticremarks,clearingremarks,cluster,location,deducttype,status,process,verificationdate,verificationreason,ilrno,stamped,cleared_time) 
-                VALUES ('$f325number','$brcode','$preparedby','$issuedby','$emaildate','$f325date','$vendor','','','','0000-00-00','0000-00-00','','','','','','$cluster','$location','$deducttype','OPEN','UPLOADED','0000-00-00','','','','')";
+                VALUES ('$f325number','$brcode','$preparedby','$issuedby','$emaildate','$f325date','$vendor','','','', NULL , NULL ,'','','','','','$cluster','$location','$deducttype','OPEN','UPLOADED', NULL ,'','','','')";
                 if (!mysqli_query($conn, $sql)) {
                     echo "ERROR inserting dbf325number: " . mysqli_error($conn);
                 }
@@ -72,7 +103,7 @@ if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
                 $processed = 'Convert and Import.';
                 $sql1 = "INSERT INTO dbhistory(processnumber,name,processed,dateprocessed,timeprocessed) VALUES ('$f325number','$username','$processed','$dateprocessed','$timeprocessed')";
                 if (!mysqli_query($conn, $sql1)) {
-                    echo "ERROR inserting dbf325number: " . mysqli_error($conn);
+                    echo "ERROR inserting DBRAW: " . mysqli_error($conn);
                 }
                 // echo "<pre>";
                 // echo "SQL Query: $f325number, $username, $processed, $dateprocessed, $timeprocessed";
@@ -111,9 +142,13 @@ if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
                                     // not inserted
                                 } else {
                                     // var_dump($f325number, $mdccode, $vendor, $deducttype, $check_qty, $expire_date, $cost_each, $costextended, $reason_code, $location);
-                                    $sql2 = "INSERT INTO dbraw(f325number,mdccode,vendorcode,deducttype,dmpiclass,quantity,expiration,unitcost,costextended,reasoncode,arnumber,arreason,dmpireason,rcvdqty,dmpiref,deductref,deductqty,deductcostextended,datecleared,pulloutref,location,status,statusout,paymentstatus,skustatus,slstatus,skutype) VALUES ('$f325number','$mdccode','$vendor','$deducttype','','$check_qty','$expire_date','$cost_each','$costextended','$reason_code','','','0','0','','','0','0','0000-00-00','','$location','OPEN','','','0','','') ";
-                                    if (!mysqli_query($conn, $sql2)) {
-                                        echo "ERROR inserting dbf325number: " . mysqli_error($conn);
+                                    $sql2 = "SELECT category FROM dbproduct WHERE mdccode='$mdccode'";
+                                    $category_result = mysqli_query($conn, $sql2);
+                                    $category_row = mysqli_fetch_array($category_result);
+                                    $category = $category_row['category'];
+                                    $sql3 = "INSERT INTO dbraw(f325number,mdccode, category,vendorcode,deducttype,dmpiclass,quantity,expiration,unitcost,costextended,reasoncode,arnumber,arreason,dmpireason,rcvdqty,dmpiref,deductref,deductqty,deductcostextended,datecleared,pulloutref,location,status,statusout,paymentstatus,skustatus,slstatus,skutype,forpullout,forcharging) VALUES ('$f325number','$mdccode','$category','$vendor','$deducttype','','$check_qty','$expire_date','$cost_each','$costextended','$reason_code','','','0','0','','','0','0',NULL,'','$location','OPEN','','','0','','','0','0') ";
+                                    if (!mysqli_query($conn, $sql3)) {
+                                        echo "ERROR inserting dbraw: " . mysqli_error($conn);
                                     }
                                     // echo "<pre>";
                                     // echo "SQL Query: $f325number, $mdccode, $vendor, $deducttype, $check_qty, $expire_date, $cost_each, $costextended, $reason_code, $location";
@@ -123,6 +158,7 @@ if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
                         }
                     }
                 }
+                // header("Location: import-notepad.php?status=succ");
             }
             // Close the open file
             fclose($open_file);

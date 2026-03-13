@@ -218,7 +218,7 @@ include_once("nav.php");
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <img src="filepicture/dbapps/<?php echo $f325number;?>.jpg" class="img-fluid">
+                                        <img src="uploads/shortlanded/<?php echo $f325number;?>.jpg" class="img-fluid">
                                     </div>
                                     <div class="modal-footer">
                                         <a class="btn btn-success btn-sm" type="button" onclick="window.open('download_f325.php?f325number=<?php echo $f325number; ?>&folder=dbapps')"><i class="fa fa-sm fa-download"></i> Download</a>

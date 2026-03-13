@@ -29,12 +29,13 @@ if (isset($_GET['edit_id'])) {
 
             <div class="table-responsive">
                 <?php
-                $result = $conn->query("SELECT * FROM dbproduct WHERE active='1' ORDER BY description ASC");
+                $result = $conn->query("SELECT * FROM dbproduct WHERE active='1' ORDER BY description ASC ");
                 ?>
 
                 <table id="productTable" class="table table-striped table-bordered">
                     <thead class="table-dark">
                         <tr>
+                            <th hidden>#</th>
                             <th>MDC Code</th>
                             <th>Item Code</th>
                             <th>Description</th>
@@ -47,6 +48,7 @@ if (isset($_GET['edit_id'])) {
                     <tbody>
                         <?php while ($row = $result->fetch_assoc()): ?>
                             <tr>
+                                <td hidden><?= $row['id']; ?></td>
                                 <td><?= $row['mdccode']; ?></td>
                                 <td><?= $row['itemcode']; ?></td>
                                 <td><?= $row['description']; ?></td>

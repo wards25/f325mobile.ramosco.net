@@ -9,7 +9,21 @@ if (!isset($_GET['edit_id'])) {
 }
 
 $id = $_GET['edit_id'];
-$get = $conn->query("SELECT * FROM dbproduct WHERE id='$id' LIMIT 1");
+
+// Query to get product data and related company name based on vendor
+$query = "SELECT p.*, c.nickname AS company_name 
+          FROM dbproduct p
+          LEFT JOIN dbcompany c ON p.vendor = c.vendorcode
+          WHERE p.id='$id' LIMIT 1";
+
+$get = $conn->query($query);
+
+// Check for query execution errors
+if (!$get) {
+    // Log the error for debugging
+    die("Query failed: " . $conn->error);
+}
+
 $editData = $get->fetch_assoc();
 
 if (!$editData) {
@@ -22,6 +36,11 @@ if (!$editData) {
 <?php include('nav.php'); ?>
 
 <div class="container my-5">
+    <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+        <div id="success-alert" class='alert alert-success'>
+            product updated successfully!
+        </div>
+    <?php endif; ?>
     <div class="d-flex justify-content-between align-items-center mb-3 border-bottom">
         <h4 class="mb-0">Edit Product</h4>
         <a href="product-list.php" class="btn btn-secondary">Back to Product List</a>
@@ -33,62 +52,83 @@ if (!$editData) {
             <form method="POST" action="edit-product-process.php">
 
                 <input type="hidden" name="id" value="<?= $editData['id']; ?>">
+                <input type="hidden" name="oldmdccode" value="<?= $editData['mdccode']; ?>">
+                <input type="hidden" name="oldcategory" value="<?= $editData['category']; ?>">
+                <input type="hidden" name="oldvendor" value="<?= $editData['company_name']; ?>">
 
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <label>MDC Code</label>
-                        <input type="text" name="mdccode" class="form-control" value="<?= $editData['mdccode']; ?>" required>
+                        <input type="text" name="mdccode" class="form-control" value="<?= $editData['mdccode']; ?>"
+                            required>
                     </div>
 
                     <div class="col-md-6">
                         <label>Item Code</label>
-                        <input type="text" name="itemcode" class="form-control" value="<?= $editData['itemcode']; ?>" required>
+                        <input type="text" name="itemcode" class="form-control" value="<?= $editData['itemcode']; ?>"
+                            required>
                     </div>
 
                     <div class="col-md-12">
                         <label>Description</label>
-                        <textarea name="description" class="form-control" required><?= $editData['description']; ?></textarea>
+                        <textarea name="description" class="form-control"
+                            required><?= $editData['description']; ?></textarea>
                     </div>
 
                     <div class="col-md-4">
                         <label>Category</label>
-                        <input type="text" name="category" class="form-control" value="<?= $editData['category']; ?>" required>
+                        <input type="text" name="category" class="form-control" value="<?= $editData['category']; ?>"
+                            required>
                     </div>
 
                     <div class="col-md-4">
                         <label>UOM</label>
                         <input type="text" name="uom" class="form-control" value="<?= $editData['uom']; ?>">
                     </div>
-                    
+
                     <div class="col-md-4">
                         <label>Company</label>
-                        <input type="text" name="company" class="form-control" value="<?= $editData['dmpiclassification']; ?>">
+                        <!-- Display the company name fetched from dbcompany -->
+                        <input type="text" name="company" class="form-control"
+                            value="<?= $editData['company_name']; ?>">
                     </div>
                 </div>
 
+                <!-- Stock Availability per Location (unchanged) -->
                 <h5 class="fw-bold mb-3">Stock Availability per Location</h5>
                 <div class="row g-3 mb-4">
                     <?php
                     $mdccode = $editData['mdccode'];
-                    $location_query = mysqli_query($conn, "SELECT * FROM dblocation WHERE active='1'");
+                    $status_cleared = "CLEARED";
+                    $status_scheduled = "SCHEDULED";
+
+                    // Query to fetch stock and pick quantities for all locations at once
+                    $query = "
+            SELECT 
+                l.location,
+                SUM(CASE WHEN r.statusout = '$status_cleared' THEN r.quantity ELSE 0 END) AS totalquantity,
+                SUM(CASE WHEN r.status = '$status_scheduled' THEN r.quantity ELSE 0 END) AS totalpickquantity
+            FROM 
+                dblocation l
+            LEFT JOIN dbraw r ON l.location = r.location AND r.mdccode = '$mdccode'
+            WHERE 
+                l.active = '1'
+            GROUP BY 
+                l.location
+        ";
+                    $location_query = mysqli_query($conn, $query);
+
                     while ($loc = mysqli_fetch_assoc($location_query)) {
-                        $location = $loc['location'];
-                        $status_cleared = "CLEARED";
-                        $status_scheduled = "SCHEDULED";
-
-                        $stock_query = mysqli_query($conn,"SELECT SUM(quantity) AS totalquantity FROM dbraw WHERE mdccode='$mdccode' AND location='$location' AND statusout='$status_cleared'");
-                        $stock = mysqli_fetch_assoc($stock_query);
-
-                        $pick_query = mysqli_query($conn,"SELECT SUM(quantity) AS totalpickquantity FROM dbraw WHERE mdccode='$mdccode' AND location='$location' AND status='$status_scheduled'");
-                        $pick = mysqli_fetch_assoc($pick_query);
-                    ?>
+                        ?>
                         <div class="col-md-6">
-                            <label class="form-label"><?= htmlspecialchars($location); ?> Available</label>
-                            <input type="text" class="form-control" value="<?= number_format($stock['totalquantity'],0); ?>" readonly>
+                            <label class="form-label"><?= htmlspecialchars($loc['location']); ?> Available</label>
+                            <input type="text" class="form-control" value="<?= number_format($loc['totalquantity'], 0); ?>"
+                                readonly>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label"><?= htmlspecialchars($location); ?> Scheduled</label>
-                            <input type="text" class="form-control" value="<?= number_format($pick['totalpickquantity'],0); ?>" readonly>
+                            <label class="form-label"><?= htmlspecialchars($loc['location']); ?> Scheduled</label>
+                            <input type="text" class="form-control"
+                                value="<?= number_format($loc['totalpickquantity'], 0); ?>" readonly>
                         </div>
                     <?php } ?>
                 </div>
@@ -107,3 +147,15 @@ if (!$editData) {
 
 <?php include('footer.php'); ?>
 <?php $conn->close(); ?>
+<script>
+    setTimeout(function() {
+        var alert = document.getElementById('success-alert');
+        if (alert) {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.remove();
+            }, 500); 
+        }
+    }, 1000);
+</script>
