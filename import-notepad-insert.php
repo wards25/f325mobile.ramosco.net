@@ -158,11 +158,7 @@ if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
                         }
                     }
                 }
-<<<<<<< HEAD
                 // header("Location: import-notepad.php?status=succ");
-=======
-                header("Location: import-notepad.php?status=succ");
->>>>>>> 44ac350420260f5310e58126a5ef01461f12204f
             }
             // Close the open file
             fclose($open_file);

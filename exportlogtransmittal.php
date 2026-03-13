@@ -28,11 +28,7 @@ if($_POST['type'] == 2){
         LEFT JOIN dbproduct ON dbraw.mdccode = dbproduct.mdccode
         LEFT JOIN dbf325number ON dbraw.f325number = dbf325number.f325number
         WHERE dbraw.status = 'CLEARED' 
-<<<<<<< HEAD
             AND statusout = 'CLEARED'
-=======
-            AND status_out = 'CLEARED'
->>>>>>> 44ac350420260f5310e58126a5ef01461f12204f
             AND dbf325number.cleared_time BETWEEN '$timefrom' AND '$timeto'
             AND dbraw.datecleared = '$cleareddate'
             AND dbraw.location = '$location'
@@ -70,11 +66,7 @@ if($_POST['type'] == 2){
         LEFT JOIN dbproduct ON dbraw.mdccode = dbproduct.mdccode AND vendor = dbraw.vendorcode
         LEFT JOIN dbf325number ON dbraw.f325number = dbf325number.f325number
         WHERE dbraw.status = 'cleared' 
-<<<<<<< HEAD
             AND statusout = 'cleared'
-=======
-            AND status_out = 'cleared'
->>>>>>> 44ac350420260f5310e58126a5ef01461f12204f
             AND dbf325number.cleared_time BETWEEN '$timefrom' AND '$timeto'
             AND dbraw.datecleared = '$cleareddate'
             AND dbraw.location = '$location'

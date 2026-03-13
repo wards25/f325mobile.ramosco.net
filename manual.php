@@ -117,14 +117,9 @@ include_once("nav.php");
                                 foreach ($options as $option) {
                                     ?>
                                     <option value="<?php echo $option['code']; ?>">
-<<<<<<< HEAD
                                         <?php echo $option['code'] . ' - ' . $option['branchname']; ?>
                                     </option>
                                     <?php
-=======
-                                        <?php echo $option['code'] . ' - ' . $option['branchname']; ?> </option>
-                                <?php
->>>>>>> 44ac350420260f5310e58126a5ef01461f12204f
                                 }
                         }
                         ?>
@@ -184,14 +179,9 @@ include_once("nav.php");
                                 <?php
                                 foreach ($options as $option) {
                                     ?>
-<<<<<<< HEAD
                                     <option value="<?php echo $option['vendorcode']; ?>"><?php echo $option['name']; ?>
                                     </option>
                                     <?php
-=======
-                                    <option value="<?php echo $option['vendorcode']; ?>"><?php echo $option['name']; ?> </option>
-                                <?php
->>>>>>> 44ac350420260f5310e58126a5ef01461f12204f
                                 }
                         }
                         ?>
@@ -226,7 +216,6 @@ include_once("nav.php");
                         <label><i>Is Document Stamped?</i></label>
                         <br>
                         <div class="form-check form-check-inline">
-<<<<<<< HEAD
                             <input class="form-check-input" type="radio" name="stamped" id="stampedYes" value="1"
                                 required>
                             <label class="form-check-label" for="stampedYes">Yes</label>
@@ -235,14 +224,6 @@ include_once("nav.php");
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="stamped" id="stampedNo" value="0">
                             <label class="form-check-label" for="stampedNo">No</label>
-=======
-                            <input class="form-check-input" type="radio" id="inlineCheckbox1" value="1" name="stamped"
-                                required>
-                            <label class="form-check-label" for="inlineCheckbox1">YES</label>
-                            &nbsp;&nbsp;&nbsp;&nbsp;
-                            <input class="form-check-input" type="radio" id="inlineCheckbox2" value="0" name="stamped">
-                            <label class="form-check-label" for="inlineCheckbox2">NO</label>
->>>>>>> 44ac350420260f5310e58126a5ef01461f12204f
                         </div>
                     </div>
                 </div>
@@ -337,14 +318,9 @@ include_once("nav.php");
                                         foreach ($options as $option) {
                                             ?>
                                             <option value="<?php echo $option['reasoncode']; ?>">
-<<<<<<< HEAD
                                                 <?php echo $option['reasoncode'] . ' - ' . $option['reason']; ?>
                                             </option>
                                             <?php
-=======
-                                                <?php echo $option['reasoncode'] . ' - ' . $option['reason']; ?> </option>
-                                        <?php
->>>>>>> 44ac350420260f5310e58126a5ef01461f12204f
                                         }
                                 }
                                 ?>

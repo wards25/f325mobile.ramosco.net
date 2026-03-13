@@ -40,13 +40,10 @@ $userRow = mysqli_fetch_array($res);
                 $statusType = 'alert-success';
                 $statusMsg = '<i class="fa fa-check-circle"></i> <b>Success!</b> F325 cleared successfully.';
                 break;
-<<<<<<< HEAD
             case 'reopen':
                 $statusType = 'alert-success';
                 $statusMsg = '<i class="fa fa-check-circle"></i> <b>Success!</b> F325 re-opened successfully.';
                 break;
-=======
->>>>>>> 44ac350420260f5310e58126a5ef01461f12204f
             case 'verify':
                 $statusType = 'alert-success';
                 $statusMsg = '<i class="fa fa-check-circle"></i> <b>Success!</b> F325 for verification.';
