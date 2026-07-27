@@ -1,12 +1,39 @@
 <?php
 session_start();
 include('dbconnect.php');
+$allowed_locations = [];
+
+$query = "SELECT id, location FROM dblocation WHERE active = 1 ORDER BY location ASC";
+$result = mysqli_query($conn, $query);
+
+while ($row = mysqli_fetch_assoc($result)) {
+	$loc_id = $row['id'];
+
+	if (!empty($_SESSION['loc' . $loc_id]) && $_SESSION['loc' . $loc_id] == 1) {
+		$allowed_locations[] = "'" . mysqli_real_escape_string($conn, $row['location']) . "'";
+	}
+}
+$location_filter = implode(",", $allowed_locations);
+
+$allowed_company = [];
+
+$query = "SELECT id, vendorcode FROM dbcompany WHERE active = 1 ORDER BY vendorcode ASC";
+$result = mysqli_query($conn, $query);
+
+while ($row = mysqli_fetch_assoc($result)) {
+	$comp_id = $row['id'];
+
+	if (!empty($_SESSION['comp' . $comp_id]) && $_SESSION['comp' . $comp_id] == 1) {
+		$allowed_company[] = "'" . mysqli_real_escape_string($conn, $row['vendorcode']) . "'";
+	}
+}
+$company_filter = implode(",", $allowed_company);
 
 $status = $_POST['status'];
-$process = 'UPLOADED';
+// $process = 'UPLOADED';
 
 // query
-$search_query = "SELECT * FROM dbf325number WHERE status='$status' AND process='$process' ";
+$search_query = "SELECT * FROM dbf325number WHERE status='$status' AND process IN ('UPLOADED', 'MANUAL') AND location IN ($location_filter) AND vendor IN ($company_filter) AND emaildate BETWEEN '2025-01-01' AND NOW() ";
 // $search_query = "SELECT * FROM dbf325number WHERE status='$status' ";
 
 // allow to re-open is today

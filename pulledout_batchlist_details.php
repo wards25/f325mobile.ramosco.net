@@ -249,7 +249,7 @@ include_once("nav.php");
                                     <td>{$row['description']}</td>
                                     <td class='text-end'>{$row['forpullout']}</td>
                                     <td class='text-center'>{$row['uom']}</td>
-                                    <td class='text-end'>" . number_format($row['unitcost'], 2) . "</td>
+                                    <td class='text-end'>" . number_format($row['costextended'], 2) . "</td>
                                 </tr>";
                             }
                         }

@@ -40,10 +40,6 @@ $userRow = mysqli_fetch_array($res);
                 $statusType = 'alert-success';
                 $statusMsg = '<i class="fa fa-check-circle"></i> <b>Success!</b> F325 cleared successfully.';
                 break;
-            case 'reopen':
-                $statusType = 'alert-success';
-                $statusMsg = '<i class="fa fa-check-circle"></i> <b>Success!</b> F325 re-opened successfully.';
-                break;
             case 'verify':
                 $statusType = 'alert-success';
                 $statusMsg = '<i class="fa fa-check-circle"></i> <b>Success!</b> F325 for verification.';
@@ -93,7 +89,7 @@ $userRow = mysqli_fetch_array($res);
                                     $conn,
                                     "SELECT * FROM dbf325number
                                      WHERE status = 'SCHEDULED'
-                                     AND emaildate BETWEEN '2024-01-01' AND NOW()"
+                                     AND emaildate BETWEEN '2025-01-01' AND NOW()"
                                 );
                                 $scheduled_count = mysqli_num_rows($scheduled_query);
                                 echo number_format($scheduled_count);
@@ -205,7 +201,7 @@ $userRow = mysqli_fetch_array($res);
                         $datetime2 = new DateTime($now);
 
                         // Build query based on filter
-                        $where = "f.status='scheduled' AND f.emaildate BETWEEN '2023-01-01' AND NOW()";
+                        $where = "f.status='scheduled' AND f.emaildate BETWEEN '2025-01-01' AND NOW()";
 
                         if (isset($_POST['view'])) {
                             $vendor = $_POST['company'];

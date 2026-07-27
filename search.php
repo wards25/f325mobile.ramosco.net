@@ -135,19 +135,25 @@ include_once("nav.php");
                                             </center>
                                         </td>
                                         <?php
-                                    } else {
+                                    } else if($row['status'] == 'CLEARED'){
                                         ?>
                                         <td>
                                             <center><span class="badge bg-success">Cleared</span></center>
                                         </td>
                                         <?php
+                                    }else {
+                                        ?>
+                                        <td>
+                                            <center><span class="badge bg-danger">Disposed</span></center>
+                                        </td>
+                                        <?php
                                     }
                                     ?>
                                     <td>
-                                        <center><a type="button" class="data btn-sm btn-warning"
-                                                onclick="window.open('print-notepad-details.php?f325number=<?php echo $row['f325number'] ?>&action=RE-PRINT')">Re-print</a>
-                                        </center>
-                                    </td>
+                                            <center><a type="button" class="data btn-sm btn-warning"
+                                                    onclick="window.open('print-notepad-details.php?f325number=<?php echo $row['f325number'] ?>&action=RE-PRINT')">Re-print</a>
+                                            </center>
+                                        </td>
                                 </tr>
                                 <?php
                             }

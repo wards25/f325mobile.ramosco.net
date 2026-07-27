@@ -167,6 +167,7 @@ include_once("nav.php");
                                         <th>Reason Code</th>
                                         <th>Qty</th>
                                         <th>Rcvd</th>
+                                        <th>Unit Cost</th>
                                         <th>Cost Ext</th>
                                     </tr>
                                 </thead>
@@ -185,6 +186,7 @@ include_once("nav.php");
                                             <?php echo '<td><center>' . $fetch_product['reasoncode'] . '</center></td>'; ?>
                                             <?php echo '<td><center>' . $fetch_product['quantity'] . '</center></td>'; ?>
                                             <?php echo '<td><center>' . $fetch_product['rcvdqty'] . '</center></td>'; ?>
+                                            <?php echo '<td><center>' . number_format($fetch_product['unitcost'], 2) . '</center></td>'; ?>
                                             <?php echo '<td><center>' . number_format($fetch_product['costextended'], 2) . '</center></td>'; ?>
                                         </tr>
                                         <?php
@@ -208,6 +210,10 @@ include_once("nav.php");
                     <button class="d-sm-inline-block btn btn-sm btn-secondary shadow-sm" onclick="window.close()">x</button>
                     <a type="button" class="d-sm-inline-block btn btn-sm btn-info shadow-sm" href="#" data-toggle="modal"
                         data-target="#historyModal">History</a>
+                    <a href="#" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#reopenModal"
+                        data-f325="<?php echo $f325number; ?>">
+                        <i class="fa fa-open"></i> RE-OPEN F325
+                    </a>
                     <?php
                     $sl_query = mysqli_query($conn, "SELECT * FROM sl_number WHERE f325no = '$f325number'");
                     $sl_count = mysqli_num_rows($sl_query);
@@ -427,28 +433,38 @@ include_once("nav.php");
 
 </div>
 <!-- End of Page Wrapper -->
+<div class="modal fade" id="reopenModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Re-open</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                Are you sure you want to re-open this F325 record?
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <a href="re-open-notepad-cleared.php?f325number=<?php echo $f325number; ?>" class="btn btn-warning">
+                    Yes, Re-open
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 <!-- Scroll to Top Button-->
 <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
 </a>
 
-<!-- Bootstrap core JavaScript-->
-<!-- <script src="vendor/jquery/jquery.min.js"></script> -->
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-<!-- Core plugin JavaScript-->
-<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-<!-- Custom scripts for all pages-->
-<script src="js/sb-admin-2.min.js"></script>
-
-<!-- Page level plugins -->
-<script src="vendor/datatables/jquery.dataTables.min.js"></script>
-<script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-<!-- Page level custom scripts -->
-<script src="js/demo/datatables-demo.js"></script>
 
 </body>
 

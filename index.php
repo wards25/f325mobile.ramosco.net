@@ -8,7 +8,7 @@ if (isset($_SESSION['id'])) {
 ?>
 
 <body style="background-color: #915c83;">
-    <div class="env-ribbon">STAGING</div>
+    <!-- <div class="env-ribbon">STAGING</div> -->
     <!-- <div class="env-banner">
         ⚠ DATABASE IS NEUTRALIZED — STAGING ENVIRONMENT
     </div> -->

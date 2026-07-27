@@ -10,10 +10,12 @@ if (!isset($_SESSION['id'])) {
 
 $res = mysqli_query($conn, "SELECT * FROM dbuser WHERE id=" . $_SESSION['id']);
 $userRow = mysqli_fetch_array($res);
+$maintenanceModule = 'batchlist';
+include('maintenance_check.php');
 
 include_once("nav.php");
-?>
 
+?>
 <!-- Begin Page Content -->
 <div class="container-fluid">
     <?php
@@ -62,10 +64,19 @@ include_once("nav.php");
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2 ml-4">
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Total Amount </div>
+                            Total Amount For Pullout </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             <?php
-                            $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forpullout) AS total_cost FROM dbraw WHERE forpullout >=1 AND batchnumber_forpullout <> '' AND statusout = 'FOR PULL-OUT' AND status = 'CLEARED'");
+                            // $scheduled_query = mysqli_query($conn, "SELECT SUM(costextended) AS total_cost FROM dbraw WHERE forpullout >=1 AND batchnumber_forpullout <> '' AND statusout = 'FOR PULL-OUT' AND status = 'CLEARED'");
+                            $scheduled_query = mysqli_query(
+                                $conn,
+                                "SELECT SUM(unitcost * forpullout) AS total_cost
+                                    FROM dbraw
+                                    WHERE forpullout >= 1
+                                    AND batchnumber_forpullout <> ''
+                                    AND statusout = 'FOR PULL-OUT'
+                                    AND status = 'CLEARED'"
+                                                            );
 
                             $row = mysqli_fetch_assoc($scheduled_query);
                             $total_cost = $row['total_cost'] ?? 0;
@@ -114,11 +125,12 @@ include_once("nav.php");
                             }
                         }
                         $location_filter = implode(",", $allowed_locations);
-
+                        // var_dump($location_filter);
                         $query = "
                             SELECT 
                                 r.batchnumber_forpullout AS batchnumber,
                                 r.category,
+                                SUM(r.costextended) AS costextended,
                                 p.dateprocessed,
                                 SUM(r.unitcost * r.forpullout) AS total_cost
                             FROM dbraw r
@@ -134,7 +146,7 @@ include_once("nav.php");
                             ORDER BY r.batchnumber_forpullout DESC
                         ";
                         $result = mysqli_query($conn, $query);
-                        if(!$result){
+                        if (!$result) {
                             die("Error executing query: " . mysqli_error($conn));
                         }
                         while ($row = mysqli_fetch_assoc($result)) {
@@ -144,7 +156,7 @@ include_once("nav.php");
                                 <td>{$row['total_cost']}</td>
                                 <td>{$row['dateprocessed']}</td>
                                <td>
-                                <a href='batchlist_details.php?batchnumber={$row['batchnumber']}'
+                                <a href='batchlist_details.php?batchnumber={$row['batchnumber']}&principal={$row['category']}'
                                 class='btn btn-primary btn-sm'>
                                     View
                                 </a>

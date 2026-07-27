@@ -19,7 +19,7 @@ include_once("nav.php");
                 <div class="container-fluid">
 
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Unpaid F325</h1>
+                <h1 class="h3 mb-0 text-gray-800">Unpaid Shortlanded F325</h1>
                 </div>
 
                     <!-- Content Row -->
@@ -30,7 +30,7 @@ include_once("nav.php");
                             <div class="card border-left-info shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
+                                        <div class="col ml-4 mr-2">
                                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                                 Total Unpaid F325</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -40,9 +40,9 @@ include_once("nav.php");
                                                     echo '₱'.number_format($fetch_sl['sum(costextended)'], 2);
                                                 ?>
                                             </div>
-                                            <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="shortlanded_complete.php">Complete List</a></small>
+                                            <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="shortlanded_complete.php">View Paid</a></small>
                                         </div>
-                                        <div class="col-auto">
+                                        <div class="col-auto mr-4">
                                             <i class="fas fa-money-bill fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
@@ -60,6 +60,7 @@ include_once("nav.php");
                                         <tr>
                                             <th>SL Date</th>
                                             <th>SL No.</th>
+                                            <th>Location</th>
                                             <th>Days Unpaid</th>
                                             <th>View</th>
                                         </tr>
@@ -69,7 +70,17 @@ include_once("nav.php");
                                         $now = date('Y-m-d');
                                         $datetime2 = new DateTime($now);
                                     
-                                        $result = mysqli_query($conn,"SELECT f325no, dateprocessed, slno FROM sl_list WHERE paymentstatus = 'UNPAID' GROUP BY f325no, slno, dateprocessed");
+                                        $result = mysqli_query($conn,"
+                                            SELECT 
+                                                sl.f325no, 
+                                                sl.dateprocessed, 
+                                                sl.slno,
+                                                f.location
+                                            FROM sl_list sl
+                                            INNER JOIN dbf325number f ON sl.f325no = f.f325number
+                                            WHERE sl.paymentstatus = 'UNPAID' 
+                                            GROUP BY sl.f325no, sl.slno, sl.dateprocessed, f.location
+                                        ");
                                         if (!$result) {
                                             die('Error executing query: ' . mysqli_error($conn));
                                         }
@@ -82,6 +93,7 @@ include_once("nav.php");
                                         <tr>
                                             <?php echo '<td>'.$row['dateprocessed'].'</td>'; ?>
                                             <?php echo '<td>'.$row['slno'].'</td>'; ?>
+                                            <?php echo '<td>'.$row['location'].'</td>'; ?>
                                             <?php echo '<td class="text-danger">'.$diff.' Days</td>'; ?>
                                             <td><center><a type="submit" name="view" class="data btn-sm btn-success" onclick="window.open('view_shortlanded.php?f325number=<?php echo $row['f325no'] ?>')">View</a></center></td>
                                         </tr>

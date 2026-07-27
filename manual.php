@@ -107,7 +107,21 @@ include_once("nav.php");
                     <div class="col-12">
                         <label><i>Branch Name:</i></label>
                         <?php
-                        $query = "SELECT * FROM dbcensus";
+                        $allowed_locations = [];
+
+                        $query = "SELECT id, location FROM dblocation WHERE active = 1 ORDER BY location ASC";
+                        $result = mysqli_query($conn, $query);
+
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            $loc_id = $row['id'];
+
+                            if (!empty($_SESSION['loc' . $loc_id]) && $_SESSION['loc' . $loc_id] == 1) {
+                                $allowed_locations[] = "'" . mysqli_real_escape_string($conn, $row['location']) . "'";
+                            }
+                        }
+                        $location_filter = implode(",", $allowed_locations);
+
+                        $query = "SELECT * FROM dbcensus WHERE location IN ($location_filter)";
                         $result = $conn->query($query);
                         if ($result->num_rows > 0) {
                             $options = mysqli_fetch_all($result, MYSQLI_ASSOC); ?>
@@ -168,7 +182,21 @@ include_once("nav.php");
                     <div class="col-12">
                         <label><i>Company:</i></label>
                         <?php
-                        $query = "SELECT * FROM dbcompany WHERE active = '1'";
+                        $allowed_company = [];
+
+                        $query = "SELECT id, vendorcode FROM dbcompany WHERE active = 1 ORDER BY vendorcode ASC";
+                        $result = mysqli_query($conn, $query);
+
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            $comp_id = $row['id'];
+
+                            if (!empty($_SESSION['comp' . $comp_id]) && $_SESSION['comp' . $comp_id] == 1) {
+                                $allowed_company[] = "'" . mysqli_real_escape_string($conn, $row['vendorcode']) . "'";
+                            }
+                        }
+                        $company_filter = implode(",", $allowed_company);
+
+                        $query = "SELECT * FROM dbcompany WHERE active = '1' AND vendorcode IN ($company_filter)";
                         $result = $conn->query($query);
                         if ($result->num_rows > 0) {
                             $options = mysqli_fetch_all($result, MYSQLI_ASSOC); ?>

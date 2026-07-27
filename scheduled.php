@@ -14,7 +14,29 @@ if (!isset($_SESSION['id'])) {
 $res = mysqli_query($conn, "SELECT * FROM dbuser WHERE id=" . $_SESSION['id']);
 $userRow = mysqli_fetch_array($res);
 ?>
+<style>
+    #preloader {
+        display: none;
+        /* hidden by default */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        z-index: 9999;
+    }
 
+    #preloader .preloader-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 100%;
+    }
+</style>
 <?php
 include_once('header.php');
 include_once("nav.php");
@@ -43,7 +65,15 @@ if (!empty($_GET['status'])) {
     }
 }
 ?>
-
+<!-- Preloader Overlay -->
+<div id="preloader">
+    <div class="preloader-content">
+        <div class="spinner-border text-primary" role="status" style="width:2rem;height:2rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Uploading files, please wait...</p>
+    </div>
+</div>
 <!-- Display status message -->
 <?php if (!empty($statusMsg)) { ?>
     <div class="alert <?php echo $statusType; ?> alert-dismissible fade show" role="alert">
@@ -59,7 +89,7 @@ if (!empty($_GET['status'])) {
                 <i class="fas fa-file-export me-1"></i> Export CSV
             </button>
 
-            <button class="btn btn-sm btn-success import-csv">
+            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#importCSVModal">
                 <i class="fas fa-file-import me-1"></i> Import CSV
             </button>
         </div>
@@ -75,7 +105,7 @@ if (!empty($_GET['status'])) {
                                 Total F325 For Schedule Status</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <?php
-                                $open_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE status = 'PRINTED' AND emaildate BETWEEN '2024-01-01' AND NOW()");
+                                $open_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE status = 'PRINTED' AND emaildate BETWEEN '2025-01-01' AND NOW()");
                                 $open_count = mysqli_num_rows($open_query);
                                 echo number_format($open_count);
                                 ?>
@@ -163,7 +193,7 @@ if (!empty($_GET['status'])) {
                     </table>
 
                     <!-- View Order Detail -->
-                    <div class="modal" id="order-detail-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal fade" id="order-detail-modal" tabindex="-1" role="dialog" aria-hidden="true">
                         <div class="modal-dialog modal-xl" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -360,6 +390,90 @@ if (!empty($_GET['status'])) {
         </div>
     </div>
 </div>
+<!-- Import CSV Modal -->
+<div class="modal fade" id="importCSVModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+
+            <form method="POST" id="uploadForm" action="importcsv_schedule.php" enctype="multipart/form-data">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-import"></i> Import CSV File
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="alert alert-info">
+                        Upload a CSV file containing the F325 schedule data.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select CSV File</label>
+                        <input type="file" name="file" id="csvFile" class="form-control" accept=".csv" required>
+                    </div>
+
+                    <div class="small text-muted mb-3">
+                        <b>CSV Format:</b><br>
+                        F325 Number, Code, TM Number, Driver Name, Plate Number, Date Schedule, Remarks
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+
+                            <table id="previewTable" class="table table-bordered table-sm table-striped"
+                                style="width:100%">
+
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>F325 #</th>
+                                        <th>Code</th>
+                                        <th>TM Number</th>
+                                        <th>Driver</th>
+                                        <th>Plate</th>
+                                        <th>Date</th>
+                                        <th>Remarks</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="import-preview">
+
+                                    <tr>
+                                        <td colspan="9" class="text-center text-muted">
+                                            CSV preview will appear here after upload.
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-upload"></i> Upload CSV
+                    </button>
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
 <?php include_once("footer.php"); ?>
 <?php $conn->close(); ?>
 
@@ -367,10 +481,11 @@ if (!empty($_GET['status'])) {
     $(document).ready(function () {
         exportCSV();
         setTimeout(function () {
-        $(".alert").fadeTo(500, 0).slideUp(500, function () {
-            $(this).remove();
-        });
-    }, 3000); 
+            $(".alert").fadeTo(500, 0).slideUp(500, function () {
+                $(this).remove();
+            });
+        }, 3000);
+
     });
 
     function exportCSV() {
@@ -378,4 +493,98 @@ if (!empty($_GET['status'])) {
             window.location.href = "exportprinted.php";
         });
     }
+</script>
+<script>
+
+    $(document).ready(function () {
+
+        $("#csvFile").change(function () {
+
+            $("#import-preview").html(
+                "<tr><td colspan='9' class='text-center'>Loading preview...</td></tr>"
+            );
+
+            var formData = new FormData();
+            formData.append("file", this.files[0]);
+
+            $.ajax({
+
+                url: "importcsv_preview.php",
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+
+                success: function (data) {
+
+                    $("#import-preview").html(data);
+
+                    /* Initialize DataTable */
+                    $("#previewTable").DataTable({
+
+                        destroy: true,
+                        pageLength: 5,
+                        lengthMenu: [5, 10, 25, 50],
+                        scrollY: "300px",
+                        scrollCollapse: true,
+                        paging: true,
+                        ordering: false
+
+                    });
+
+                }
+
+            });
+
+        });
+
+    });
+    $(document).on("click", ".button-raw-delete", function () {
+
+        if (confirm("Remove this row?")) {
+
+            var table = $("#previewTable").DataTable();
+
+            table
+                .row($(this).parents('tr'))
+                .remove()
+                .draw();
+
+        }
+
+    });
+    const preloader = document.getElementById('preloader');
+    const uploadForm = document.getElementById('uploadForm');
+
+    uploadForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var table = $("#previewTable").DataTable();
+
+        // Remove any previously injected hidden inputs
+        $("#uploadForm input.all-rows-data").remove();
+
+        // Loop through ALL rows (not just visible/current page)
+        table.rows().every(function () {
+            var $row = $(this.node());
+
+            // Skip warning/danger rows (already scheduled or not found)
+            if ($row.hasClass('table-warning') || $row.hasClass('table-danger')) return;
+
+            var fields = ['f325number', 'code', 'tmnumber', 'drivername', 'platenumber', 'datesched', 'remarks'];
+
+            fields.forEach(function (field) {
+                var val = $row.find('input[name="' + field + '[]"]').val();
+                var hiddenInput = $('<input>')
+                    .attr('type', 'hidden')
+                    .attr('name', field + '[]')
+                    .attr('class', 'all-rows-data')
+                    .val(val);
+                $("#uploadForm").append(hiddenInput);
+            });
+        });
+
+        preloader.style.display = 'block';
+        this.submit();
+    });
 </script>

@@ -62,7 +62,7 @@ include_once("nav.php");
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2 ml-4">
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Total Amount Unpaid</div>
+                            Total Amount For Charging</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             <?php
                             $scheduled_query = mysqli_query($conn, "SELECT SUM(unitcost * forcharging) AS total_cost FROM dbraw WHERE forcharging >=1 AND batchnumber_forcharging <> '' AND statusout = 'FOR CHARGING' AND status = 'CLEARED'");

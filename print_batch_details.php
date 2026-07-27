@@ -12,8 +12,8 @@ $dateProcessed = $_GET['date_processed'] ?? date('Y-m-d');
 $location = $_GET['hub'] ?? '';
 
 if ($type === 'total') {
-    $qtyField = 'r.rcvdqty';
-    $qtyLabel = 'Received Qty';
+    $qtyField = 'r.quantity';
+    $qtyLabel = 'Total Qty';
 } else {
     $qtyField = 'r.forpullout';
     $qtyLabel = 'Pull-Out Qty';
@@ -178,6 +178,7 @@ $location = $header['location'] ?? $location;
             <tr>
                 <th>Branch Name</th>
                 <th>F325 Number</th>
+                <th>Material Code</th>
                 <th>Description</th>
                 <th><?= $qtyLabel ?></th>
                 <th>Reason Code</th>
@@ -203,8 +204,10 @@ SELECT DISTINCT
     r.forpullout,
     r.reasoncode,
     r.expiration,
+    r.costextended,
     p.uom,
-    r.unitcost
+    r.unitcost,
+    s.prod_insp_memo
 FROM dbraw r
 
 LEFT JOIN (
@@ -225,6 +228,9 @@ LEFT JOIN (
     GROUP BY mdccode
 ) p ON r.mdccode = p.mdccode
 
+LEFT JOIN tbl_sku_list s
+ON r.mdccode = s.mdccode
+
 WHERE r.batchnumber_forpullout = '$batchnumber';
 ";
 
@@ -235,11 +241,13 @@ WHERE r.batchnumber_forpullout = '$batchnumber';
                 $cost_extended = (float) $row['unitcost'] * (float) $row['forpullout'];
 
                 $totalQty += (float) $row['qty'];
+                // $subtotal += $row['costextended'];
                 $subtotal += $cost_extended;
                 ?>
                 <tr>
                     <td><?= "{$row['franchise']} {$row['code']} - {$row['branchname']}" ?></td>
                     <td class="text-center"><?= htmlspecialchars($row['f325number']) ?></td>
+                    <td class="text-center"><?= htmlspecialchars($row['prod_insp_memo']) ?></td>
                     <td><?= htmlspecialchars($row['description']) ?></td>
                     <td class="text-right"><?= number_format($row['qty'], 2) ?></td>
                     <td class="text-center"><?= htmlspecialchars($row['reasoncode']) ?></td>

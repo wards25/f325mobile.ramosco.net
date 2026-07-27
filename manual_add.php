@@ -34,10 +34,7 @@ if($row >= 1){
 		$existing_vendor = $fetch_existingvendor['vendor'];
 
 		if($vendor == $existing_vendor){
-			$query = mysqli_query($conn, "INSERT INTO manual_list (user,mdccode,quantity,unitcost,received,reason,dmpireason,bbd,vendor) VALUES('$user','$mdccode','$qty','$unit','$received','$reason','$dmpireason','$bbd','$vendor')");
-			if(!$query){
-				die("Error: " . mysqli_error($conn));
-			}
+			mysqli_query($conn, "INSERT INTO manual_list (user,mdccode,quantity,unitcost,received,reason,dmpireason,bbd,vendor) VALUES('$user','$mdccode','$qty','$unit','$received','$reason','$dmpireason','$bbd','$vendor')");
 		}else{
 			echo '<div class="alert alert-warning alert-dismissable fade show" role="alert">
 		            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -46,10 +43,7 @@ if($row >= 1){
 		}
 
 	}else{
-		$query = mysqli_query($conn, "INSERT INTO manual_list (user,mdccode,quantity,unitcost,received,reason,dmpireason,bbd,vendor) VALUES('$user','$mdccode','$qty','$unit','$received','$reason','$dmpireason','$bbd','$vendor')");
-		if(!$query){
-			die("Error: " . mysqli_error($conn));
-		}
+		mysqli_query($conn, "INSERT INTO manual_list (user,mdccode,quantity,unitcost,received,reason,dmpireason,bbd,vendor) VALUES('$user','$mdccode','$qty','$unit','$received','$reason','$dmpireason','$bbd','$vendor')");
 	}
 }
 

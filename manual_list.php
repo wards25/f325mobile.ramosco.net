@@ -22,7 +22,7 @@ $user = $_SESSION['fname'];
     
 <?php
     $qty = $row['quantity'];
-    $unitcost = number_format($row['unitcost'],2);
+    $unitcost = $row['unitcost'];
     $total += $unitcost * $qty;
 
     }

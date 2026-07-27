@@ -1,219 +1,265 @@
-<?php 
+<?php
 session_start();
 include('dbconnect.php');
 
-//mime type
+if (!isset($_SESSION['id'])) {
+    header("Location: index.php");
+    exit();
+}
+
+// --- Increase limits for large exports ---
+set_time_limit(0);
+ini_set('memory_limit', '512M');
+mysqli_query($conn, "SET SESSION net_read_timeout=3600");
+mysqli_query($conn, "SET SESSION net_write_timeout=3600");
+
 header('Content-Type: text/csv');
-//tell browser what's the file name
-header('Content-Disposition: attachment; filename="F325 Per Principal Report as of '.date('m-d-Y').'.csv"');
-//no cache
+header('Content-Disposition: attachment; filename="F325 Per Principal Report as of ' . date('m-d-Y') . '.csv"');
 header('Cache-Control: max-age=0');
 
 $output = fopen('php://output', 'w');
-$header = array();
 
-// header
-if(isset($_POST['f325number'])){$header[] = 'F325 NUMBER';}
-if(isset($_POST['skucode'])){$header[] = 'SKU CODE';}
-if(isset($_POST['description'])){$header[] = 'DESCRIPTION';}
-if(isset($_POST['category'])){$header[] = 'CATEGORY';}
-if(isset($_POST['brcode'])){$header[] = 'BRCODE';}
-if(isset($_POST['brname'])){$header[] = 'BRNAME';}
-if(isset($_POST['dmpiclass'])){$header[] = 'DMPI CLASS';}
-if(isset($_POST['dmpireason'])){$header[] = 'DMPI REASON';}
-if(isset($_POST['reasoncode'])){$header[] = 'REASON CODE';}
-if(isset($_POST['quantity'])){$header[] = 'QTY';}
-if(isset($_POST['rcvdqty'])){$header[] = 'RCVD QTY';}
-if(isset($_POST['expiration'])){$header[] = 'EXPIRATION';}
-if(isset($_POST['f325status'])){$header[] = 'STATUS';}
-if(isset($_POST['arnumber'])){$header[] = 'AR NO';}
-if(isset($_POST['arreason'])){$header[] = 'AR REASON';}
-if(isset($_POST['preparedby'])){$header[] = 'PREPARED BY';}
-if(isset($_POST['issuedby'])){$header[] = 'ISSUED BY';}
-if(isset($_POST['emaildate'])){$header[] = 'EMAIL DATE';}
-if(isset($_POST['f325date'])){$header[] = 'F325 DATE';}
-if(isset($_POST['company'])){$header[] = 'COMPANY';}
-if(isset($_POST['tmnumber'])){$header[] = 'TM NO';}
-if(isset($_POST['platenumber'])){$header[] = 'PLATE NO';}
-if(isset($_POST['driver'])){$header[] = 'DRIVER';}
-if(isset($_POST['scheddate'])){$header[] = 'SCHED DATE';}
-if(isset($_POST['cleardate'])){$header[] = 'CLEARED DATE';}
-if(isset($_POST['unitcost'])){$header[] = 'UNIT COST';}
-if(isset($_POST['costextended'])){$header[] = 'COST EXT';}
-if(isset($_POST['print'])){$header[] = 'PRINT';}
-if(isset($_POST['log'])){$header[] = 'LOGISTIC';}
-if(isset($_POST['clearing'])){$header[] = 'CLEARING';}
-if(isset($_POST['cluster'])){$header[] = 'CLUSTER';}
-if(isset($_POST['f325location'])){$header[] = 'LOCATION';}
-if(isset($_POST['process'])){$header[] = 'PROCESS';}
-if(isset($_POST['ilrno'])){$header[] = 'ILR NO';}
+// --- Build CSV header based on selected columns ---
+$columns = [
+    'f325number'   => 'F325 NUMBER',
+    'skucode'      => 'SKU CODE',
+    'description'  => 'DESCRIPTION',
+    'category'     => 'CATEGORY',
+    'brcode'       => 'BRCODE',
+    'brname'       => 'BRNAME',
+    'dmpiclass'    => 'DMPI CLASS',
+    'dmpireason'   => 'DMPI REASON',
+    'reasoncode'   => 'REASON CODE',
+    'quantity'     => 'QTY',
+    'rcvdqty'      => 'RCVD QTY',
+    'expiration'   => 'EXPIRATION',
+    'f325status'   => 'STATUS',
+    'arnumber'     => 'AR NO',
+    'arreason'     => 'AR REASON',
+    'preparedby'   => 'PREPARED BY',
+    'issuedby'     => 'ISSUED BY',
+    'emaildate'    => 'EMAIL DATE',
+    'f325date'     => 'F325 DATE',
+    'company'      => 'COMPANY',
+    'tmnumber'     => 'TM NO',
+    'platenumber'  => 'PLATE NO',
+    'driver'       => 'DRIVER',
+    'scheddate'    => 'SCHED DATE',
+    'cleardate'    => 'CLEARED DATE',
+    'unitcost'     => 'UNIT COST',
+    'costextended' => 'COST EXT',
+    'print'        => 'PRINT',
+    'log'          => 'LOGISTIC',
+    'clearing'     => 'CLEARING',
+    'cluster'      => 'CLUSTER',
+    'f325location' => 'LOCATION',
+    'process'      => 'PROCESS',
+    'ilrno'        => 'ILR NO',
+];
 
-fputcsv($output,$header);
-
-$from = date("Y-m-d",strtotime($_POST['from']));
-$to = date("Y-m-d",strtotime($_POST['to']));
-$status = $_POST['status'];
-$principal = $_POST['principal'];
-$location = $_POST['location'];
-
-if($location == 'all'){
-	if($status == 'all'){
-		$f325_query = mysqli_query($conn,"SELECT * FROM dbf325number WHERE emaildate BETWEEN '$from' AND '$to'");
-	}else{
-		$f325_query = mysqli_query($conn,"SELECT * FROM dbf325number WHERE status = '$status' AND emaildate BETWEEN '$from' AND '$to'");
-	}
-}else{
-	if($status == 'all'){
-		$f325_query = mysqli_query($conn,"SELECT * FROM dbf325number WHERE location = '$location' AND emaildate BETWEEN '$from' AND '$to'");
-	}else{
-		$f325_query = mysqli_query($conn,"SELECT * FROM dbf325number WHERE status = '$status' AND location = '$location' AND emaildate BETWEEN '$from' AND '$to'");
-	}
+// Only include selected columns
+$selectedColumns = [];
+$header = [];
+foreach ($columns as $key => $label) {
+    if (isset($_POST[$key])) {
+        $selectedColumns[] = $key;
+        $header[] = $label;
+    }
 }
 
-	while($fetch_f325 = mysqli_fetch_array($f325_query)) {
+if (empty($selectedColumns)) {
+    fclose($output);
+    exit;
+}
 
-	    $f325number = $fetch_f325['f325number'];
-	    $vendor = $fetch_f325['vendor'];
+fputcsv($output, $header);
 
-	    if($location == 'all'){
-	    	$result	= mysqli_query($conn,"SELECT * FROM dbraw WHERE f325number = '$f325number' ORDER BY id ASC ");
-	    }else{
-	    	$result	= mysqli_query($conn,"SELECT * FROM dbraw WHERE f325number = '$f325number' AND category = '$principal' ORDER BY id ASC ");
-	    }
+// --- Parse dates safely ---
+// type="date" always sends Y-m-d, but handle other formats just in case
+$fromRaw = $_POST['from'] ?? '';
+$toRaw   = $_POST['to']   ?? '';
 
-		// get nickname of vendor
-		$nickname_query = mysqli_query($conn,"SELECT * FROM dbcompany WHERE vendorcode='$vendor'");
-		$fetch_nickname = mysqli_fetch_array($nickname_query);
+$fromDate = DateTime::createFromFormat('Y-m-d', $fromRaw)
+          ?: DateTime::createFromFormat('d/m/Y', $fromRaw)
+          ?: DateTime::createFromFormat('m/d/Y', $fromRaw);
 
-		$company = $fetch_nickname['nickname'];
+$toDate   = DateTime::createFromFormat('Y-m-d', $toRaw)
+          ?: DateTime::createFromFormat('d/m/Y', $toRaw)
+          ?: DateTime::createFromFormat('m/d/Y', $toRaw);
 
-		while($row = mysqli_fetch_array($result))
-		{
+$from = $fromDate ? $fromDate->format('Y-m-d') : date('Y-m-d');
+$to   = $toDate   ? $toDate->format('Y-m-d')   : date('Y-m-d');
 
-			$mdccode = $row['mdccode'];
+// --- Sanitize other inputs ---
+$status    = mysqli_real_escape_string($conn, $_POST['status']    ?? 'all');
+$principal = mysqli_real_escape_string($conn, $_POST['principal'] ?? 'all');
+$location  = mysqli_real_escape_string($conn, $_POST['location']  ?? 'all');
 
-			// dbproduct
-			$product_query = mysqli_query($conn,"SELECT * FROM dbproduct WHERE mdccode = '$mdccode'");
-			$fetch_product = mysqli_fetch_array($product_query);
+// --- Build WHERE clause ---
+$where = "f.emaildate BETWEEN '$from 00:00:00' AND '$to 23:59:59'";
 
-			if (is_array($fetch_product))
-			{
-				$category = $fetch_product['category'];
-				$dmpiclass = $fetch_product['dmpiclassification'];
-			}
-			else
-			{
-				$category = 'For Fill-up';
-				$dmpiclass = '';
-			}
+if ($status !== 'all') {
+    // These values belong to status_out
+    $statusOutValues = ['FOR PULL-OUT', 'FOR CHARGING', 'PULL-OUT'];
+    
+    if (in_array($status, $statusOutValues)) {
+        $where .= " AND r.statusout = '$status'";
+    } else {
+        $where .= " AND r.status = '$status'";
+    }
+}
 
-			$brcode = $fetch_f325['brcode'];
+if ($location !== 'all') {
+    $where .= " AND f.location = '$location'";
+}
 
-			// branch code detail
-			$branch_query = mysqli_query($conn,"SELECT * FROM dbcensus WHERE code='$brcode' ");
-			$fetch_branch = mysqli_fetch_array($branch_query);
+// --- Principal filter ---
+$principalFilter = ($principal !== 'all') ? "AND r.category = '$principal'" : "";
 
-			if (is_array($fetch_branch))
-			{
-				$branch = $fetch_branch['branchname'];
-			}
-			else
-			{
-				$branch = 'For Fill-up';
-			}
+// --- Query ---
+$sql = "
+    SELECT
+        r.f325number,
+        r.mdccode,
+        r.quantity,
+        r.rcvdqty,
+        r.expiration,
+        r.status          AS row_status,
+        r.statusout,
+        r.arnumber,
+        r.arreason,
+        r.reasoncode,
+        r.dmpireason      AS raw_dmpireason,
+        r.unitcost,
+        r.category        AS raw_category,
 
-			if ($row['dmpireason'] == 0)
-			{
-				$fullreason = '';
-			}
-			else
-			{
-				$dmpireason = $row['dmpireason'];
+        f.brcode,
+        f.preparedby,
+        f.issuedby,
+        f.emaildate,
+        f.f325date,
+        f.vendor,
+        f.tmnumber,
+        f.platenumber,
+        f.drivername,
+        f.datesched,
+        f.datecleared,
+        f.printremarks,
+        f.logisticremarks,
+        f.clearingremarks,
+        f.cluster,
+        f.location        AS f325_location,
+        f.process,
+        f.ilrno,
 
-				// get reason
-				$reason_query = mysqli_query($conn,"SELECT * FROM dbdmpireason WHERE reasoncode='$dmpireason'");
-				$fetch_reason = mysqli_fetch_array($reason_query);
+        p.description,
+        p.category        AS product_category,
+        p.dmpiclassification,
 
-				$rawreason = $fetch_reason['reason'];
-				$fullreason = $dmpireason.'-'.$rawreason;
-			}
+        c.branchname,
 
-			if(isset($_POST['f325number'])){$f325number = $row['f325number'];}else{$f325number = '@';}
-			if(isset($_POST['skucode'])){$mdccode = $row['mdccode'];}else{$mdccode = '@';}
-			if(isset($_POST['description'])){$description = $fetch_product['description'];}else{$description = '@';}
-			if(isset($_POST['category'])){$category = $category;}else{$category = '@';}
-			if(isset($_POST['brcode'])){$brcode = $fetch_f325['brcode'];;}else{$brcode = '@';}
-			if(isset($_POST['brname'])){$brname = $branch;}else{$brname = '@';}
-			if(isset($_POST['dmpiclass'])){$dmpiclass = $dmpiclass;}else{$dmpiclass = '@';}
-			if(isset($_POST['dmpireason'])){$dmpireason = $fullreason;}else{$dmpireason = '@';}
-			if(isset($_POST['reasoncode'])){$reasoncode = $row['reasoncode'];}else{$reasoncode = '@';}
-			if(isset($_POST['quantity'])){$quantity = $row['quantity'];}else{$quantity = '@';}
-			if(isset($_POST['rcvdqty'])){$rcvdqty = $row['rcvdqty'];}else{$rcvdqty = '@';}
-			if(isset($_POST['expiration'])){$expiration = $row['expiration'];}else{$expiration = '@';}
-			if(isset($_POST['f325status'])){$f325status = $row['status'];}else{$f325status = '@';}
-			if(isset($_POST['arnumber'])){$arnumber = $row['arnumber'];}else{$arnumber = '@';}
-			if(isset($_POST['arreason'])){$arreason = $row['arreason'];}else{$arreason = '@';}
-			if(isset($_POST['preparedby'])){$preparedby = $fetch_f325['preparedby'];}else{$preparedby = '@';}
-			if(isset($_POST['issuedby'])){$issuedby = $fetch_f325['issuedby'];}else{$issuedby = '@';}
-			if(isset($_POST['emaildate'])){$emaildate = $fetch_f325['emaildate'];}else{$emaildate = '@';}
-			if(isset($_POST['f325date'])){$f325date = $fetch_f325['f325date'];}else{$f325date = '@';}
-			if(isset($_POST['company'])){$company = $company;}else{$company = '@';}
-			if(isset($_POST['tmnumber'])){$tmnumber = $fetch_f325['tmnumber'];}else{$tmnumber = '@';}
-			if(isset($_POST['platenumber'])){$platenumber = $fetch_f325['platenumber'];}else{$platenumber = '@';}
-			if(isset($_POST['driver'])){$driver = $fetch_f325['drivername'];}else{$driver = '@';}
+        co.nickname       AS company_nickname,
 
-			if(isset($_POST['scheddate']))
-			{
-				if ($fetch_f325['datesched'] == '0000-00-00')
-				{
-					$datesched = '';
-				}
-				else
-				{
-					$datesched = $fetch_f325['datesched'];
-				}
-			}
-			else
-			{
-				$datesched = '@';
-			}
+        CONCAT(dr.reasoncode, '-', dr.reason) AS full_dmpireason
 
-			if(isset($_POST['cleardate']))
-			{
-				if ($fetch_f325['datecleared'] == '0000-00-00')
-				{
-					$datecleared = '';
-				}
-				else
-				{
-					$datecleared = $fetch_f325['datecleared'];
-				}
-			}
-			else
-			{
-				$datecleared = '@';
-			}
+    FROM dbf325number f
+    INNER JOIN dbraw r
+        ON r.f325number = f.f325number
+        $principalFilter
+    LEFT JOIN dbproduct p
+        ON p.mdccode = r.mdccode
+        AND p.vendor = f.vendor
+    LEFT JOIN dbcensus c
+        ON c.code = f.brcode
+    LEFT JOIN dbcompany co
+        ON co.vendorcode = f.vendor
+    LEFT JOIN dbdmpireason dr
+        ON dr.reasoncode = r.dmpireason
+        AND r.dmpireason != 0
 
-			if(isset($_POST['unitcost'])){$unitcost = $row['unitcost'];}else{$unitcost = '@';}
-			if(isset($_POST['costextended'])){$costextended = $row['quantity'] * $row['unitcost'];}else{$costextended = '@';}
-			if(isset($_POST['print'])){$print = $fetch_f325['printremarks'];}else{$print = '@';}
-			if(isset($_POST['log'])){$log = $fetch_f325['logisticremarks'];}else{$log = '@';}
-			if(isset($_POST['clearing'])){$clearing = $fetch_f325['clearingremarks'];}else{$clearing = '@';}
-			if(isset($_POST['cluster'])){$cluster = $fetch_f325['cluster'];}else{$cluster = '@';}
-			if(isset($_POST['location'])){$location = $fetch_f325['location'];}else{$location = '@';}
-			if(isset($_POST['process'])){$process = $fetch_f325['process'];}else{$process = '@';}
-			if(isset($_POST['ilrno'])){$ilrno = $fetch_f325['ilrno'];}else{$ilrno = '@';}
+    WHERE $where
+    ORDER BY r.id ASC
+";
 
-			$array_list = array($f325number,$mdccode,$description,$category,$brcode,$brname,$dmpiclass,$dmpireason,$reasoncode,$quantity,$rcvdqty,$expiration,$f325status,$arnumber,$arreason,$preparedby,$issuedby,$emaildate,$f325date,$company,$tmnumber,$platenumber,$driver,$datesched,$datecleared,$unitcost,$costextended,$print,$log,$clearing,$cluster,$location,$process,$ilrno);
+// --- Use unbuffered query to stream rows and avoid memory overload ---
+mysqli_real_query($conn, $sql);
+$result = mysqli_use_result($conn);
 
-			$remove = array('@');
-			$result_array = array_diff($array_list, $remove);
+if (!$result) {
+    fclose($output);
+    exit;
+}
 
-			fputcsv($output,$result_array);
-		}
-	}
+// --- Stream rows directly to CSV ---
+while ($row = mysqli_fetch_assoc($result)) {
 
+    // Derived / fallback values
+    $category    = !empty($row['product_category'])  ? $row['product_category']  : 'For Fill-up';
+    $dmpiclass   = !empty($row['dmpiclassification']) ? $row['dmpiclassification'] : '';
+    $branch      = !empty($row['branchname'])         ? $row['branchname']         : 'For Fill-up';
+    $company     = $row['company_nickname'] ?? '';
+    $fullreason  = ($row['raw_dmpireason'] == 0 || empty($row['full_dmpireason'])) ? '' : $row['full_dmpireason'];
+    $datesched   = (!empty($row['datesched'])   && $row['datesched']   !== '0000-00-00') ? $row['datesched']   : '';
+    $datecleared = (!empty($row['datecleared']) && $row['datecleared'] !== '0000-00-00') ? $row['datecleared'] : '';
+    $statusOutValues = ['FOR PULL-OUT', 'FOR CHARGING', 'PULL-OUT'];
+    $displayStatus   = in_array($row['statusout'], $statusOutValues)
+                       ? $row['statusout']
+                       : $row['row_status'];
+
+    // Map all column keys to their values
+    $valueMap = [
+        'f325number'   => $row['f325number'],
+        'skucode'      => $row['mdccode'],
+        'description'  => $row['description'] ?? '',
+        'category'     => $category,
+        'brcode'       => $row['brcode'],
+        'brname'       => $branch,
+        'dmpiclass'    => $dmpiclass,
+        'dmpireason'   => $fullreason,
+        'reasoncode'   => $row['reasoncode'],
+        'quantity'     => $row['quantity'],
+        'rcvdqty'      => $row['rcvdqty'],
+        'expiration'   => $row['expiration'],
+        'f325status'   => $displayStatus,
+        'arnumber'     => $row['arnumber'],
+        'arreason'     => $row['arreason'],
+        'preparedby'   => $row['preparedby'],
+        'issuedby'     => $row['issuedby'],
+        'emaildate'    => $row['emaildate'],
+        'f325date'     => $row['f325date'],
+        'company'      => $company,
+        'tmnumber'     => $row['tmnumber'],
+        'platenumber'  => $row['platenumber'],
+        'driver'       => $row['drivername'],
+        'scheddate'    => $datesched,
+        'cleardate'    => $datecleared,
+        'unitcost'     => $row['unitcost'],
+        'costextended' => $row['quantity'] * $row['unitcost'],
+        'print'        => $row['printremarks'],
+        'log'          => $row['logisticremarks'],
+        'clearing'     => $row['clearingremarks'],
+        'cluster'      => $row['cluster'],
+        'f325location' => $row['f325_location'],
+        'process'      => $row['process'],
+        'ilrno'        => $row['ilrno'],
+    ];
+
+    // Only output selected columns in correct order
+    $csvRow = [];
+    foreach ($selectedColumns as $key) {
+        $csvRow[] = $valueMap[$key] ?? '';
+    }
+
+    fputcsv($output, $csvRow);
+
+    // Flush output buffer periodically to avoid memory buildup
+    if (ob_get_level() > 0) {
+        ob_flush();
+    }
+    flush();
+}
+
+$result->close();
 fclose($output);
-
 $conn->close();
 ?>

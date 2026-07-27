@@ -78,7 +78,7 @@ include_once("nav.php");
                                                 Total F325 Available for Disposal</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                                 <?php
-                                                    $scheduled_query = mysqli_query($conn,"SELECT * FROM dbf325number WHERE status = 'scheduled' AND emaildate BETWEEN '2023-01-01' AND NOW()");
+                                                    $scheduled_query = mysqli_query($conn,"SELECT * FROM dbf325number WHERE status = 'scheduled' AND emaildate BETWEEN '2025-01-01' AND NOW()");
                                                     $scheduled_count = mysqli_num_rows($scheduled_query);
                                                     echo number_format($scheduled_count);
                                                 ?>

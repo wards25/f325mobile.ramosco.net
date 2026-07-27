@@ -138,7 +138,7 @@ include_once("nav.php");
                                         <tr>
                                             <?php echo '<td>'.$row['datecleared'].'</td>'; ?>
                                             <?php echo '<td>'.$row['f325number'].'</td>'; ?>
-                                            <td><center><a type="submit" name="view" class="data btn-sm btn-success" onclick="window.open('view_f325_cleared.php?f325number=<?php echo $row['f325number'] ?>&emaildate=<?php echo $row['emaildate'] ?>')">View</a></center></td>
+                                            <td><center><a type="submit" name="view" class="data btn-sm btn-success" onclick="window.open('view_f325.php?f325number=<?php echo $row['f325number'] ?>&emaildate=<?php echo $row['emaildate'] ?>')">View</a></center></td>
                                         </tr>
                                     <?php
                                         }

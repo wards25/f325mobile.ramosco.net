@@ -4,7 +4,8 @@ session_start();
 include_once("header.php");
 include_once("dbconnect.php");
 $username = $_SESSION['fname'];
-
+$maintenanceModule = 'for_pullout';
+include('maintenance_check.php');
 // delete prdlist in db 
 mysqli_query($conn, "DELETE FROM cleared_list WHERE user = '$username'");
 
@@ -13,6 +14,8 @@ if (!isset($_SESSION['id'])) {
 }
 $res = mysqli_query($conn, "SELECT * FROM dbuser WHERE id=" . $_SESSION['id']);
 $userRow = mysqli_fetch_array($res);
+$maintenanceModule = 'for_pullout';
+include('maintenance_check.php');
 ?>
 
 <?php
@@ -170,7 +173,7 @@ include_once("nav.php");
                                 FROM dbraw r
                                 INNER JOIN dbcompany c
                                     ON r.vendorcode = c.vendorcode
-                                WHERE r.forpullout >= 1 AND r.batchnumber_forpullout = ''
+                                WHERE r.forpullout >= 1 AND r.batchnumber_forpullout IS NULL
                                 AND r.location IN ($location_filter)
                                 GROUP BY c.nickname, r.category, r.vendorcode
                                 ORDER BY r.category ASC
@@ -196,6 +199,9 @@ include_once("nav.php");
 
 
                             $result = mysqli_query($conn, $query);
+                            if (!$result) {
+                                die("Query failed: " . mysqli_error($conn));
+                            }
                             while ($row = mysqli_fetch_assoc($result)) {
                                 echo "<tr>
                                 <td>{$row['company']}</td>

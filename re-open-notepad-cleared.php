@@ -27,7 +27,7 @@ if (!$query) {
 }
 
 // update in dbraw
-mysqli_query($conn, "UPDATE dbraw SET datecleared = NULL, status='$status' WHERE f325number='$f325number'");
+mysqli_query($conn, "UPDATE dbraw SET datecleared = NULL, status='$status', statusout = '$status' WHERE f325number='$f325number'");
 
 // insert in dbhistory
 $processed = 'Re-open';

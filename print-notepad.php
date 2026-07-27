@@ -1,6 +1,8 @@
 <?php
 session_start();
 include('dbconnect.php');
+$maintenanceModule = 'print_notepad';
+include('maintenance_check.php');
 ?>
 <?php include_once('header.php'); ?>
 <?php include_once('nav.php'); ?>
@@ -33,7 +35,7 @@ include('dbconnect.php');
                                 Total F325 For Open Status</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <?php
-                                $open_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE status = 'open' AND emaildate BETWEEN '2024-01-01' AND NOW()");
+                                $open_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE status = 'open' AND emaildate BETWEEN '2025-01-01' AND NOW()");
                                 $open_count = mysqli_num_rows($open_query);
                                 echo number_format($open_count);
                                 ?>
@@ -121,7 +123,7 @@ include('dbconnect.php');
                     </table>
 
                     <!-- View Order Detail -->
-                    <div class="modal" id="order-detail-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal fade" id="order-detail-modal" tabindex="-1"  aria-hidden="true">
                         <div class="modal-dialog modal-xl" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -156,10 +158,7 @@ include('dbconnect.php');
                                             </div>
                                         </div>
                                     </div>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                                        onclick="UnloadNotepadDetail()">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
+                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="container py-4">

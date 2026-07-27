@@ -208,7 +208,7 @@ include_once("nav.php");
                     <button class="d-sm-inline-block btn btn-sm btn-secondary shadow-sm" onclick="window.close()">x</button>
                     <a type="button" class="d-sm-inline-block btn btn-sm btn-info shadow-sm" href="#" data-toggle="modal"
                         data-target="#historyModal">History</a>
-                    <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#reopenModal"
+                    <a href="#" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#reopenModal"
                         data-f325="<?php echo $f325number; ?>">
                         <i class="fa fa-open"></i> RE-OPEN F325
                     </a>
@@ -449,7 +449,7 @@ include_once("nav.php");
                     Cancel
                 </button>
 
-                <a href="re-open-notepad-cleared.php?f325number=<?php echo $f325number; ?>" class="btn btn-info">
+                <a href="re-open-notepad-cleared.php?f325number=<?php echo $f325number; ?>" class="btn btn-warning">
                     Yes, Re-open
                 </a>
             </div>

@@ -14,13 +14,13 @@ $f325number = $_POST['f325number'];
 mysqli_query($conn,"UPDATE dbf325number SET status='$status' WHERE f325number='$f325number' ");
 
 // update in dbraw
-mysqli_query($conn,"UPDATE dbraw SET status='$status' WHERE f325number='$f325number' ");
+mysqli_query($conn,"UPDATE dbraw SET status='$status', statusout = '$status' WHERE f325number='$f325number' ");
 
 // insert in dbhistory
 $processed = 'Re-open';
 mysqli_query($conn,"INSERT INTO dbhistory(processnumber,name,processed,dateprocessed,timeprocessed) VALUES ('$f325number','$username','$processed','$dateprocessed','$timeprocessed')");
 
-echo 'Reopen successfully!';
+echo 'Update successfully!';
 
 $conn->close();
 ?>

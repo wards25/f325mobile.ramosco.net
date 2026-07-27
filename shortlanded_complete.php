@@ -19,7 +19,7 @@ include_once("nav.php");
                 <div class="container-fluid">
 
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Shortlanded F325</h1>
+                <h1 class="h3 mb-0 text-gray-800">Paid Shortlanded F325</h1>
                 </div>
 
                     <!-- Content Row -->
@@ -30,19 +30,19 @@ include_once("nav.php");
                             <div class="card border-left-info shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
+                                        <div class="col ml-4 mr-2">
                                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                                Total Unpaid F325</div>
+                                                Total Paid F325</div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                                 <?php
-                                                    $sl_query = mysqli_query($conn,"SELECT sum(costextended) FROM sl_list WHERE paymentstatus = 'UNPAID'");
+                                                    $sl_query = mysqli_query($conn,"SELECT sum(costextended) FROM sl_list WHERE paymentstatus = 'PAID'");
                                                     $fetch_sl = mysqli_fetch_array($sl_query);
                                                     echo '₱'.number_format($fetch_sl['sum(costextended)'], 2);
                                                 ?>
                                             </div>
-                                            <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="shortlanded.php">View</a></small>
+                                            <small class="mb-0 text-gray-800">as of <?php echo date("h:i A"); ?> | <a href="shortlanded.php">View unpaid</a></small>
                                         </div>
-                                        <div class="col-auto">
+                                        <div class="col-auto mr-4">
                                             <i class="fas fa-money-bill fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
@@ -58,8 +58,9 @@ include_once("nav.php");
                                 <table class="table table-striped table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead class="table-info text-dark text-center">
                                         <tr>
-                                            <th>SL Date</th>
+                                            <th>F325 No.</th>
                                             <th>SL No.</th>
+                                            <th>SL Date</th>
                                             <th>Status</th>
                                             <th>View</th>
                                         </tr>
@@ -69,7 +70,7 @@ include_once("nav.php");
                                         $now = date('Y-m-d');
                                         $datetime2 = new DateTime($now);
 
-                                        $result = mysqli_query($conn,"SELECT f325no, dateprocessed, slno, paymentstatus FROM sl_number GROUP BY f325no, slno, dateprocessed, paymentstatus");
+                                        $result = mysqli_query($conn,"SELECT f325no, dateprocessed, slno, paymentstatus FROM sl_list WHERE paymentstatus = 'PAID' GROUP BY f325no, slno, dateprocessed, paymentstatus");
                                         while($row = mysqli_fetch_array($result))
                                             {
                                                 $datetime1 = new DateTime($row['dateprocessed']);
@@ -77,8 +78,9 @@ include_once("nav.php");
                                                 $diff = $difference->format('%a' );
                                         ?>
                                         <tr>
-                                            <?php echo '<td>'.$row['dateprocessed'].'</td>'; ?>
+                                            <?php echo '<td>'.$row['f325no'].'</td>'; ?>
                                             <?php echo '<td>'.$row['slno'].'</td>'; ?>
+                                            <?php echo '<td>'.$row['dateprocessed'].'</td>'; ?>
                                             <?php 
                                             if($row['paymentstatus'] == 'PAID'){
                                                 echo '<td class="table-success">'.$row['paymentstatus'].'</td>'; 

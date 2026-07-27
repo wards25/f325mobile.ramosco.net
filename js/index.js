@@ -311,12 +311,12 @@ function LoadNotepadDetail() {
   });
 }
 
-function UnloadNotepadDetail() {
-  var modal = new bootstrap.Modal(
-    document.getElementById("order-detail-modal"),
-  );
-  modal.hide();
-}
+// function UnloadNotepadDetail() {
+//   var modal = new bootstrap.Modal(
+//     document.getElementById("order-detail-modal"),
+//   );
+//   modal.hide();
+// }
 function LoadSKU() {
   const f325number = $(".input-ordernumber").val();
   const vendorCode = $(".input-company").attr("vcode");

@@ -14,7 +14,7 @@ if (!isset($_GET['batchnumber'])) {
 }
 
 $batchnumber = mysqli_real_escape_string($conn, $_GET['batchnumber']);
-
+$principal = $_GET['principal'] ?? '';
 include_once("nav.php");
 ?>
 <style>
@@ -76,7 +76,6 @@ include_once("nav.php");
     </div>
 </div>
 <div class="container-fluid">
-
     <div
         class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between mb-4 gap-3">
         <div class="d-flex align-items-center">
@@ -89,20 +88,98 @@ include_once("nav.php");
         </div>
 
         <div class="d-flex align-items-center gap-2">
+            <?php
+            $is_already_printed = false;
+            $check_query = "SELECT id FROM tbl_preform WHERE batchnumber = '" . mysqli_real_escape_string($conn, $batchnumber) . "' LIMIT 1";
+            $check_result = mysqli_query($conn, $check_query);
 
-            <button class="btn btn-primary btn-sm" onclick="printBatch('pullout')">
-                <i class="bi bi-printer me-1"></i> Print Pull-Out QTY
-            </button>
+            if ($check_result && mysqli_num_rows($check_result) > 0) {
+                $is_already_printed = true;
+            }
 
-            <button class="btn btn-success btn-sm" onclick="printBatch('total')">
-                <i class="bi bi-printer me-1"></i> Print Total QTY
-            </button>
+            $isLoc1 = $_SESSION['loc1'] == 1;
+            $isPurefoods = $principal === 'PUREFOODS';
+            $isMagnolia = $principal === 'MAGNOLIA INC.';
+            $isSanmiguel = $principal === 'SAN MIGUEL SUPER COFFEEMIX CO., INC.';
+            $principalName = $isMagnolia
+                ? 'MAGNOLIA INC.'
+                : 'SAN MIGUEL SUPER COFFEEMIX CO., INC.';
+            ?>
+
+            <?php if ($isPurefoods && $isLoc1): ?>
+                <?php if ($is_already_printed): ?>
+                    <a href="preform_purefoods_reprint.php?batchnumber=<?= urlencode($batchnumber) ?>"
+                        class="btn btn-warning btn-sm">
+                        <i class="bi bi-printer me-1"></i> RePrint SMIS FORMAT
+                    </a>
+
+                    <!-- if the principal is purefoods -->
+                    <button class="btn btn-primary btn-sm" onclick="printBatch('export-preform')">
+                        <i class="bi-file-earmark-pdf me-1"></i> Export SMIS PDF
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="printBatch('export-notepad')">
+                        <i class="bi-file-earmark-pdf me-1"></i> Export Notepad PDF
+                    </button>
+                <?php else: ?>
+                    <button class="btn btn-warning btn-sm" onclick="printBatch('smis')">
+                        <i class="bi bi-printer me-1"></i> Print SMIS FORMAT
+                    </button>
+                <?php endif; ?>
+                <!-- if the principal is magnolia and sanmiguel -->
+            <?php elseif (($isMagnolia || $isSanmiguel) && $isLoc1): ?>
+                <?php if ($is_already_printed): ?>
+                    <a href="preform_magnolia_reprint.php?batchnumber=<?= urlencode($batchnumber) ?>&type=<?= urlencode($principalName) ?>"
+                        class="btn btn-warning btn-sm">
+                        <i class="bi bi-printer me-1"></i> RePrint SMIS FORMAT
+                    </a>
+
+                    <!-- if the principal is purefoods -->
+                    <button class="btn btn-primary btn-sm" onclick="printBatch('export-magnolia-pdf')">
+                        <i class="bi-file-earmark-pdf me-1"></i> Export SMIS PDF
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="printBatch('export-notepad')">
+                        <i class="bi-file-earmark-pdf me-1"></i> Export Notepad PDF
+                    </button>
+                <?php else: ?>
+                    <button class="btn btn-warning btn-sm" onclick="printBatch('<?= $principalName ?>')">
+                        <i class="bi bi-printer me-1"></i> Print SMIS FORMAT
+                    </button>
+                <?php endif; ?>
+                <!-- kapag ka none purefoods, sanmiguel at magnolia -->
+            <?php else: ?>
+                <!-- kapag cainta ang location -->
+                <?php if ($isLoc1): ?>
+                    <button class="btn btn-primary btn-sm" onclick="printBatch('pullout')">
+                        <i class="bi bi-printer me-1"></i> Print Pull-Out QTY
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="printBatch('total')">
+                        <i class="bi bi-printer me-1"></i> Print Total QTY
+                    </button>
+                <?php else: ?>
+                    <button class="btn btn-primary btn-sm" onclick="printBatch('pullout')">
+                        <i class="bi bi-printer me-1"></i> Print Pull-Out QTY
+                    </button>
+                <?php endif; ?>
+            <?php endif; ?>
+
+            <!-- old code -->
+            <!-- <?php if ($isLoc1): ?>
+                <button class="btn btn-primary btn-sm" onclick="printBatch('pullout')">
+                    <i class="bi bi-printer me-1"></i> Print Pull-Out QTY
+                </button>
+                <button class="btn btn-success btn-sm" onclick="printBatch('total')">
+                    <i class="bi bi-printer me-1"></i> Print Total QTY
+                </button>
+            <?php else: ?>
+                <button class="btn btn-primary btn-sm" onclick="printBatch('pullout')">
+                    <i class="bi bi-printer me-1"></i> Print Pull-Out QTY
+                </button>
+            <?php endif; ?> -->
 
             <!-- History Button -->
             <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#historyModal">
                 <i class="bi bi-clock-history me-1"></i> View History
             </button>
-
         </div>
     </div>
 
@@ -185,6 +262,7 @@ include_once("nav.php");
                         <tr>
                             <th>Branch Name</th>
                             <th>F325 Number</th>
+                            <th>Material Code</th>
                             <th>Description</th>
                             <th>Pullout Qty</th>
                             <th>UoM</th>
@@ -209,7 +287,8 @@ include_once("nav.php");
                                 p.uom,
                                 r.costextended,
                                 r.mdccode,
-                                r.unitcost
+                                r.unitcost,
+                                s.prod_insp_memo
                             FROM dbraw r
 
                             LEFT JOIN (
@@ -233,6 +312,9 @@ include_once("nav.php");
                                 GROUP BY mdccode
                             ) p ON r.mdccode = p.mdccode
 
+                             LEFT JOIN tbl_sku_list s
+                                ON r.mdccode = s.mdccode
+
                             WHERE r.batchnumber_forpullout = '$batchnumber';
                             ";
 
@@ -245,16 +327,18 @@ include_once("nav.php");
 
                                 $totalQty += (float) $row['forpullout'];
                                 $cost_extended = (float) $row['unitcost'] * $row['forpullout'];
-                                $subtotal += (float) $cost_extended;
+                                // $subtotal += (float) $row['costextended'];
+                                $subtotal += $cost_extended;
 
                                 echo "
                                 <tr>
                                     <td>{$row['franchise']} {$row['code']} - {$row['branchname']}</td>
                                     <td class='text-center'>{$row['f325number']}</td>
+                                    <td class='text-center'>{$row['prod_insp_memo']}</td>
                                     <td>{$row['description']}</td>
                                     <td class='text-end'>{$row['forpullout']}</td>
                                     <td class='text-center'>{$row['uom']}</td>
-                                    <td class='text-end'>" . number_format($row['unitcost'], 2) . "</td>
+                                    <td class='text-end'>" . number_format($cost_extended, 2) . "</td>
                                 </tr>";
                             }
                         }
@@ -264,58 +348,60 @@ include_once("nav.php");
                 </table>
             </div>
             <hr>
-            <form id="pullout-upload" method="POST" enctype="multipart/form-data" action="upload_pullout_attachment.php">
-                <input type="hidden" name="batchnumber" value="<?= htmlspecialchars($batchnumber) ?>">
-                <div class="row g-4 align-items-start">
+            <?php if ($_SESSION['loc1'] == 1): ?>
+                <form id="pullout-upload" method="POST" enctype="multipart/form-data"
+                    action="upload_pullout_attachment.php">
+                    <input type="hidden" name="batchnumber" value="<?= htmlspecialchars($batchnumber) ?>">
+                    <div class="row g-4 align-items-start">
 
-                    <!-- LEFT: Upload Section -->
-                    <div class="col-lg-8">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header bg-light fw-bold text-center">
-                                Pull-Out Details
-                            </div>
+                        <!-- LEFT: Upload Section -->
+                        <div class="col-lg-8">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-header bg-light fw-bold text-center">
+                                    Pull-Out Details
+                                </div>
 
-                            <div class="card-body">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="fw-bold">Pull-Out Date <span class="text-danger">*</span></label>
-                                        <input type="date" name="pullout_date" class="form-control" required
-                                            value="<?= date('Y-m-d') ?>">
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="fw-bold">Pull-Out Date <span class="text-danger">*</span></label>
+                                            <input type="date" name="pullout_date" class="form-control" required
+                                                value="<?= date('Y-m-d') ?>">
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="fw-bold">Driver Name <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="drivername" required>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <label class="fw-bold">LOGP # <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="logpnumber" required>
+                                        </div>
+
+                                        <!-- LogP Images -->
+                                        <div class="col-12">
+                                            <label class="fw-bold">Upload LogP Images <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="file" id="logpImages" name="logp_images[]" class="form-control"
+                                                multiple accept="image/*" required>
+                                            <div id="logpPreview" class="d-flex flex-wrap mt-2"></div>
+                                        </div>
+
+                                        <!-- Pullout Summary Images -->
+                                        <div class="col-12">
+                                            <label class="fw-bold">Upload Pull-Out Summary Images <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="file" name="pullout_summary[]" id="summaryImage"
+                                                class="form-control" multiple accept="image/*" required>
+                                            <div id="summaryPreview" class="d-flex flex-wrap mt-2"></div>
+                                        </div>
+
                                     </div>
-
-                                    <div class="col-md-6">
-                                        <label class="fw-bold">Driver Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="drivername" required>
-                                    </div>
-
-                                    <div class="col-md-12">
-                                        <label class="fw-bold">LOGP # <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="logpnumber" required>
-                                    </div>
-
-                                    <!-- LogP Images -->
-                                    <div class="col-12">
-                                        <label class="fw-bold">Upload LogP Images <span
-                                                class="text-danger">*</span></label>
-                                        <input type="file" id="logpImages" name="logp_images[]" class="form-control"
-                                            multiple accept="image/*" required>
-                                        <div id="logpPreview" class="d-flex flex-wrap mt-2"></div>
-                                    </div>
-
-                                    <!-- Pullout Summary Images -->
-                                    <div class="col-12">
-                                        <label class="fw-bold">Upload Pull-Out Summary Images <span
-                                                class="text-danger">*</span></label>
-                                        <input type="file" name="pullout_summary[]" id="summaryImage"
-                                            class="form-control" multiple accept="image/*" required>
-                                        <div id="summaryPreview" class="d-flex flex-wrap mt-2"></div>
-                                    </div>
-
                                 </div>
                             </div>
                         </div>
-                    </div>
-
+                    <?php endif; ?>
                     <!-- RIGHT: Summary Section -->
                     <div class="col-lg-4">
                         <div class="card shadow-sm">
@@ -342,16 +428,17 @@ include_once("nav.php");
                     </div>
 
                 </div>
-
-                <!-- CENTERED BUTTON -->
-                <div class="row mt-4">
-                    <div class="col text-center">
-                        <button class="btn btn-success btn-sm" type="submit">
-                            <i class="fas fa-upload me-1"></i> Complete Pull-Out
-                        </button>
+                <?php if ($_SESSION['loc1'] == 1): ?>
+                    <!-- CENTERED BUTTON -->
+                    <div class="row mt-4">
+                        <div class="col text-center">
+                            <button class="btn btn-success btn-sm" type="submit">
+                                <i class="fas fa-upload me-1"></i> Complete Pull-Out
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -433,8 +520,26 @@ include_once("nav.php");
         const hub = "<?= htmlspecialchars($location) ?>";
         const company = "<?= htmlspecialchars($vendorcode) ?>";
         const dateProcessed = "<?= htmlspecialchars($dateProcessed) ?>";
+        let url = "print_batch_details.php";
+
+        if (type === 'smis') {
+            url = "preform_purefoods.php"; // NEW FILE
+        } else if (type === 'export-notepad') {
+            url = "preform_export_notepad.php";
+        } else if (type === 'export-preform') {
+            url = "preform_purefoods_pdf.php";
+        } else if (type === 'MAGNOLIA INC.' || type === 'SAN MIGUEL SUPER COFFEEMIX CO., INC.') {
+            url = "preform_magnolia.php";
+        } else if (type == 'export-magnolia-pdf') {
+            url = "preform_magnolia_pdf.php";
+        } else if (type === 'pullout') {
+            url = "print_batch_details.php";
+        } else if (type === 'total') {
+            url = "print_batch_details.php";
+        }
+
         window.location.href =
-            "print_batch_details.php?batchnumber=" +
+            url + "?batchnumber=" +
             encodeURIComponent(batchnumber) +
             "&vendor=" + encodeURIComponent(company) +
             "&type=" + type +
@@ -449,7 +554,7 @@ include_once("nav.php");
 
     let logpFiles = []; // store selected files
 
-    logpInput.addEventListener('change', function() {
+    logpInput.addEventListener('change', function () {
         Array.from(this.files).forEach(file => {
             if (file.type.startsWith('image/')) {
                 logpFiles.push(file);
@@ -500,7 +605,7 @@ include_once("nav.php");
 
     let summaryFiles = []; // store selected files
 
-    summaryInput.addEventListener('change', function() {
+    summaryInput.addEventListener('change', function () {
         Array.from(this.files).forEach(file => {
             if (file.type.startsWith('image/')) {
                 summaryFiles.push(file);
@@ -548,7 +653,7 @@ include_once("nav.php");
         summaryFiles.forEach(file => dataTransfer.items.add(file));
         summaryInput.files = dataTransfer.files;
     }
-    document.getElementById("pullout-upload").addEventListener("submit", function() {
+    document.getElementById("pullout-upload").addEventListener("submit", function () {
         const loader = document.getElementById("preloader");
         loader.style.display = "block";
 

@@ -1,4 +1,3 @@
-```php
 <?php
 session_start();
 include_once("dbconnect.php");
@@ -40,29 +39,36 @@ if (isset($_POST['create_batch'])) {
         exit();
     }
 
-    /* CHECK IF ITEMS BELONG TO SAME LOCATION */
+    /* BUILD PAIRED CONDITIONS */
 
-    $fPlaceholders = implode(',', array_fill(0, count($f325numbers), '?'));
-    $mPlaceholders = implode(',', array_fill(0, count($mdccodes), '?'));
+    $conditions = [];
+    $pairedParams = [];
+    $pairedTypes = '';
+
+    foreach ($f325numbers as $i => $f325) {
+        $conditions[] = "(f325number = ? AND mdccode = ?)";
+        $pairedParams[] = $f325;
+        $pairedParams[] = $mdccodes[$i];
+        $pairedTypes .= 'ii';
+    }
+
+    $whereClause = implode(' OR ', $conditions);
+
+    /* CHECK IF ITEMS BELONG TO SAME LOCATION */
 
     $sqlCheck = "
         SELECT DISTINCT location
         FROM dbraw
-        WHERE f325number IN ($fPlaceholders)
-        AND mdccode IN ($mPlaceholders)
+        WHERE $whereClause
     ";
 
     $stmtCheck = $conn->prepare($sqlCheck);
 
-    $typesCheck = str_repeat('i', count($f325numbers) + count($mdccodes));
-    $paramsCheck = array_merge($f325numbers, $mdccodes);
-
     $tmpCheck = [];
-    foreach ($paramsCheck as $key => $value) {
-        $tmpCheck[$key] = &$paramsCheck[$key];
+    foreach ($pairedParams as $key => $value) {
+        $tmpCheck[$key] = &$pairedParams[$key];
     }
-
-    array_unshift($tmpCheck, $typesCheck);
+    array_unshift($tmpCheck, $pairedTypes);
     call_user_func_array([$stmtCheck, 'bind_param'], $tmpCheck);
 
     $stmtCheck->execute();
@@ -117,20 +123,18 @@ if (isset($_POST['create_batch'])) {
         $sql = "
             UPDATE dbraw
             SET batchnumber_forpullout = ?, statusout = 'FOR PULL-OUT'
-            WHERE f325number IN ($fPlaceholders)
-            AND mdccode IN ($mPlaceholders)
+            WHERE $whereClause
         ";
 
         $stmt = $conn->prepare($sql);
 
-        $types = 's' . str_repeat('i', count($f325numbers) + count($mdccodes));
-        $params = array_merge([$batchNumber], $f325numbers, $mdccodes);
+        $types = 's' . $pairedTypes;
+        $params = array_merge([$batchNumber], $pairedParams);
 
         $tmp = [];
         foreach ($params as $key => $value) {
             $tmp[$key] = &$params[$key];
         }
-
         array_unshift($tmp, $types);
         call_user_func_array([$stmt, 'bind_param'], $tmp);
 
@@ -142,22 +146,17 @@ if (isset($_POST['create_batch'])) {
         $sqlInfo = "
             SELECT category, vendorcode, location
             FROM dbraw
-            WHERE f325number IN ($fPlaceholders)
-            AND mdccode IN ($mPlaceholders)
+            WHERE $whereClause
             LIMIT 1
         ";
 
         $stmtInfo = $conn->prepare($sqlInfo);
 
-        $typesInfo = str_repeat('i', count($f325numbers) + count($mdccodes));
-        $paramsInfo = array_merge($f325numbers, $mdccodes);
-
         $tmpInfo = [];
-        foreach ($paramsInfo as $key => $value) {
-            $tmpInfo[$key] = &$paramsInfo[$key];
+        foreach ($pairedParams as $key => $value) {
+            $tmpInfo[$key] = &$pairedParams[$key];
         }
-
-        array_unshift($tmpInfo, $typesInfo);
+        array_unshift($tmpInfo, $pairedTypes);
         call_user_func_array([$stmtInfo, 'bind_param'], $tmpInfo);
 
         $stmtInfo->execute();
@@ -201,11 +200,10 @@ if (isset($_POST['create_batch'])) {
         $processed = "Created Pullout Batch: $batchNumber";
 
         foreach ($f325numbers as $f325number) {
-
-            mysqli_query($conn,"INSERT INTO dbhistory
-            (processnumber,name,processed,dateprocessed,timeprocessed)
+            mysqli_query($conn, "INSERT INTO dbhistory
+            (processnumber, name, processed, dateprocessed, timeprocessed)
             VALUES
-            ('$f325number','$username','$processed','$dateprocessed','$timeprocessed')");
+            ('$f325number', '$username', '$processed', '$dateprocessed', '$timeprocessed')");
         }
 
         $conn->commit();
@@ -226,4 +224,3 @@ if (isset($_POST['create_batch'])) {
     }
 }
 ?>
-```

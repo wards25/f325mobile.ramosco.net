@@ -49,11 +49,8 @@ if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
             $preparedby = trim(str_replace('Prepared by - ', '', $thirdline));
             $preparedby = preg_replace('/\s+on\s+\d{2}\/\d{2}\/\d{4}$/', '', $preparedby); // remove "on 03/07/2026"
 
-            // Detect encoding and convert to UTF-8
-            $preparedby = mb_convert_encoding($preparedby, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252');
-
-            // Replace accented/special characters with ASCII equivalents
-            $preparedby = iconv('UTF-8', 'ASCII//TRANSLIT', $preparedby);
+            $preparedby = iconv('ISO-8859-1', 'UTF-8//TRANSLIT', $preparedby);
+            $preparedby = preg_replace('/[^\x20-\x7E]/', '', $preparedby); // keep only printable ASCII
 
             // Remove any remaining non-printable characters
             $preparedby = preg_replace('/[^\x20-\x7E]/', '', $preparedby);
@@ -64,11 +61,8 @@ if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
             $issuedby = trim(fgets($open_file));
             $issuedby = trim($issuedby);
 
-            // Convert encoding to UTF-8 safely
-            $issuedby = mb_convert_encoding($issuedby, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252');
-
-            // Replace accented/special characters with ASCII equivalents
-            $issuedby = iconv('UTF-8', 'ASCII//TRANSLIT', $issuedby);
+            $issuedby = iconv('ISO-8859-1', 'UTF-8//TRANSLIT', $issuedby);
+            $issuedby = preg_replace('/[^\x20-\x7E]/', '', $issuedby); // keep only printable ASCII
 
             // Remove any remaining non-printable characters
             $issuedby = preg_replace('/[^\x20-\x7E]/', '', $issuedby);

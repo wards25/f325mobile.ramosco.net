@@ -28,10 +28,6 @@ $q = mysqli_query($conn, "
 ") or die("SQL ERROR: " . mysqli_error($conn));
 
 $h = mysqli_fetch_assoc($q);
-if (!$h) {
-    echo "F325 Number not found.";
-    exit;
-}
 
 // Fetch items
 $items = [];
@@ -41,109 +37,119 @@ while ($row = mysqli_fetch_assoc($qi)) {
 }
 
 $f325date = date('m/d/Y', strtotime($h['f325date']));
-
-// Change content type to HTML for browser printing
 header("Content-Type: text/html; charset=UTF-8");
 ?>
 <!DOCTYPE html>
 <html>
-
 <head>
     <style>
-        body {
-            font-family: monospace;
-            /* preserves spacing */
-            white-space: pre;
-            /* preserves formatting */
+        @page {
+            size: auto;
+            margin: 0.5in;
         }
 
-        .print-button {
-            margin-bottom: 20px;
+        body {
+            font-family: "Courier New", Courier, monospace;
+            white-space: pre;
+            font-size: 13px;
+            /* Adjust size if columns wrap */
+            line-height: 1.2;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
         }
     </style>
 </head>
-
 <body>
-    <?php
-    $total = 0;
+<?php
+$total = 0;
 
-    // Document Header
-    echo "\x0C\r\n"; // Form feed for thermal printers
-    echo "\r\n";
-    echo "@\r\n";
-    echo "M\r\n";
-    echo "                                                            Doc.#  - {$h['f325number']}\r\n";
-    echo "                                                            Branch - {$h['brcode']} {$h['branchname']}\r\n";
-    echo "                                                            Prepared by - {$h['preparedby']} on {$f325date}\r\n";
-    echo "                                                            Issued by - ________________________________\r\n";
-    echo "                                                                         MS.MA. FE NERI RASCO\r\n";
-    echo "                                                                            (Branch Manager)\r\n\r\n";
-    echo " Shipped To - {$h['vendorname']} ({$h['vendorcode']}  )\r\n";
-    echo " Shipped Via Forwarder (Name and Waybill No.) - _________________________________    Date - _________________\r\n\r\n";
-    echo "  ITEM                                                          COST    COST\r\n";
-    echo "  CODE    QNTY   DESCRIPTION                  EXP-DATE Reason   EACH  EXTENDED\r\n";
-    echo "  ----    ----   -----------                  --Lot #- -----    ----  --------\r\n\r\n";
+// Printer Control Codes with New Lines
+echo "\x1B@\r\n"; // Initialize
+echo "\x1BM\r\n"; // Select 12 CPI
 
-    // Document Items
-    foreach ($items as $i) {
-        $code = $i['mdccode'] ?? '';
-        $qty = $i['quantity'] ?? '';
-        $product = mysqli_query($conn, "SELECT * FROM dbproduct WHERE mdccode= '$code'");
-        $product_query = mysqli_fetch_array($product);
-        $desc = $product_query['description'] ?? '';
-        $exp = date('m/d/Y', strtotime($i['expiration'])) ?? '';
-        $reason = $i['reasoncode'] ?? '';
-        $unit = $i['unitcost'] ?? 0;
-        $sub = $i['costextended'] ?? 0;
+// Header Section (60 spaces indentation)
+$indent = "                                                            ";
+echo $indent . "Doc.#  - {$h['f325number']}\r\n";
+echo $indent . "Branch - {$h['brcode']} {$h['branchname']}\r\n";
+echo $indent . "Prepared by - {$h['preparedby']} on {$f325date}\r\n";
+echo $indent . "Issued by - ________________________________\r\n";
+echo $indent . "             {$h['issuedby']}\r\n";
+echo $indent . "             (Branch Manager)\r\n\r\n";
 
-        $each = number_format($unit, 2);
-        $ext = number_format($sub, 2);
+echo " Shipped To - " . str_pad($h['vendorname'] . " (" . $h['vendorcode'] . ")", 45) . "\r\n";
+echo " Shipped Via Forwarder (Name and Waybill No.) - ________________________  Date - _________\r\n\r\n";
 
-        $total += $sub;
+// Table Header
+echo " ITEM                                                     COST    COST     \r\n";
+echo " CODE     QNTY  DESCRIPTION                EXP-DATE Reason EACH    EXTENDED \r\n";
+echo " ----     ----  -----------                --Lot #- ----- ----    -------- \r\n";
 
-        echo " {$code}    {$qty}  {$desc}       {$exp} {$reason}      {$each}   {$ext}\r\n";
+// Document Items
+foreach ($items as $i) {
+    $code   = $i['mdccode'] ?? '';
+    $qty    = $i['quantity'] ?? 0;
+    
+    $product_q = mysqli_query($conn, "SELECT description FROM dbproduct WHERE mdccode= '$code'");
+    $p_row = mysqli_fetch_assoc($product_q);
+    $desc = substr($p_row['description'] ?? '', 0, 26); 
+    
+    $exp_raw = $i['expiration'];
+    $exp = (!is_null($exp_raw) && !empty($exp_raw) && $exp_raw !== '0000-00-00' && $exp_raw !== '0000-00-00 00:00:00') 
+       ? date('m/d/y', strtotime($exp_raw)) 
+       : '        ';
+    $reason = $i['reasoncode'] ?? '';
+    $unit   = number_format($i['unitcost'] ?? 0, 2);
+    $ext    = number_format($i['costextended'] ?? 0, 2);
+    $lot    = $i['lotno'] ?? ''; 
+
+    $total += ($i['costextended'] ?? 0);
+
+    // Row Logic
+    $row = " " . str_pad($code, 9, " ");
+    $row .= str_pad($qty, 6, " ");
+    $row .= str_pad($desc, 27, " ");
+    $row .= str_pad($exp, 9, " ");
+    $row .= str_pad($reason, 7, " ");
+    $row .= str_pad($unit, 8, " ", STR_PAD_LEFT);
+    $row .= str_pad($ext, 10, " ", STR_PAD_LEFT);
+    
+    echo $row . "\r\n";
+
+    if (!empty($lot)) {
+        echo "                " . $lot . "\r\n";
     }
-    echo "\r\n\r\n";
-    echo "\r\n";
-    echo "\r\n";
-    echo "\r\n";
-    echo "\r\n";
-    echo "\r\n";
-    echo "\r\n";
-    echo "\r\n";
-    echo "\r\n";
-    echo "\r\n";
-    echo "\r\n";
-    echo "\r\n";
-    echo " NO. OF CARTONS OF THIS F-325                         TOTAL==>          " . number_format($total, 2) . "\r\n";
-    echo "                                                       Rundate " . date("m/d/Y  H:i:s") . "\r\n\r\n";
+}
 
-    // Reason for return
-    $reason_query = mysqli_query($conn, "SELECT * FROM dbmercuryreason WHERE nameinitial= '$reason'");
-    $reason_row = mysqli_fetch_array($reason_query);
-    echo " Reasons for returning the item/s to Central Warehouse c/o Returns Section or to Supplier\r\n";
-    echo "  " . $reason . "-" . $reason_row['reason'] . "\r\n";
+// Footer Section
+echo "\r\n";
+echo " NO. OF CARTONS OF THIS F-325                TOTAL==>     " . str_pad(number_format($total, 2), 10, " ", STR_PAD_LEFT) . "\r\n";
+echo "                                             Rundate " . date("m/d/Y  H:i:s") . "\r\n\r\n";
 
-    // Optional remarks
-    $remarks = $_POST['remarks'] ?? '';
+// Reason Detail
+$reason_query = mysqli_query($conn, "SELECT * FROM dbmercuryreason WHERE nameinitial= '$reason'");
+$reason_row = mysqli_fetch_array($reason_query);
+$full_reason = $reason_row['reason'] ?? 'EXPIRING';
 
-    if ($action == 'RE-PRINT') {
+echo " Reasons for returning the item/s to Central Warehouse c/o Returns Section or to Supplier\r\n";
+echo "  " . $reason . "-" . $full_reason . "\r\n";
+if ($action == 'RE-PRINT') {
         ?>
         <script>window.print()</script>
         <?php
-        return;
-    } else {
-        // Update database
-        mysqli_query($conn, "UPDATE dbf325number SET status='$status', printremarks='$remarks' WHERE f325number='$f325'");
-        mysqli_query($conn, "UPDATE dbraw SET status='$status' WHERE f325number='$f325'");
-        $processed = 'Printed';
-        mysqli_query($conn, "INSERT INTO dbhistory(processnumber,name,processed,dateprocessed,timeprocessed) VALUES ('$f325','$username','$processed','$dateprocessed','$timeprocessed')");
-    }
+}else{
+    // Database Updates
+$remarks = $_POST['remarks'] ?? '';
+mysqli_query($conn, "UPDATE dbf325number SET status='$status', printremarks='$remarks' WHERE f325number='$f325'");
+mysqli_query($conn, "UPDATE dbraw SET status='$status' WHERE f325number='$f325'");
+mysqli_query($conn, "INSERT INTO dbhistory(processnumber,name,processed,dateprocessed,timeprocessed) VALUES ('$f325','$username','Printed','$dateprocessed','$timeprocessed')");
+}
 
-
-    $conn->close();
-    ?>
-
+$conn->close();
+?>
 </body>
 </html>
 <script>window.print()</script>

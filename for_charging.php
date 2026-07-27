@@ -132,7 +132,7 @@ include_once("nav.php");
                                             AND r.vendorcode = p.vendor
                                         WHERE 
                                             r.forcharging >= 1  
-                                        AND batchnumber_forcharging = ''
+                                        AND batchnumber_forcharging IS NULL
                                         AND r.statusout = 'CLEARED'
                                         AND r.location IN ($location_filter)
                                     ";

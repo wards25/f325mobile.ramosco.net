@@ -22,6 +22,7 @@ if (isset($_POST['submit'])) {
     $ilrno = $_POST['ilrno'];
     $stamped = $_POST['stamped'];
 
+
     // check if items exist in cleared_list
     $check_query = mysqli_query($conn, "SELECT * FROM cleared_list WHERE user = '$username'");
     $row = mysqli_num_rows($check_query);
@@ -65,9 +66,18 @@ if (isset($_POST['submit'])) {
             $dmpireason = $fetch_data['dmpireason'];
             $bbd = $fetch_data['bbd'];
 
-            // convert expiration date to MySQL format YYYY-MM-DD
             if (!empty($bbd)) {
-                $bbd = date("Y-m-d", strtotime(str_replace("/", "-", $bbd)));
+                $bbd_parts = explode("/", $bbd);
+                if (count($bbd_parts) == 3) {
+                    $month = $bbd_parts[0];
+                    $day = $bbd_parts[1];
+                    $year = $bbd_parts[2];
+                    // If year is 2 digits, convert to 4 digits
+                    if (strlen($year) == 2) {
+                        $year = '20' . $year;
+                    }
+                    $bbd = $month . '/' . $day . '/' . substr($year, 2);
+                }
             }
 
             $costextended = ($quantity * $unitcost);
@@ -82,16 +92,22 @@ if (isset($_POST['submit'])) {
             if ($db_id == '0') {
                 if ($quantity <= $received) {
                     // insert raw data
-                    mysqli_query($conn, "INSERT INTO dbraw
-                        (f325number,mdccode,category,vendorcode,deducttype,dmpiclass,quantity,expiration,unitcost,costextended,reasoncode,arnumber,arreason,dmpireason,rcvdqty,dmpiref,deductref,deductqty,deductcostextended,datecleared,pulloutref,location,status,statusout,paymentstatus,skustatus,slstatus,skutype)
+                    $query = mysqli_query($conn, "INSERT INTO dbraw
+                        (f325number,mdccode,category,vendorcode,deducttype,dmpiclass,quantity,expiration,unitcost,costextended,reasoncode,arnumber,arreason,dmpireason,rcvdqty,dmpiref,deductref,deductqty,deductcostextended,datecleared,pulloutref,location,status,statusout,paymentstatus,skustatus,slstatus,skutype, forpullout, forcharging)
                         VALUES
-                        ('$ordernumber','$mdccode','$category','$vcode','$deducttype','$dmpiclass','$quantity','$bbd','$unitcost','$costextended','$reason','$arnumber','','$dmpireason','$received','','','0','0.00','$dateprocessed','','$location','$status','$status','','1','','Added')");
+                        ('$ordernumber','$mdccode','$category','$vcode','$deducttype','$dmpiclass','$quantity','$bbd','$unitcost','$costextended','$reason','$arnumber','','$dmpireason','$received','','','0','0.00','$dateprocessed','','$location','$status','$status','','1','','Added','0','0')");
+                    if (!$query) {
+                        die(mysqli_error($conn));
+                    }
                 } else {
                     // insert raw data
-                    mysqli_query($conn, "INSERT INTO dbraw
-                        (f325number,mdccode,category,vendorcode,deducttype,dmpiclass,quantity,expiration,unitcost,costextended,reasoncode,arnumber,arreason,dmpireason,rcvdqty,dmpiref,deductref,deductqty,deductcostextended,datecleared,pulloutref,location,status,statusout,paymentstatus,skustatus,slstatus,skutype)
+                    $query2 = mysqli_query($conn, "INSERT INTO dbraw
+                        (f325number,mdccode,category,vendorcode,deducttype,dmpiclass,quantity,expiration,unitcost,costextended,reasoncode,arnumber,arreason,dmpireason,rcvdqty,dmpiref,deductref,deductqty,deductcostextended,datecleared,pulloutref,location,status,statusout,paymentstatus,skustatus,slstatus,skutype, forpullout, forcharging)
                         VALUES
-                        ('$ordernumber','$mdccode','$category','$vcode','$deducttype','$dmpiclass','$quantity','$bbd','$unitcost','$costextended','$reason','$arnumber','','$dmpireason','$received','','','0','0.00','$dateprocessed','','$location','$status','$status','','1','UNPAID','Added')");
+                        ('$ordernumber','$mdccode','$category','$vcode','$deducttype','$dmpiclass','$quantity','$bbd','$unitcost','$costextended','$reason','$arnumber','','$dmpireason','$received','','','0','0.00','$dateprocessed','','$location','$status','$status','','1','UNPAID','Added','0','0')");
+                    if (!$query2) {
+                        die(mysqli_error($conn));
+                    }
 
                     // insert into sl_list with checkedby and checkdate
                     $short = $quantity - $received;
