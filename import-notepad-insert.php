@@ -71,23 +71,23 @@ if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
             $vendor = trim(preg_replace("/[^-0-9]+/", "", str_replace('Shipped To - ', ' ', fgets($open_file))));
 
             // Check if the F325 number exists in the database
-            $f325_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE f325number='$f325number' ");
+            $f325_query = mysqli_query($conn, "SELECT * FROM tbl_f325number WHERE f325number='$f325number' ");
             $fetch_f325number = mysqli_fetch_array($f325_query);
 
             // If the F325 number doesn't exist, insert the data
             if (!is_array($fetch_f325number)) {
                 // Get branch details
-                $branch_query = mysqli_query($conn, "SELECT * FROM dbcensus WHERE code='$brcode' ");
+                $branch_query = mysqli_query($conn, "SELECT * FROM tbl_census WHERE code='$brcode' ");
                 $fetch_branch = mysqli_fetch_array($branch_query);
                 $cluster = $fetch_branch['cluster'];
                 $location = $fetch_branch['location'];
                 $deducttype = $fetch_branch['deducttype'];
 
-                // Insert data into dbf325number table
-                $sql = "INSERT INTO dbf325number(f325number,brcode,preparedby,issuedby,emaildate,f325date,vendor,tmnumber,drivername,platenumber,datesched,datecleared,arnumber,pageno,printremarks,logisticremarks,clearingremarks,cluster,location,deducttype,status,process,verificationdate,verificationreason,ilrno,stamped,cleared_time) 
-                VALUES ('$f325number','$brcode','$preparedby','$issuedby','$emaildate','$f325date','$vendor','','','', NULL , NULL ,'','','','','','$cluster','$location','$deducttype','OPEN','UPLOADED', NULL ,'','','','')";
+                // Insert data into tbl_f325number table
+                $sql = "INSERT INTO tbl_f325number(f325number,brcode,preparedby,issuedby,emaildate,f325date,vendor,tmnumber,drivername,platenumber,datesched,datecleared,arnumber,pageno,printremarks,logisticremarks,clearingremarks,cluster,location,deducttype,status,process,verificationdate,verificationreason,ilrno,stamped,cleared_time,retailer) 
+                VALUES ('$f325number','$brcode','$preparedby','$issuedby','$emaildate','$f325date','$vendor','','','', NULL , NULL ,'','','','','','$cluster','$location','$deducttype','OPEN','UPLOADED', NULL ,'','','','','MERCURY DRUG')";
                 if (!mysqli_query($conn, $sql)) {
-                    echo "ERROR inserting dbf325number: " . mysqli_error($conn);
+                    echo "ERROR inserting f325number: " . mysqli_error($conn);
                 }
                 // echo "<pre>";
                 // echo "SQL Query: $f325number, $brcode, $preparedby, $issuedby, $emaildate, $f325date, $vendor, $cluster, $location, $deducttype";
@@ -95,7 +95,7 @@ if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
 
                 // Insert history
                 $processed = 'Convert and Import.';
-                $sql1 = "INSERT INTO dbhistory(processnumber,name,processed,dateprocessed,timeprocessed) VALUES ('$f325number','$username','$processed','$dateprocessed','$timeprocessed')";
+                $sql1 = "INSERT INTO tbl_history(processnumber,name,processed,dateprocessed,timeprocessed) VALUES ('$f325number','$username','$processed','$dateprocessed','$timeprocessed')";
                 if (!mysqli_query($conn, $sql1)) {
                     echo "ERROR inserting DBRAW: " . mysqli_error($conn);
                 }
@@ -124,23 +124,23 @@ if (isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
                                 $reason_code = substr(preg_replace('/\s+/', ' ', $lines), $cost_position - 2, 1);
 
                                 // get branch detail
-                                $branch_query = mysqli_query($conn, "SELECT * FROM dbcensus WHERE code='$brcode' ");
+                                $branch_query = mysqli_query($conn, "SELECT * FROM tbl_census WHERE code='$brcode' ");
                                 $fetch_branch = mysqli_fetch_array($branch_query);
                                 $location = $fetch_branch['location'];
                                 $deducttype = $fetch_branch['deducttype'];
 
-                                $check_query = mysqli_query($conn, "SELECT * FROM dbraw WHERE f325number='$f325number' AND mdccode='$mdccode' ");
+                                $check_query = mysqli_query($conn, "SELECT * FROM tbl_raw WHERE f325number='$f325number' AND mdccode='$mdccode' ");
                                 $fetch_check = mysqli_fetch_array($check_query);
 
                                 if (is_array($fetch_check)) {
                                     // not inserted
                                 } else {
                                     // var_dump($f325number, $mdccode, $vendor, $deducttype, $check_qty, $expire_date, $cost_each, $costextended, $reason_code, $location);
-                                    $sql2 = "SELECT category FROM dbproduct WHERE mdccode='$mdccode'";
+                                    $sql2 = "SELECT category FROM tbl_product WHERE mdccode='$mdccode'";
                                     $category_result = mysqli_query($conn, $sql2);
                                     $category_row = mysqli_fetch_array($category_result);
                                     $category = $category_row['category'];
-                                    $sql3 = "INSERT INTO dbraw(f325number,mdccode, category,vendorcode,deducttype,dmpiclass,quantity,expiration,unitcost,costextended,reasoncode,arnumber,arreason,dmpireason,rcvdqty,dmpiref,deductref,deductqty,deductcostextended,datecleared,pulloutref,location,status,statusout,paymentstatus,skustatus,slstatus,skutype,forpullout,forcharging) VALUES ('$f325number','$mdccode','$category','$vendor','$deducttype','','$check_qty','$expire_date','$cost_each','$costextended','$reason_code','','','0','0','','','0','0',NULL,'','$location','OPEN','','','0','','','0','0') ";
+                                    $sql3 = "INSERT INTO tbl_raw(f325number,mdccode, category,vendorcode,deducttype,dmpiclass,quantity,expiration,unitcost,costextended,reasoncode,arnumber,arreason,dmpireason,rcvdqty,dmpiref,deductref,deductqty,deductcostextended,datecleared,pulloutref,location,status,statusout,paymentstatus,skustatus,slstatus,skutype,forpullout,forcharging,retailer) VALUES ('$f325number','$mdccode','$category','$vendor','$deducttype','','$check_qty','$expire_date','$cost_each','$costextended','$reason_code','','','0','0','','','0','0',NULL,'','$location','OPEN','','','0','','','0','0','MERCURY DRUG') ";
                                     if (!mysqli_query($conn, $sql3)) {
                                         echo "ERROR inserting dbraw: " . mysqli_error($conn);
                                     }

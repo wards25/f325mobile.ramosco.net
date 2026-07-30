@@ -19,7 +19,7 @@ if (!is_array($data)) {
 // $module_groups array in account.php. Column names are never taken
 // from client input directly, only these fixed keys are used.
 $module_fields = [
-    'census', 'productlist', 'import_notepad', 'import_pu_charge', 'import_nestle_sku',
+    'census', 'productlist', 'storelist', 'import_notepad', 'import_rtv' ,'import_pu_charge', 'import_nestle_sku',
     'print', 'schedule', 'clearing', 'shortlanded', 'manual', 'pullout', 'deduct',
     'report', 'borf', 'settings'
 ];

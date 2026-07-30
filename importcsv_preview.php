@@ -21,7 +21,7 @@ if($_FILES['file']['name'] != '')
         $datesched = $row[5];
         $remarks = $row[6];
 
-        $check_query = mysqli_query($conn, "SELECT f325number, status FROM dbf325number WHERE f325number='$f325number'");
+        $check_query = mysqli_query($conn, "SELECT f325number, status FROM tbl_f325number WHERE f325number='$f325number'");
         $count = mysqli_num_rows($check_query);
 
         if($count >= 1)

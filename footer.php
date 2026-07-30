@@ -51,7 +51,7 @@
                         <?php
                             $year = date("Y");
                         ?>
-                     <span>&copy; 2025 - <?php echo $year; ?> RGC BO App | Developed by RGC IT</span>
+                     <span>&copy; 2025 - <?php echo $year; ?> RGC BO App | Developed by RGC IT | v2.5.0</span>
                     </div>
                 </div>
             </footer>

@@ -38,7 +38,7 @@ if (isset($_POST['btn-login'])) {
             $_SESSION['user_type'] = $fetch_login['user_type']; 
             
             $module_fields = [
-                'census', 'productlist', 'import_notepad', 'import_pu_charge', 'import_nestle_sku',
+                'census', 'productlist', 'storelist','import_notepad', 'import_rtv' , 'import_pu_charge', 'import_nestle_sku',
                 'print', 'schedule', 'clearing', 'shortlanded', 'manual', 'pullout', 'deduct',
                 'report', 'borf', 'settings'
             ];

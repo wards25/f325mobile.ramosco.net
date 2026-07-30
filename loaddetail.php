@@ -15,7 +15,7 @@ if ($id == 'addnew')
 }
 else
 {
-	$detail_query = mysqli_query($conn,"SELECT * FROM dbcompany WHERE id='$id' ");
+	$detail_query = mysqli_query($conn,"SELECT * FROM tbl_company WHERE id='$id' ");
 	$fetch_detail = mysqli_fetch_array($detail_query);
 
 	$name = $fetch_detail['name'];

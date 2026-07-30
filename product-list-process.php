@@ -1,44 +1,61 @@
 <?php
 session_start();
-include('dbconnect.php');
+include_once("dbconnect.php");
 
-$mdccode = $_POST['mdccode'];
-$itemcode = $_POST['itemcode'];
-$description = $_POST['description'];
-$category = $_POST['category'];
-$dmpicode = $_POST['dmpicode'] ?? "";
-$dmpipack = $_POST['dmpipack'] ?? "";
-$dmpiclass = $_POST['dmpiclass'] ?? "";
-$uom = $_POST['uom'];
-$vendor = $_POST['company'];
-$status = "1";
-
-// check if code is exist
-$check_query = mysqli_query($conn,"SELECT mdccode FROM dbproduct WHERE mdccode='$mdccode' AND category='$category' AND vendor='$vendor' ");
-$fetch_check = mysqli_fetch_array($check_query);
-
-if (is_array($fetch_check))
-{
-	echo "Already exist!";
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['form_action'])) {
+    header("Location: product-list.php");
+    exit;
 }
-else
-{
-	mysqli_query($conn,"INSERT INTO dbproduct(mdccode,itemcode,barcode,casecode,description,category,vendor,dmpicode,dmpipack,dmpiclassification,uom,active,batch) VALUES('$mdccode','$itemcode','','','$description','$category','$vendor','$dmpicode','$dmpipack','$dmpiclass','$uom','$status','')");
-	
-	// date and time
-	date_default_timezone_set("Asia/Manila");
-	$dateprocessed = date("Y-m-d");
-	$timeprocessed = date("H:i:s");
 
-	$username = $_SESSION['fname'];
+if ($_POST['form_action'] === 'save') {
 
-	// insert in dbhistory
-	$processed = 'Added new product';
-	mysqli_query($conn,"INSERT INTO dbproducthistory(mdccode,name,processed,dateprocessed,timeprocessed) VALUES ('$mdccode','$username','$processed','$dateprocessed','$timeprocessed')");
+    $product_id = (int) ($_POST['product_id'] ?? 0);
+    $mdccode = trim($_POST['mdccode'] ?? '');
+    $itemcode = trim($_POST['itemcode'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $category = trim($_POST['category'] ?? '');
+    $uom = trim($_POST['uom'] ?? '');
+    $vendor = trim($_POST['company'] ?? '');
+    $retailer = trim($_POST['retailer'] ?? '');
+    $active = !empty($_POST['active']) ? 1 : 0;
 
-	echo "Added successfully!";
-    header("Location: product-list.php?status=success");
+    if ($mdccode === '' || $itemcode === '' || $description === '' || $category === '' || $vendor === '' || $retailer === '') {
+        $_SESSION['product_flash'] = ['type' => 'danger', 'msg' => 'Please fill in all required fields.'];
+    } elseif ($product_id > 0) {
+        // Update
+        $stmt = $conn->prepare(
+            "UPDATE tbl_product SET mdccode=?, itemcode=?, description=?, category=?, uom=?, vendor=?, retailer=?, active=? WHERE id=?"
+        );
+        $stmt->bind_param("sssssssii", $mdccode, $itemcode, $description, $category, $uom, $vendor, $retailer, $active, $product_id);
+        $stmt->execute();
+        $stmt->close();
+
+        $_SESSION['product_flash'] = ['type' => 'success', 'msg' => 'Product updated successfully.'];
+    } else {
+        // Insert
+        $stmt = $conn->prepare(
+            "INSERT INTO tbl_product (mdccode, itemcode, description, category, uom, vendor, retailer, active)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        );
+        $stmt->bind_param("sssssssi", $mdccode, $itemcode, $description, $category, $uom, $vendor, $retailer, $active);
+        $stmt->execute();
+        $stmt->close();
+
+        $_SESSION['product_flash'] = ['type' => 'success', 'msg' => 'Product added successfully.'];
+    }
+
+} elseif ($_POST['form_action'] === 'delete') {
+    $product_id = (int) ($_POST['product_id'] ?? 0);
+    if ($product_id > 0) {
+        $stmt = $conn->prepare("DELETE FROM tbl_product WHERE id=?");
+        $stmt->bind_param("i", $product_id);
+        $stmt->execute();
+        $stmt->close();
+
+        $_SESSION['product_flash'] = ['type' => 'success', 'msg' => 'Product deleted.'];
+    }
 }
 
 $conn->close();
-?>
+header("Location: product-list.php");
+exit;

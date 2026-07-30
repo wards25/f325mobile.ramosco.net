@@ -4,7 +4,7 @@ include('dbconnect.php');
 $processnumber = $_POST['processnumber'];
 
 // get history
-$history_query = mysqli_query($conn,"SELECT * FROM dbhistory WHERE processnumber='$processnumber' ORDER BY id DESC ");
+$history_query = mysqli_query($conn,"SELECT * FROM tbl_history WHERE processnumber='$processnumber' ORDER BY id DESC ");
 $row = mysqli_num_rows($history_query);
 
 if ($row >= 1)

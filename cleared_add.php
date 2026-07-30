@@ -21,7 +21,7 @@ if($row >= 1){
           </div>';
 }else{
 
-    $category_query = mysqli_query($conn,"SELECT category FROM dbproduct WHERE mdccode = '$mdccode'");
+    $category_query = mysqli_query($conn,"SELECT category FROM tbl_product WHERE mdccode = '$mdccode'");
     $fetch_category = mysqli_fetch_array($category_query);
     $category = $fetch_category['category'];
 

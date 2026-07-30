@@ -8,7 +8,7 @@ $username = $_SESSION['fname'];
 if (!isset($_SESSION['id'])) {
     header("Location: index.php");
 }
-$res = mysqli_query($conn, "SELECT * FROM dbuser WHERE id=" . $_SESSION['id']);
+$res = mysqli_query($conn, "SELECT * FROM tbl_users WHERE id=" . $_SESSION['id']);
 $userRow = mysqli_fetch_array($res);
 ?>
 
@@ -48,7 +48,7 @@ include_once("nav.php");
 
             } else {
 
-                $category_query = mysqli_query($conn, "SELECT category FROM dbproduct WHERE mdccode = '$mdccode' AND vendor = '$company'");
+                $category_query = mysqli_query($conn, "SELECT category FROM tbl_product WHERE mdccode = '$mdccode' AND vendor = '$company'");
                 $fetch_category = mysqli_fetch_array($category_query);
                 $category = $fetch_category['category'];
 
@@ -166,7 +166,7 @@ include_once("nav.php");
                                 </div>
                                 <div class="modal-body">
                                     <?php
-                                    $info_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE f325number = '$f325number'");
+                                    $info_query = mysqli_query($conn, "SELECT * FROM tbl_f325number WHERE f325number = '$f325number'");
                                     $fetch_info = mysqli_fetch_array($info_query);
                                     ?>
                                     <div class="row">
@@ -187,7 +187,7 @@ include_once("nav.php");
                                             <label><i>Branch Name:</i></label>
                                             <?php
                                             $code = $fetch_info['brcode'];
-                                            $branch_query = mysqli_query($conn, "SELECT * FROM dbcensus WHERE code = '$code'");
+                                            $branch_query = mysqli_query($conn, "SELECT * FROM tbl_census WHERE code = '$code'");
                                             $fetch_branch = mysqli_fetch_array($branch_query);
                                             ?>
                                             <input type="text" class="form-control form-control-sm"
@@ -250,7 +250,7 @@ include_once("nav.php");
                                             <label><i>Company:</i></label>
                                             <?php
                                             $vendorcode = $fetch_info['vendor'];
-                                            $branch_query = mysqli_query($conn, "SELECT * FROM dbcompany WHERE vendorcode = '$vendorcode'");
+                                            $branch_query = mysqli_query($conn, "SELECT * FROM tbl_company WHERE vendorcode = '$vendorcode'");
                                             $fetch_branch = mysqli_fetch_array($branch_query);
                                             ?>
                                             <input type="text" class="form-control form-control-sm"

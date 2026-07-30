@@ -29,7 +29,7 @@ if (isset($_SESSION['id'])) {
                             <div class="col-lg-6">
                                 <div class="p-5">
                                     <div class="text-center">
-                                        <img src="img/rgc.png" class="img-fluid" style="width: 270px;">
+                                        <img src="img/rgc.png" class="img-fluid" style="width: 210px;">
                                         <h6 style="color:#0c4562;"><b>F325 / INVENTORY SYSTEM</b></h6>
                                     </div>
                                     <hr>
@@ -95,7 +95,7 @@ if (isset($_SESSION['id'])) {
                                                 $year = date("Y");
                                                 ?>
                                                 <small>&copy; 2025 - <?php echo $year; ?> RGC Sales App | Developed by
-                                                    RGC IT</small>
+                                                    RGC IT | v2.5.0</small>
                                             </div>
                                             </center>
                                     </form>

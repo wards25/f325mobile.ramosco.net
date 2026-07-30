@@ -65,7 +65,7 @@ include_once("nav.php");
         <div class="card shadow mb-4">
             <div class="card-body">
                 <?php
-                $info_query = mysqli_query($conn, "SELECT * FROM dbf325number WHERE f325number = '$f325number'");
+                $info_query = mysqli_query($conn, "SELECT * FROM tbl_f325number WHERE f325number = '$f325number'");
                 $fetch_info = mysqli_fetch_array($info_query);
                 ?>
                 <div class="row">
@@ -86,7 +86,7 @@ include_once("nav.php");
                         <label><i>Branch Name:</i></label>
                         <?php
                         $code = $fetch_info['brcode'];
-                        $branch_query = mysqli_query($conn, "SELECT * FROM dbcensus WHERE code = '$code'");
+                        $branch_query = mysqli_query($conn, "SELECT * FROM tbl_census WHERE code = '$code'");
                         $fetch_branch = mysqli_fetch_array($branch_query);
                         ?>
                         <input type="text" class="form-control form-control-sm"
@@ -146,7 +146,7 @@ include_once("nav.php");
                         <label><i>Company:</i></label>
                         <?php
                         $vendorcode = $fetch_info['vendor'];
-                        $branch_query = mysqli_query($conn, "SELECT * FROM dbcompany WHERE vendorcode = '$vendorcode'");
+                        $branch_query = mysqli_query($conn, "SELECT * FROM tbl_company WHERE vendorcode = '$vendorcode'");
                         $fetch_branch = mysqli_fetch_array($branch_query);
                         ?>
                         <input type="text" class="form-control form-control-sm" value="<?php echo $fetch_branch['name']; ?>"
@@ -177,7 +177,7 @@ include_once("nav.php");
                                     $product_query = mysqli_query($conn, "SELECT * FROM dbraw WHERE f325number = '$f325number'");
                                     while ($fetch_product = mysqli_fetch_array($product_query)) {
                                         $mdc = $fetch_product['mdccode'];
-                                        $description_query = mysqli_query($conn, "SELECT * FROM dbproduct WHERE mdccode = '$mdc'");
+                                        $description_query = mysqli_query($conn, "SELECT * FROM tbl_product WHERE mdccode = '$mdc'");
                                         $fetch_description = mysqli_fetch_array($description_query);
                                         ?>
                                         <tr>

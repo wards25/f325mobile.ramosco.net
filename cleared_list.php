@@ -8,7 +8,7 @@ $f325number = $_SESSION['f325number'];
     while($row = mysqli_fetch_array($result)) {
     $mdc = $row['mdccode'];
 
-    $product_query = mysqli_query($conn,"SELECT * FROM dbproduct WHERE mdccode = '$mdc'");
+    $product_query = mysqli_query($conn,"SELECT * FROM tbl_product WHERE mdccode = '$mdc'");
     $fetch_product = mysqli_fetch_array($product_query);
 
     if($row['db_id'] == 0){

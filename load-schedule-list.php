@@ -11,7 +11,7 @@ $user_id = (string) $_SESSION['id'];
 
 $allowed_retailers = [];
 $allowed_locations = [];
-$allowed_companies = []; // vendorcodes
+$allowed_companies = [];
 
 $perm_stmt = $conn->prepare(
     "SELECT DISTINCT p.retailer, l.location, c.vendorcode
@@ -46,11 +46,10 @@ if (empty($allowed_retailers) || empty($allowed_locations) || empty($allowed_com
     exit;
 }
 
-$status = $_POST['status'] ?? 'OPEN';
+$status = $_POST['status'] ?? 'PRINTED';
 $company_choice = trim($_POST['company'] ?? '');
 $retailer_choice = trim($_POST['retailer'] ?? '');
 
-// Chip-based multi-value search, matching the same param contract as search.php
 $f325numbers = array_filter(array_map('trim', explode(',', $_POST['f325number'] ?? '')));
 $branches = array_filter(array_map('trim', explode(',', $_POST['branch'] ?? '')));
 
@@ -61,13 +60,11 @@ $sql = "SELECT f.id, f.f325number, f.brcode, f.emaildate, f.f325date, f.vendor, 
         LEFT JOIN tbl_census c ON c.code = f.brcode AND c.retailer = f.retailer
         LEFT JOIN tbl_company v ON v.vendorcode = f.vendor
         WHERE f.status = ?
-          AND f.process IN ('UPLOADED', 'MANUAL')
           AND f.emaildate BETWEEN '2025-01-01' AND NOW()";
 
 $types = "s";
 $params = [$status];
 
-// Retailer scope: a specific retailer was picked, or every retailer the user can see
 if ($retailer_choice !== '' && in_array($retailer_choice, $allowed_retailers, true)) {
     $sql .= " AND f.retailer = ?";
     $types .= "s";
@@ -81,7 +78,6 @@ if ($retailer_choice !== '' && in_array($retailer_choice, $allowed_retailers, tr
     }
 }
 
-// Location scope (always applied)
 $loc_placeholders = implode(',', array_fill(0, count($allowed_locations), '?'));
 $sql .= " AND f.location IN ($loc_placeholders)";
 foreach ($allowed_locations as $loc) {
@@ -89,7 +85,6 @@ foreach ($allowed_locations as $loc) {
     $params[] = $loc;
 }
 
-// Company scope: a specific company was picked, or every company the user can see
 if ($company_choice !== '') {
     $sql .= " AND f.vendor = ?";
     $types .= "s";
@@ -103,7 +98,6 @@ if ($company_choice !== '') {
     }
 }
 
-// F325 number chips — any one of them can match (partial match, OR'd together)
 if (!empty($f325numbers)) {
     $sql .= " AND (" . implode(' OR ', array_fill(0, count($f325numbers), 'f.f325number LIKE ?')) . ")";
     foreach ($f325numbers as $val) {
@@ -112,7 +106,6 @@ if (!empty($f325numbers)) {
     }
 }
 
-// Branch chips — match against either branch name or branch code
 if (!empty($branches)) {
     $branch_clauses = [];
     foreach ($branches as $val) {
@@ -138,7 +131,7 @@ if ($result->num_rows > 0) {
             : htmlspecialchars($row['brcode']) . ' - ';
         $vendor_label = $row['vendor_name'] ? htmlspecialchars($row['vendor_name']) : 'For Fill-Up';
         $status_upper = strtoupper($row['status']);
-        $status_class = $status_upper === 'OPEN' ? 'badge-active' : 'badge-printed';
+        $status_class = $status_upper === 'SCHEDULED' ? 'badge-active' : 'badge-printed';
         ?>
         <tr class="tbl-list-order-tr" role="button" f325id="<?php echo (int) $row['id']; ?>">
             <td class="tbl-list-order-td1"><?php echo htmlspecialchars($row['f325number']); ?></td>

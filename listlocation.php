@@ -2,7 +2,7 @@
 include('dbconnect.php');
 
 // get all location
-$location_query = mysqli_query($conn,"SELECT * FROM dblocation ");
+$location_query = mysqli_query($conn,"SELECT * FROM tbl_location ");
 while ($fetch_location = mysqli_fetch_array($location_query))
 {
 	?>

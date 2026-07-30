@@ -91,6 +91,8 @@ $user = mysqli_fetch_assoc($result);
     <div class="div-emaildate mt-3 mb-3">
         <label for="emailDate" class="form-label">Email Date:</label>
         <input type="date" class="form-control w-auto email-date" name="emaildate" value="<?php echo date("Y-m-d"); ?>">
+        <label for="emailDate" class="form-label">Retailer</label>
+        <input type="text" class="form-control w-auto" value="MERCURY DRUG" readonly>
     </div>
     <!-- Drag & Drop Area -->
     <div class="upload-area mb-3 drop-area"

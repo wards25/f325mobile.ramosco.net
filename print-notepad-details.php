@@ -21,9 +21,9 @@ $q = mysqli_query($conn, "
            b.name AS vendorname, 
            b.vendorcode,
            c.branchname
-    FROM dbf325number a
-    LEFT JOIN dbcompany b ON a.vendor = b.vendorcode
-    LEFT JOIN dbcensus c ON a.brcode = c.code
+    FROM tbl_f325number a
+    LEFT JOIN tbl_company b ON a.vendor = b.vendorcode
+    LEFT JOIN tbl_census c ON a.brcode = c.code
     WHERE a.f325number = '$f325'
 ") or die("SQL ERROR: " . mysqli_error($conn));
 
@@ -31,7 +31,7 @@ $h = mysqli_fetch_assoc($q);
 
 // Fetch items
 $items = [];
-$qi = mysqli_query($conn, "SELECT * FROM dbraw WHERE f325number = '$f325'");
+$qi = mysqli_query($conn, "SELECT * FROM tbl_raw WHERE f325number = '$f325'");
 while ($row = mysqli_fetch_assoc($qi)) {
     $items[] = $row;
 }
@@ -93,7 +93,7 @@ foreach ($items as $i) {
     $code   = $i['mdccode'] ?? '';
     $qty    = $i['quantity'] ?? 0;
     
-    $product_q = mysqli_query($conn, "SELECT description FROM dbproduct WHERE mdccode= '$code'");
+    $product_q = mysqli_query($conn, "SELECT description FROM tbl_product WHERE mdccode= '$code'");
     $p_row = mysqli_fetch_assoc($product_q);
     $desc = substr($p_row['description'] ?? '', 0, 26); 
     
@@ -143,13 +143,20 @@ if ($action == 'RE-PRINT') {
 }else{
     // Database Updates
 $remarks = $_POST['remarks'] ?? '';
-mysqli_query($conn, "UPDATE dbf325number SET status='$status', printremarks='$remarks' WHERE f325number='$f325'");
-mysqli_query($conn, "UPDATE dbraw SET status='$status' WHERE f325number='$f325'");
-mysqli_query($conn, "INSERT INTO dbhistory(processnumber,name,processed,dateprocessed,timeprocessed) VALUES ('$f325','$username','Printed','$dateprocessed','$timeprocessed')");
+mysqli_query($conn, "UPDATE tbl_f325number SET status='$status', printremarks='$remarks' WHERE f325number='$f325'");
+mysqli_query($conn, "UPDATE tbl_raw SET status='$status' WHERE f325number='$f325'");
+mysqli_query($conn, "INSERT INTO tbl_history(processnumber,name,processed,dateprocessed,timeprocessed) VALUES ('$f325','$username','Printed','$dateprocessed','$timeprocessed')");
 }
 
 $conn->close();
 ?>
 </body>
 </html>
-<script>window.print()</script>
+<script>
+    window.print()
+
+    window.onafterprint = function() {
+    window.location.href = 'print-notepad.php';
+};
+
+</script>

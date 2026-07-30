@@ -83,7 +83,7 @@ $avatar_color = nav_get_avatar_color($_SESSION['username'] ?? ($_SESSION['fname'
                         <h6 class="collapse-header">Search:</h6>
                         <a class="collapse-item" href="search.php">Search F325</a>
                         <?php
-                        if (!empty($_SESSION['store']) && $_SESSION['store'] == '1') {
+                        if (!empty($_SESSION['storelist']) && $_SESSION['storelist'] == '1') {
                             echo '<a class="collapse-item" href="store-list.php">Store List</a>';
                         }
                         if (!empty($_SESSION['productlist']) && $_SESSION['productlist'] == '1') {
@@ -104,81 +104,105 @@ $avatar_color = nav_get_avatar_color($_SESSION['username'] ?? ($_SESSION['fname'
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                    aria-expanded="true" aria-controls="collapseTwo">
-                    <i class="fas fa-file-import"></i>
-                    <span>Importing</span>
-                </a>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <?php
-                        if (!empty($_SESSION['import_notepad']) && $_SESSION['import_notepad'] == '1') {
-                        ?>
-                            <a class="collapse-item" href="import-notepad.php">Import F325</a>
-                        <?php
+            <?php
+            $has_import_access = (
+                (!empty($_SESSION['import_rtv']) && $_SESSION['import_rtv'] == '1') ||
+                (!empty($_SESSION['import_notepad']) && $_SESSION['import_notepad'] == '1') ||
+                (!empty($_SESSION['import_pu_charge']) && $_SESSION['import_pu_charge'] == '1') ||
+                (!empty($_SESSION['import_nestle_sku']) && $_SESSION['import_nestle_sku'] == '1')
+            );
+            ?>
+
+            <?php if ($has_import_access): ?>
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" ...>
+                        <i class="fas fa-file-import"></i>
+                        <span>Importing</span>
+                    </a>
+                    <div id="collapseTwo" class="collapse" ...>
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <?php
+                            if (!empty($_SESSION['import_rtv']) && $_SESSION['import_rtv'] == '1') {
+                                ?>
+                                    <a class="collapse-item" href="import_rtv.php">Import RTV</a>
+                                    <?php
                             }
-                         ?>
-                         <?php
-                        if (!empty($_SESSION['import_pu_charge']) && $_SESSION['import_pu_charge'] == '1') {
-                        ?>
-                            <a class="collapse-item" href="import_forpull_forcharge.php">Import Pullout -
-                            Charging</a>
-                        <?php
+                            ?>
+                            <?php
+                            if (!empty($_SESSION['import_notepad']) && $_SESSION['import_notepad'] == '1') {
+                                ?>
+                                    <a class="collapse-item" href="import-notepad.php">Import F325</a>
+                                    <?php
                             }
-                        ?>
-                        <?php
-                        if (!empty($_SESSION['import_nestle_sku']) && $_SESSION['import_nestle_sku'] == '1') {
-                         ?>
-                            <a class="collapse-item" href="import_sku_list.php">Nestle Sku List</a>
-                        <?php
-                        }
-                        ?>
+                            ?>
+                            <?php
+                            if (!empty($_SESSION['import_pu_charge']) && $_SESSION['import_pu_charge'] == '1') {
+                                ?>
+                                    <a class="collapse-item" href="import_forpull_forcharge.php">Import Pullout -
+                                        Charging</a>
+                                    <?php
+                            }
+                            ?>
+                            <?php
+                            if (!empty($_SESSION['import_nestle_sku']) && $_SESSION['import_nestle_sku'] == '1') {
+                                ?>
+                                    <a class="collapse-item" href="import_sku_list.php">Nestle Sku List</a>
+                                    <?php
+                            }
+                            ?>
+                        </div>
                     </div>
-                </div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
-                    aria-expanded="true" aria-controls="collapseThree">
-                    <i class="fas fa-fw fa-window-maximize"></i>
-                    <span>F325 Modules</span>
-                </a>
-                <div id="collapseThree" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">F325 Modules:</h6>
-                        <!-- <a class="collapse-item" href="open.php">Open F325</a> -->
-                        <?php
-                        if (!empty($_SESSION['print']) && $_SESSION['print'] == '1') {
-                            echo '<a class="collapse-item" href="print-notepad.php">Print F325</a>';
-                        }
-                        if (!empty($_SESSION['schedule']) && $_SESSION['schedule'] == '1') {
-                            echo '<a class="collapse-item" href="scheduled.php">Schedule F325</a>';
-                        }
+                </li>
+            <?php endif; ?>
+            <?php
+            // Precompute whether this user has access to anything inside "F325 Modules"
+            $has_f325_module_access = (
+                (!empty($_SESSION['print']) && $_SESSION['print'] == '1') ||
+                (!empty($_SESSION['schedule']) && $_SESSION['schedule'] == '1') ||
+                (!empty($_SESSION['clearing']) && $_SESSION['clearing'] == '1') ||
+                (!empty($_SESSION['pulloutdoc']) && $_SESSION['pulloutdoc'] == '1') ||
+                (!empty($_SESSION['payment']) && $_SESSION['payment'] == '1')
+            );
+            ?>
 
-                        if (!empty($_SESSION['clearing']) && $_SESSION['clearing'] == '1') {
-                            // echo '<a class="collapse-item" href="cleared.php">Cleared F325</a>';
-                            echo '<a class="collapse-item" href="clearing.php">Clearing</a>';
-                            echo '<a class="collapse-item" href="verification.php">Verification</a>';
-                            echo '<a class="collapse-item" href="disposed.php">Disposed F325</a>';
-                        }
-                        ?>
-                        <?php if (!empty($_SESSION['pulloutdoc']) && $_SESSION['pulloutdoc'] == '1'): ?>
-                            <h6 class="collapse-header">Pull-Out</h6>
-                            <a class="collapse-item" href="for_pullout.php">For Pull Out</a>
-                            <a class="collapse-item" href="batchlist.php">For Pull Out Batch List</a>
-                        <?php endif; ?>
+            <?php if ($has_f325_module_access): ?>
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
+                        aria-expanded="true" aria-controls="collapseThree">
+                        <i class="fas fa-fw fa-window-maximize"></i>
+                        <span>F325 Modules</span>
+                    </a>
+                    <div id="collapseThree" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <h6 class="collapse-header">F325 Modules:</h6>
+                            <?php
+                            if (!empty($_SESSION['print']) && $_SESSION['print'] == '1') {
+                                echo '<a class="collapse-item" href="print-notepad.php">Print F325</a>';
+                            }
+                            if (!empty($_SESSION['schedule']) && $_SESSION['schedule'] == '1') {
+                                echo '<a class="collapse-item" href="scheduled.php">Schedule F325</a>';
+                            }
+                            if (!empty($_SESSION['clearing']) && $_SESSION['clearing'] == '1') {
+                                echo '<a class="collapse-item" href="clearing.php">Clearing</a>';
+                                echo '<a class="collapse-item" href="verification.php">Verification</a>';
+                                echo '<a class="collapse-item" href="disposed.php">Disposed F325</a>';
+                            }
+                            ?>
+                            <?php if (!empty($_SESSION['pulloutdoc']) && $_SESSION['pulloutdoc'] == '1'): ?>
+                                <h6 class="collapse-header">Pull-Out</h6>
+                                <a class="collapse-item" href="for_pullout.php">For Pull Out</a>
+                                <a class="collapse-item" href="batchlist.php">For Pull Out Batch List</a>
+                            <?php endif; ?>
 
-                        <?php if (!empty($_SESSION['payment']) && $_SESSION['payment'] == '1'): ?>
-
-                            <h6 class="collapse-header">Charging</h6>
-                            <a class="collapse-item" href="for_charging.php">For Charging</a>
-                            <a class="collapse-item" href="charging_batchlist.php">For Charging Batch List</a>
-
-                        <?php endif; ?>
-
+                            <?php if (!empty($_SESSION['payment']) && $_SESSION['payment'] == '1'): ?>
+                                <h6 class="collapse-header">Charging</h6>
+                                <a class="collapse-item" href="for_charging.php">For Charging</a>
+                                <a class="collapse-item" href="charging_batchlist.php">For Charging Batch List</a>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                </div>
-            </li>
+                </li>
+            <?php endif; ?>
 
             <?php
             if (!empty($_SESSION['payment']) && $_SESSION['payment'] == '1') {
@@ -513,7 +537,7 @@ $avatar_color = nav_get_avatar_color($_SESSION['username'] ?? ($_SESSION['fname'
                                                                 required>
                                                                 <option value="">-- Select Location --</option>
                                                                 <?php
-                                                                $query = "SELECT * FROM dblocation WHERE active = 1 ORDER BY location ASC";
+                                                                $query = "SELECT * FROM tbl_location WHERE active = 1 ORDER BY location ASC";
                                                                 $result = mysqli_query($conn, $query);
                                                                 while ($row = mysqli_fetch_assoc($result)) {
                                                                     $loc_id = $row['id'];

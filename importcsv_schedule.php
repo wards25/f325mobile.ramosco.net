@@ -8,7 +8,6 @@ date_default_timezone_set("Asia/Manila");
 $username = $_SESSION['fname'];
 $dateprocessed = date("Y-m-d");
 $timeprocessed = date("H:i:s");
-
 $status = "SCHEDULED";
 $beforestatus = "PRINTED";
 
@@ -31,7 +30,7 @@ if(isset($_POST['f325number']))
         // check if PRINTED
         $check = mysqli_query($conn,"
             SELECT f325number
-            FROM dbf325number
+            FROM tbl_f325number
             WHERE f325number='$f325number'
             AND status='$beforestatus'
         ");
@@ -39,9 +38,9 @@ if(isset($_POST['f325number']))
         if(mysqli_num_rows($check) > 0)
         {
 
-            // update dbf325number
+            // update tbl_f325number
             $query = mysqli_query($conn,"
-                UPDATE dbf325number
+                UPDATE tbl_f325number
                 SET
                 tmnumber='$tmnumber',
                 drivername='$drivername',
@@ -55,7 +54,7 @@ if(isset($_POST['f325number']))
 
             // update dbraw
             mysqli_query($conn,"
-                UPDATE dbraw
+                UPDATE tbl_raw
                 SET status='$status'
                 WHERE f325number='$f325number'
                 AND status ='$beforestatus'
@@ -65,7 +64,7 @@ if(isset($_POST['f325number']))
             $processed = "Scheduled";
 
             mysqli_query($conn,"
-                INSERT INTO dbhistory
+                INSERT INTO tbl_history
                 (processnumber,name,processed,dateprocessed,timeprocessed)
                 VALUES
                 ('$f325number','$username','$processed','$dateprocessed','$timeprocessed')
@@ -75,7 +74,7 @@ if(isset($_POST['f325number']))
 
     }
 
-    header("Location: scheduled.php?status=succ");
+    
 
 }
 else

@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 include_once("header.php");
 include_once("dbconnect.php");
 $username = $_SESSION['fname'];
@@ -28,7 +29,9 @@ $module_groups = [
     "Data" => [
         "census" => "Census",
         "productlist" => "Product list",
+        "storelist" => "Store list",
         "import_notepad" => "Import notepad",
+        "import_rtv" => "Import RTV",
         "import_pu_charge" => "Import pull-out charge",
         "import_nestle_sku" => "Import Nestle SKU",
     ],
@@ -64,7 +67,10 @@ while ($row = mysqli_fetch_assoc($company_query)) {
 }
 
 $locations = [];
-$location_query = mysqli_query($conn, "SELECT id, location FROM dblocation WHERE active = 1 ORDER BY location ASC");
+$location_query = mysqli_query($conn, "SELECT id, location FROM tbl_location WHERE active = 1 ORDER BY location ASC");
+if(!$location_query){
+die(mysqli_error($conn));
+}
 while ($row = mysqli_fetch_assoc($location_query)) {
     $locations[] = $row;
 }
